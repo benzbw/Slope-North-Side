@@ -333,10 +333,10 @@ async function enterProject(){var r=$("sx");if(r)r.hidden=true;lanPin();
  else{try{META=await Store.meta(S.pid)}catch(e){META=null}if(!META){toastS("ไม่พบโปรเจกต์นี้ในบัญชี");setTimeout(function(){location.hash="";location.reload()},1200);return}}
  addBar($("top"));addBar(document.querySelector("#pg1 .pgh"));try{document.title=(META.name||"")+" · Slope North Side"}catch(e){}
  if(S.demo)return;
- if(S.silent){var au0=await Store.loadAudio(S.pid,META).catch(function(){return null});if(au0&&typeof window.snsSetAudio=="function"){window.snsSetAudio(au0.url,au0.name)}else{var fn0=$("fname");if(fn0)fn0.textContent="เว็บสาธารณะไม่ได้ฝังเพลงไว้ กดอัปโหลดไฟล์เพลง Dangerous ในเครื่องนี้ครั้งเดียว"}}
+ if(S.silent){var au0=await Store.loadAudio(S.pid,META).catch(function(){return null});if(au0&&typeof window.snsSetAudio=="function"){window.snsSetAudio(au0.url,au0.name)}else{var fn0=$("fname");if(fn0)fn0.textContent="เว็บสาธารณะไม่ได้ฝังเพลงไว้ กดอัปโหลดไฟล์เพลง Dangerous ในเครื่องนี้ครั้งเดียว";needAudio()}}
  if(!S.baked){var au=await Store.loadAudio(S.pid,META).catch(function(){return null});
   if(au&&typeof window.snsSetAudio=="function")window.snsSetAudio(au.url,au.name);
-  else{var fn=$("fname");if(fn)fn.textContent=META.audio&&META.audio.localOnly?"ไฟล์เพลงอยู่ในเครื่องที่อัปโหลด เลือกไฟล์อีกครั้งในเครื่องนี้":"ยังไม่มีไฟล์เพลง กดอัปโหลดด้านล่าง"}}
+  else{var fn=$("fname");if(fn)fn.textContent=META.audio&&META.audio.localOnly?"ไฟล์เพลงอยู่ในเครื่องที่อัปโหลด เลือกไฟล์อีกครั้งในเครื่องนี้":"ยังไม่มีไฟล์เพลง กดอัปโหลดด้านล่าง";needAudio()}}
  var fi=$("fi");if(fi)fi.addEventListener("change",function(){var f=this.files[0];if(!f)return;setSave("กำลังอัปโหลดเพลง…");Store.saveAudio(S.pid,f).then(function(a){META.audio=a;S.baked=false;setSave(a.localOnly?"เสียงเก็บในเครื่องนี้":"บันทึกแล้ว")},function(){setSave("อัปโหลดเพลงไม่สำเร็จ")})});
  lastPush=+(S.raw.get("sns:t:"+S.pid)||0);setSave("บันทึกแล้ว");
  setInterval(function(){if(S.dirty&&S.dirty>lastPush&&now()-S.dirty>1500){lastPush=now();setSave("กำลังบันทึก…");Store.push(S.pid).then(function(){setSave("บันทึกแล้ว")},function(e){setSave("ยังไม่ได้บันทึก (ออฟไลน์?)");Store.log("error",{msg:"push: "+(e&&e.message||e)})})}},2500);
@@ -354,6 +354,8 @@ async function lanCard(){if(!LOCALHOST||location.protocol=="file:")return;try{va
  $("sx-lu").textContent=j.url;$("sx-lp").textContent=j.pin;
  var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";sc.onload=function(){try{new QRCode($("sx-qr"),{text:j.url,width:132,height:132,colorDark:"#000",colorLight:"#fff"})}catch(e){}};document.head.appendChild(sc)}catch(e){}}
 
+function needAudio(){if($("sx-na"))return;var bn=h('<div class="sx-demo" id="sx-na"><span>ยังไม่มีเสียงเพลงในเครื่องนี้</span><button>เลือกไฟล์เพลง</button></div>');document.body.appendChild(bn);
+ bn.querySelector("button").onclick=function(){var fi=$("fi");if(fi)fi.click()};var fi2=$("fi");if(fi2)fi2.addEventListener("change",function(){if(this.files[0])bn.remove()})}
 /* ---------- เริ่ม ---------- */
 async function start(){if(S.pid)document.documentElement.classList.add("sx-inproj");
  if(!S.pid)splash();
