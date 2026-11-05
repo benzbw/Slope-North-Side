@@ -136,7 +136,8 @@ async function loginView(mode,existing){
   btn.disabled=true;try{
   if(mode=="login"){
    var a=ST.mode=="cloud"?existing:await findLocal(id);
-   if(!a||a.handle.toLowerCase()!=id.toLowerCase()){er.textContent=ST.mode=="cloud"?"ID ไม่ตรงกับบัญชีนี้":"ไม่พบ ID นี้ในเครื่องนี้ ลองสมัครบัญชีใหม่";btn.disabled=false;return}
+   if(!a||a.handle.toLowerCase()!=id.toLowerCase()){if(ST.mode=="cloud"){er.textContent="ID ไม่ตรงกับบัญชีนี้";btn.disabled=false;return}
+    S.raw.set("sns:lastid",id);loginView("signup");setTimeout(function(){var f=$("sx-id"),p1=$("sx-pw"),p2=$("sx-pw2"),e2=$("sx-le");if(f)f.value=id;if(p1)p1.value=pw;if(e2)e2.textContent="ยังไม่มีบัญชีนี้ในเครื่องนี้ พิมพ์รหัสอีกครั้งในช่องยืนยัน แล้วกดสร้างบัญชี";if(p2)p2.focus()},80);return}
    var hh=await hashPw(pw,a.salt);if(hh!==a.hash){er.textContent="รหัสผ่านไม่ถูกต้อง";btn.disabled=false;Store.log("login_fail",{id:id});return}
    ST.acct=a;sessOn(a.handle);S.raw.set("sns:lastid",a.handle);afterLogin();return}
   if(pw.length<4){er.textContent="รหัสผ่านอย่างน้อย 4 ตัว";btn.disabled=false;return}
