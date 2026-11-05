@@ -487,7 +487,10 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <p class="mut" id="m-info" style="white-space:pre-line">กำลังวิเคราะห์เพลง...</p>
    <button class="cta alt" id="m-wav" style="margin-top:8px;min-height:44px;font-size:14px">ดาวน์โหลดเสียงที่มาสเตอร์แล้ว (.wav)</button>
    <div class="h" style="margin-top:18px;font-size:15px">MV เล่าเรื่อง (AI วาดฉาก)</div>
-   <p class="mut" style="font-size:12.5px">AI วาดภาพฉากตามเนื้อเพลงทีละท่อน สไตล์เดียวกันทั้งเรื่อง แล้วเคลื่อนกล้องช้าๆ ใต้เนื้อเพลง ไม่ชอบฉากไหนกดวาดใหม่เฉพาะฉากนั้นได้ (บนคอมนี้ ~3 นาที/ฉาก ทำงานเบื้องหลังได้)</p>
+   <p class="mut" style="font-size:12.5px">วาดภาพฉากตามเนื้อเพลงทีละท่อน สไตล์เดียวกันทั้งเรื่อง แล้วเคลื่อนกล้องช้าๆ ใต้เนื้อเพลง ไม่ชอบฉากไหนกดวาดใหม่ได้เรื่อยๆ</p>
+   <p class="mut" style="font-size:12px;margin:8px 0 4px">เลือกตัววาด (ราคาโดยประมาณ ~33 บาท/ดอลลาร์)</p>
+   <div class="chips" id="mv-eng"><button data-e="dev">ในมือถือ<small>ฟรี · ทันที · ภาพกราฟิก</small></button><button data-e="pc">AI คอมที่บ้าน<small>ฟรี · ~3 นาที/ฉาก · ภาพวาดจริง</small></button><button data-e="cloud">AI คลาวด์<small>~0.5–1 บาท/ภาพ · ~6–12 บาท/MV</small></button><button data-e="video">MV ขยับได้<small>~45–100 บาท (12 ช็อต) · ~130–640 บาท/ทั้งเพลง</small></button></div>
+   <p class="mut" id="mv-engnote" style="font-size:12px;margin:6px 0 0;white-space:pre-line"></p>
    <div class="chips" id="mv-sty"><button data-s="comic">การ์ตูนคอมมิก<small>ลายเส้นหนา สีจัด</small></button><button data-s="anime">อนิเมะ<small>ฉากหนังการ์ตูน</small></button><button data-s="water">สีน้ำ<small>ละมุน เศร้า</small></button><button data-s="oil">สีน้ำมัน<small>ภาพเขียนหรู</small></button><button data-s="neon">นีออนไซเบอร์<small>เมืองกลางคืน</small></button><button data-s="film">ฟิล์มขาวดำ<small>ภาพยนตร์</small></button><button data-s="pencil">ดินสอสตอรี่บอร์ด<small>ลายมือศิลปิน</small></button></div>
    <div class="row"><input class="inp" id="mv-char" maxlength="80" placeholder="ตัวละครหลัก (อังกฤษได้ผลดีกว่า) เช่น a young man in a black hoodie"></div>
    <textarea class="inp" id="mv-script" rows="3" placeholder="อยากให้ MV เล่าอะไร เขียนเองได้ บรรทัดละฉาก (ไม่ใส่ก็ได้ AI คิดจากเนื้อเพลง)" style="margin-top:6px"></textarea>
@@ -1276,7 +1279,20 @@ async function mvRunSVG(idx,smp){var P=mvPrompts();idx=idx||P.map(function(_,i){
    if(e&&e.code=="rate_limited"){$("mv-st").textContent="ใช้งานถี่เกินไป รอสักครู่แล้วกดวาดต่อ";break}if(e&&e.code=="not_granted"){$("mv-st").textContent="ต้องกดอนุญาตให้แอปถาม Claude ก่อน";break}}}
   if(ok)$("mv-st").textContent="วาดเสร็จ "+ok+" ฉาก (ภาพกราฟิกโดย Claude) · กด วาดใหม่ ที่ฉากที่ไม่ชอบ";else{mvRunLocal(idx);$("mv-st").textContent="Claude วาดไม่สำเร็จ"+(lastErr?" ("+lastErr+")":"")+" เลยวาดในเครื่องให้แทน · กด วาดใหม่ เพื่อสุ่มใหม่"}}
  catch(e){$("mv-st").textContent="วาดไม่สำเร็จ: "+(e.message||e)}$("mv-go").disabled=false}
-async function mvRun(idx){var smp=window.SNSX&&SNSX.ST&&SNSX.ST.sample;if(!LOCAL&&smp)return mvRunSVG(idx,smp);if(!LOCAL)return mvRunLocal(idx);var P=mvPrompts();idx=idx||P.map(function(_,i){return i});
+var MVENG={dev:"วาดในมือถือ: ฟรี ไม่ใช้เน็ต ได้ภาพกราฟิกแนวบรรยากาศ"+"\n(ในลิงก์ claude.ai จะให้ Claude วาดก่อน)",
+ pc:"AI บนคอม: ฟรี ภาพวาดจริงตามสไตล์ ช้าประมาณ 3 นาที/ฉาก\nใช้ได้เมื่อเปิด start.bat บนคอม — ในมือถือให้ต่อ Wi-Fi บ้านแล้วเปิดที่อยู่ที่แสดงในหน้าแรกของแอปบนคอม (ใส่ PIN ครั้งแรก)",
+ cloud:"AI สร้างภาพบนคลาวด์ (เช่น FLUX.2): ภาพละเอียดระดับงานจริง ใช้ได้ทุกที่\nราคาประมาณ $0.014–0.03 ต่อภาพ ≈ 0.5–1 บาท · MV 12 ฉาก ≈ 6–12 บาท (กดวาดใหม่คิดเพิ่มต่อภาพ)\nยังไม่ได้เปิดใช้: ต้องสมัครผู้ให้บริการ AI และเติมเงินขั้นต่ำก่อน",
+ video:"MV ขยับได้ด้วย AI สร้างวิดีโอ: ตัวละครขยับจริงแบบแอนิเมชัน\nราคาประมาณ $0.02–0.11 ต่อวินาที — ขยับเฉพาะ 12 ช็อต×5 วิ ≈ 45–100 บาท · ทั้งเพลง 3 นาที ≈ 130–640 บาท\nยังไม่ได้เปิดใช้: ต้องสมัครผู้ให้บริการ AI และเติมเงินขั้นต่ำก่อน"};
+function mvEngOf(){return MV.eng||(LOCAL?"pc":"dev")}
+function mvEngUI(){document.querySelectorAll("#mv-eng button").forEach(function(b){b.classList.toggle("on",b.dataset.e==mvEngOf())});var n=$("mv-engnote");n.textContent=MVENG[mvEngOf()]||"";
+ if(mvEngOf()=="cloud"||mvEngOf()=="video"){var bt=document.createElement("button");bt.className="cta alt";bt.style.cssText="min-height:36px;font-size:12.5px;margin-top:8px;width:auto;padding:0 14px";bt.textContent="ขอเปิดใช้ตัวนี้ (ส่งเรื่องให้ทีม)";
+  bt.onclick=function(){try{SNSX.Store.log("ticket",{msg:"ขอเปิดใช้ตัววาด MV: "+MV.eng})}catch(e){}bt.textContent="ส่งเรื่องแล้ว";bt.disabled=true};n.appendChild(document.createElement("br"));n.appendChild(bt)}
+ var e2=mvEngOf();$("mv-go").textContent=e2=="video"?"✦ สร้าง MV ขยับได้":e2=="cloud"?"✦ AI คลาวด์วาด MV":e2=="pc"?"✦ AI คอมวาด MV":"✦ วาด MV"}
+document.querySelectorAll("#mv-eng button").forEach(function(b){b.onclick=function(){MV.eng=b.dataset.e;mvSave();mvEngUI()}});setTimeout(mvEngUI,0);setTimeout(mvEngUI,3500);
+async function mvRun(idx){var smp=window.SNSX&&SNSX.ST&&SNSX.ST.sample,eng=mvEngOf();
+ if(eng=="cloud"||eng=="video"){$("mv-st").textContent="ตัวนี้ยังไม่ได้เปิดใช้ (ต้องตั้งบัญชีผู้ให้บริการและเติมเงินก่อน) กด ขอเปิดใช้ ด้านบน หรือเลือก ในมือถือ / AI คอมที่บ้าน";return}
+ if(eng=="pc"){if(!LOCAL){$("mv-st").textContent="ยังไม่ได้ต่อคอม: เปิด start.bat บนคอม แล้วในมือถือต่อ Wi-Fi บ้าน เปิดที่อยู่ที่แสดงในหน้าแรกของแอปบนคอม (ใส่ PIN ครั้งแรก)";return}}
+ else{if(smp)return mvRunSVG(idx,smp);return mvRunLocal(idx)}if(!LOCAL&&smp)return mvRunSVG(idx,smp);if(!LOCAL)return mvRunLocal(idx);var P=mvPrompts();idx=idx||P.map(function(_,i){return i});
  $("mv-go").disabled=true;try{var j=await (await fetch("/api/scenes",{method:"POST",headers:hdr(),body:JSON.stringify({prompts:idx.map(function(k){return P[k]}),idx:idx,seed:MV.seed,mv:"mv"+MV.seed,steps:1})})).json();if(!j.id)throw new Error(j.err||"เริ่มไม่ได้");
   for(;;){await new Promise(function(r){setTimeout(r,3000)});var st=await (await fetch("/api/job?id="+j.id,{headers:hdr()})).json();$("mv-st").textContent=(st.msg||"")+(st.status=="run"?" · ทำต่อได้ระหว่างรอ":"");
    if(st.result&&st.result.urls){var ch=false;Object.keys(st.result.urls).forEach(function(k){if(MV.urls[k]!==st.result.urls[k]){MV.urls[k]=st.result.urls[k];ch=true}});if(ch){mvSave();mvLoad();mvGrid();if(!MV.on){MV.on=true;$("mv-on").checked=true;mvSave()}}}
