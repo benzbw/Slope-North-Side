@@ -1214,14 +1214,18 @@ function mvGrid(){var g=$("mv-grid");g.innerHTML="";var S=mvCount(),P=mvPrompts(
   var cap=document.createElement("div");cap.className="cap";cap.innerHTML="<b></b><small></small>";cap.querySelector("b").textContent="ฉาก "+(k+1);cap.querySelector("small").textContent=P[k].split(", ").slice(MVSTY[MV.sty].split(", ").length+1,-4).join(", ");b.appendChild(cap);
   var rb=document.createElement("button");rb.className="sc";rb.style.cssText="border:0;cursor:pointer;color:#fff";rb.textContent="วาดใหม่";rb.onclick=function(){mvRun([k])};b.appendChild(rb);g.appendChild(b)})(k)}}
 var MVSV={comic:"bold comic-book vector art, thick black outlines, flat cel shading, halftone dot patterns, dynamic angle",anime:"anime-style vector illustration, layered painted-looking gradients, soft cinematic light",water:"watercolor look made with soft blurred blobs and translucent layered washes on paper tone",oil:"painterly look with many overlapping translucent strokes, dramatic light and shadow",neon:"cyberpunk neon vector art, glowing strokes (blur filter), dark wet street reflections, purple and red light",film:"black and white cinematic vector still, high contrast, grain made with feTurbulence",pencil:"expressive pencil storyboard look, sketchy hatched lines, mostly grey with one red accent"};
-function mvClean(t){var m=String(t||"").match(/<svg[\s\S]*<\/svg>/i);if(!m)return null;var v=m[0].replace(/<script[\s\S]*?<\/script>/gi,"").replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi,"").replace(/<image\b[^>]*>/gi,"").replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi,"").replace(/(xlink:)?href\s*=\s*("|')\s*(https?:|data:|javascript:)[^"']*\2/gi,"");
+function mvClean(t){t=String(t||"");var m=t.match(/<svg[\s\S]*<\/svg>/i);if(!m){var i0=t.search(/<svg/i);if(i0<0)return null;var body=t.slice(i0),lc=body.lastIndexOf(">");if(lc<0)return null;body=body.slice(0,lc+1);
+  var st=[];body.replace(/<(\/?)([a-zA-Z][\w:-]*)[^>]*?(\/?)>/g,function(_,c,n,sc){if(sc)return;if(c){var k=st.lastIndexOf(n);if(k>=0)st.length=k}else st.push(n)});
+  while(st.length>1){var n2=st.pop();body+="</"+n2+">"}m=[body+"</svg>"]}var v=m[0].replace(/<script[\s\S]*?<\/script>/gi,"").replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi,"").replace(/<image\b[^>]*>/gi,"").replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi,"").replace(/(xlink:)?href\s*=\s*("|')\s*(https?:|data:|javascript:)[^"']*\2/gi,"");
  if(!/xmlns=/.test(v))v=v.replace(/<svg/i,'<svg xmlns="http://www.w3.org/2000/svg"');try{return"data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(v)))}catch(e){return null}}
-async function mvRunSVG(idx,smp){var P=mvPrompts();idx=idx||P.map(function(_,i){return i});$("mv-go").disabled=true;var ok=0;
+async function mvRunSVG(idx,smp){var P=mvPrompts();idx=idx||P.map(function(_,i){return i});$("mv-go").disabled=true;var ok=0,lastErr="";
  try{for(var n=0;n<idx.length;n++){var k=idx[n];$("mv-st").textContent="Claude กำลังวาดฉาก "+(k+1)+" ("+(n+1)+"/"+idx.length+") · ทำอย่างอื่นต่อได้";
-  var q="Draw ONE scene of an animated music video as a single self-contained SVG. viewBox=\"0 0 1280 720\", fill the whole frame with a full background.\nArt style: "+(MVSV[MV.sty]||MVSV.comic)+".\nScene: "+P[k].slice((MVSTY[MV.sty]+", "+MV.char+", ").length).replace(/, no text, no letters$/,"")+"\nMain character (draw as an original stylised figure, not a real person): "+(MV.char||"a young man in a black hoodie")+".\nMood: dark, cinematic, emotional, a lyric video background (leave the centre slightly calm so lyrics stay readable). Variation #"+MV.seed+"-"+k+".\nRules: use only svg shapes, paths, gradients and filters (feGaussianBlur, feTurbulence, feDisplacementMap allowed); no text or letters, no <image>, no <foreignObject>, no scripts, no external links, no logos or known characters. Keep it under 7000 characters. Reply with the SVG only.";
-  try{var r=await smp([{role:"user",content:q}],{cache:false});var u=mvClean(r&&r.text);if(!u)throw new Error("ไม่ได้รูป");MV.urls[k]=u;ok++;mvSave();mvLoad();mvGrid();if(!MV.on){MV.on=true;$("mv-on").checked=true;mvSave()}}
-  catch(e){if(e&&e.code=="rate_limited"){$("mv-st").textContent="ใช้งานถี่เกินไป รอสักครู่แล้วกดวาดต่อ";break}if(e&&e.code=="not_granted"){$("mv-st").textContent="ต้องกดอนุญาตให้แอปถาม Claude ก่อน";break}}}
-  $("mv-st").textContent=ok?"วาดเสร็จ "+ok+" ฉาก (ภาพกราฟิกโดย Claude) · กด วาดใหม่ ที่ฉากที่ไม่ชอบ":"วาดไม่สำเร็จ ลองใหม่อีกครั้ง"}
+  var q="Draw ONE scene of an animated music video as a single self-contained SVG. viewBox=\"0 0 1280 720\", fill the whole frame with a full background.\nArt style: "+(MVSV[MV.sty]||MVSV.comic)+".\nScene: "+P[k].slice((MVSTY[MV.sty]+", "+MV.char+", ").length).replace(/, no text, no letters$/,"")+"\nMain character (draw as an original stylised figure, not a real person): "+(MV.char||"a young man in a black hoodie")+".\nMood: dark, cinematic, emotional, a lyric video background (leave the centre slightly calm so lyrics stay readable). Variation #"+MV.seed+"-"+k+".\nRules: use only svg shapes, paths, gradients and filters (feGaussianBlur, feTurbulence, feDisplacementMap allowed); no text or letters, no <image>, no <foreignObject>, no scripts, no external links, no logos or known characters. Keep it compact: under 5000 characters, at most about 40 elements. Reply with the SVG only, no explanation.";
+  try{var r=await smp([{role:"user",content:q}],{cache:false});var u=mvClean(r&&r.text);if(!u){lastErr="no_svg";try{SNSX.Store.log("error",{msg:"mv no svg",len:(r&&r.text||"").length,tr:!!(r&&r.truncated),head:String(r&&r.text||"").slice(0,120)})}catch(x){}throw new Error("ไม่ได้รูป")}MV.urls[k]=u;ok++;mvSave();mvLoad();mvGrid();if(!MV.on){MV.on=true;$("mv-on").checked=true;mvSave()}}
+  catch(e){if(e&&e.code){lastErr=e.code;try{SNSX.Store.log("error",{msg:"mv sample "+e.code,detail:String(e.message||"").slice(0,200)})}catch(x){}}
+   if(e&&e.code&&/^(sampling_disabled|capability_disabled|capability_removed|not_declared)$/.test(e.code)){$("mv-st").textContent="เครื่องนี้ใช้ Claude วาดไม่ได้ ("+e.code+")";break}
+   if(e&&e.code=="rate_limited"){$("mv-st").textContent="ใช้งานถี่เกินไป รอสักครู่แล้วกดวาดต่อ";break}if(e&&e.code=="not_granted"){$("mv-st").textContent="ต้องกดอนุญาตให้แอปถาม Claude ก่อน";break}}}
+  $("mv-st").textContent=ok?"วาดเสร็จ "+ok+" ฉาก (ภาพกราฟิกโดย Claude) · กด วาดใหม่ ที่ฉากที่ไม่ชอบ":"วาดไม่สำเร็จ ลองใหม่อีกครั้ง"+(lastErr?" ("+lastErr+")":"")}
  catch(e){$("mv-st").textContent="วาดไม่สำเร็จ: "+(e.message||e)}$("mv-go").disabled=false}
 async function mvRun(idx){var smp=window.SNSX&&SNSX.ST&&SNSX.ST.sample;if(!LOCAL&&smp)return mvRunSVG(idx,smp);if(!LOCAL){$("mv-st").textContent="วาด MV ได้ 2 ทาง: เปิดแอปจากลิงก์ claude.ai (Claude วาดเป็นภาพกราฟิกในมือถือได้เลย) หรือเปิดผ่าน start.bat บนคอม (AI วาดภาพเหมือนภาพวาดจริง)";return}var P=mvPrompts();idx=idx||P.map(function(_,i){return i});
  $("mv-go").disabled=true;try{var j=await (await fetch("/api/scenes",{method:"POST",headers:hdr(),body:JSON.stringify({prompts:idx.map(function(k){return P[k]}),idx:idx,seed:MV.seed,mv:"mv"+MV.seed,steps:1})})).json();if(!j.id)throw new Error(j.err||"เริ่มไม่ได้");
@@ -1456,6 +1460,36 @@ function showResult(blobF,ext){setTimeout(function(){try{rlRender();var n=rlName
  var f=new File([blobF],fn,{type:blobF.type});
  if(navigator.canShare&&navigator.canShare({files:[f]}))vbtn("แชร์",false,function(){navigator.share({files:[f]}).catch(function(){})});
  vbtn("ปิด",false,function(){$("vov").hidden=true;v.pause();URL.revokeObjectURL(url)})}
+/* ใส่ความยาววิดีโอให้ไฟล์ MP4 แบบแบ่งท่อน (fragmented) จาก MediaRecorder — ไม่งั้นบางเครื่องเล่นได้แค่ 1 วิ */
+function snsFixMp4(u8){try{var dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength),L=u8.length;
+ function t4(o){return String.fromCharCode(u8[o+4],u8[o+5],u8[o+6],u8[o+7])}
+ function sz(o){var s=dv.getUint32(o);if(s==1)s=Number(dv.getBigUint64(o+8));else if(s==0)s=L-o;return s}
+ function hdr(o){return dv.getUint32(o)==1?16:8}
+ function kids(o,e,fn){var p=o;while(p+8<=e){var s=sz(p);if(s<8||p+s>e)break;fn(p,t4(p),s);p+=s}}
+ function find(o,e,ty){var r=-1;kids(o,e,function(p,t){if(r<0&&t==ty)r=p});return r}
+ var moov=find(0,L,"moov");if(moov<0)return u8;var mE=moov+sz(moov),mB=moov+hdr(moov);
+ var mvhd=find(mB,mE,"mvhd");if(mvhd<0)return u8;var mv=mvhd+8,mvV=u8[mv],mvTS=dv.getUint32(mv+(mvV?20:12));
+ var tr={},trex={},absBase=false;
+ kids(mB,mE,function(p,t,s){if(t=="trak"){var e=p+s,tk=find(p+8,e,"tkhd"),md=find(p+8,e,"mdia");if(tk<0||md<0)return;var v=u8[tk+8],id=dv.getUint32(tk+8+(v?20:12)),mh=find(md+8,md+sz(md),"mdhd");if(mh<0)return;var mv2=u8[mh+8];
+   tr[id]={tkhd:tk,mdhd:mh,ts:dv.getUint32(mh+8+(mv2?20:12)),end:0}}
+  if(t=="mvex"){kids(p+8,p+s,function(q,tt){if(tt=="trex"){trex[dv.getUint32(q+12)]=dv.getUint32(q+20)}})}});
+ kids(0,L,function(p,t,s){if(t!="moof")return;kids(p+8,p+s,function(q,tt,ss){if(tt!="traf")return;var id=0,dd=0,base=0;
+  kids(q+8,q+ss,function(r,ty){var o=r+8,fl=dv.getUint32(o)&0xffffff;
+   if(ty=="tfhd"){id=dv.getUint32(o+4);var x=o+8;if(fl&1){absBase=true;x+=8}if(fl&2)x+=4;if(fl&8)dd=dv.getUint32(x);else dd=trex[id]||0}
+   if(ty=="tfdt"){base=u8[o]?Number(dv.getBigUint64(o+4)):dv.getUint32(o+4)}
+   if(ty=="trun"){var n=dv.getUint32(o+4),x2=o+8,tot=0;if(fl&1)x2+=4;if(fl&4)x2+=4;var per=(fl&0x100?4:0)+(fl&0x200?4:0)+(fl&0x400?4:0)+(fl&0x800?4:0);
+    for(var i=0;i<n;i++){tot+=(fl&0x100)?dv.getUint32(x2+i*per):dd}var T=tr[id];if(T)T.end=Math.max(T.end,base+tot);base+=tot}})})});
+ var maxMv=0;Object.keys(tr).forEach(function(k){var T=tr[k];if(!T.end||!T.ts)return;var d=Math.round(T.end*mvTS/T.ts);maxMv=Math.max(maxMv,d);
+  var mo=T.mdhd+8;if(u8[mo])dv.setBigUint64(mo+24,BigInt(T.end));else dv.setUint32(mo+16,Math.min(T.end,4294967295));
+  var to=T.tkhd+8;if(u8[to])dv.setBigUint64(to+28,BigInt(d));else dv.setUint32(to+20,Math.min(d,4294967295))});
+ if(!maxMv)return u8;if(mvV)dv.setBigUint64(mv+24,BigInt(maxMv));else dv.setUint32(mv+16,Math.min(maxMv,4294967295));
+ /* ใส่ mehd (ความยาวรวมของทุกท่อน) ถ้ายังไม่มี — ทำเฉพาะไฟล์ที่อ้างตำแหน่งข้อมูลจาก moof (ปลอดภัยเมื่อแทรกข้อมูล) */
+ var mvex=find(mB,mE,"mvex");if(mvex<0||absBase)return u8;var mehd=find(mvex+8,mvex+sz(mvex),"mehd");
+ if(mehd>=0){if(u8[mehd+8])dv.setBigUint64(mehd+12,BigInt(maxMv));else dv.setUint32(mehd+12,Math.min(maxMv,4294967295));return u8}
+ if(dv.getUint32(moov)==1||dv.getUint32(mvex)==1)return u8;
+ var box=new Uint8Array(20),bd=new DataView(box.buffer);bd.setUint32(0,20);box.set([109,101,104,100],4);bd.setUint32(8,0x01000000);bd.setBigUint64(12,BigInt(maxMv));
+ var ins=mvex+8,out=new Uint8Array(L+20);out.set(u8.subarray(0,ins),0);out.set(box,ins);out.set(u8.subarray(ins),ins+20);var od=new DataView(out.buffer);
+ od.setUint32(moov,dv.getUint32(moov)+20);od.setUint32(mvex,dv.getUint32(mvex)+20);return out}catch(e){return u8}}
 async function startVideo(){
  if(typeof MediaRecorder==="undefined"||!HTMLCanvasElement.prototype.captureStream){toast("เบราว์เซอร์นี้ยังบันทึกวิดีโอในแอปไม่ได้ ใช้ Chrome หรือ Safari รุ่นใหม่ หรือกดอัดหน้าจอเอง");return}
  var W=FMT[vfmt][0],H=FMT[vfmt][1],wl=null;
@@ -1482,7 +1516,9 @@ async function startVideo(){
  await new Promise(function(r){mr.onstop=r;try{mr.stop()}catch(e){r()}});
  stream.getVideoTracks().forEach(function(tr){tr.stop()});try{if(wl)wl.release()}catch(e){}
  if(cancelled||!chunks.length){$("vov").hidden=true;toast(cancelled?"ยกเลิกแล้ว":"ไม่ได้ข้อมูลวิดีโอ ลองใหม่อีกครั้ง");return}
- var type=mr.mimeType||mime||"video/webm";showResult(new Blob(chunks,{type:type}),/mp4/.test(type)?"mp4":"webm")}
+ var type=mr.mimeType||mime||"video/webm",vb=new Blob(chunks,{type:type});
+ if(/mp4/.test(type)){try{$("vst").textContent="กำลังจัดไฟล์วิดีโอ…";vb=new Blob([snsFixMp4(new Uint8Array(await vb.arrayBuffer()))],{type:type})}catch(e){}}
+ showResult(vb,/mp4/.test(type)?"mp4":"webm")}
 $("vgo").onclick=startVideo;$("vcancel").onclick=function(){if(vcancelFn)vcancelFn();else $("vov").hidden=true};
 document.querySelectorAll("#vlen button").forEach(function(b){b.onclick=function(){VLEN=+b.dataset.l;document.querySelectorAll("#vlen button").forEach(function(x){x.classList.toggle("on",x==b)});if(b.dataset.reel){var f9=document.querySelector('#vf button[data-f="916"]');if(f9)f9.click()}}});
 document.querySelectorAll("#vf button").forEach(function(b){b.onclick=function(){vfmt=b.dataset.f;document.querySelectorAll("#vf button").forEach(function(x){x.classList.toggle("on",x==b)})}});
