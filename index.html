@@ -216,6 +216,9 @@ body.pg1 #dock,body.pg1 #top,body.pg1 #stage{display:none}
 .lite #dock{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(18,18,24,.97)}
 .lite #bg i{animation:none}.lite .g{animation:none}
 .lite .l.on.v1,.lite .l.on.v2{animation-name:slam}
+#cv-t,#mv-grade,#mv-sty{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}#cv-t::-webkit-scrollbar,#mv-grade::-webkit-scrollbar,#mv-sty::-webkit-scrollbar{display:none}#cv-t button,#mv-grade button,#mv-sty button{flex:0 0 auto;min-width:96px;padding:10px 12px}
+.cvths{display:flex;gap:14px;align-items:flex-end;margin:4px 0 10px}.cvth{display:flex;flex-direction:column;align-items:center;gap:4px}.cvth canvas{border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.4)}.cvth small{font-size:10.5px;opacity:.7}
+.pkg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:8px}.pk{display:flex;flex-direction:column;gap:6px;align-items:center;background:rgba(255,255,255,.04);border-radius:10px;padding:8px}.pk canvas{max-width:100%;max-height:170px;border-radius:6px}.pk small{font-size:11px;opacity:.75;text-align:center}.pk .cta{min-height:36px;font-size:12.5px;padding:0 10px}
 </style>
 <style>/* ===== Slope North Side · หน้าแรก / ล็อกอิน / ผู้ช่วย =====
    layout: แถบบนบาง + กริดปกเพลงแบบแผ่นเสียง + ขั้นตอนทำเพลงเป็นแถวเดียว */
@@ -496,6 +499,13 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <textarea class="inp" id="mv-script" rows="3" placeholder="อยากให้ MV เล่าอะไร เขียนเองได้ บรรทัดละฉาก (ไม่ใส่ก็ได้ AI คิดจากเนื้อเพลง)" style="margin-top:6px"></textarea>
    <div class="two" style="margin-top:8px"><button class="cta" id="mv-go">✦ AI วาด MV</button><button class="cta alt" id="mv-re">สุ่มใหม่ทั้งเรื่อง</button></div>
    <label class="tgl"><input type="checkbox" id="mv-on"><span>ใช้ MV เป็นพื้นหลังวิดีโอ</span></label>
+   <div class="h" style="margin-top:14px;font-size:14px">ตัดต่อแบบมืออาชีพ</div>
+   <div class="chips" id="mv-cam"><button data-c="auto">อัตโนมัติ<small>ตามท่อนเพลง</small></button><button data-c="calm">นิ่ง ละมุน<small>R&amp;B / เพลงช้า</small></button><button data-c="hype">ดุ ตัดไว<small>แร็พ / drill</small></button></div>
+   <label class="tgl"><input type="checkbox" id="mv-cut" checked><span>ตัดภาพตามจังหวะบีต (เปลี่ยนมุมกล้องตรงหัวห้อง เหมือนถ่ายหลายช็อต)</span></label>
+   <p class="mut" id="mv-bpm" style="font-size:12px;margin:2px 0 6px"></p>
+   <div class="chips" id="mv-grade"><button data-g="auto">อัตโนมัติ<small>หนังโรง</small></button><button data-g="cine">หนังโรง<small>ส้ม-เขียวหัวเป็ด</small></button><button data-g="noir">นัวร์แดง<small>ขาวดำ เหลือแดง</small></button><button data-g="bleach">ฟิล์มซีด<small>คอนทราสต์จัด</small></button><button data-g="vhs">VHS 90s<small>เทปเก่า</small></button><button data-g="thermal">กล้องความร้อน<small>found footage</small></button><button data-g="night">ไนท์วิชั่น<small>เขียว ดิบ</small></button><button data-g="none">ไม่เกรด</button></div>
+   <label class="tgl"><input type="checkbox" id="mv-lb"><span>แถบดำแบบหนัง 2.39:1 (เฉพาะวิดีโอแนวนอน)</span></label>
+   <button class="cta alt" id="mv-pack" style="min-height:44px;font-size:13.5px;margin-top:6px">แพ็กส่งช่างตัดต่อ (.zip): เนื้อ SRT/LRC · shot list · มาร์กเกอร์ · บีต · ภาพฉาก · ปก</button>
    <p class="mut" id="mv-st" style="font-size:12.5px"></p>
    <div class="stg" id="mv-grid"></div>
    <div class="h" style="margin-top:18px;font-size:15px">ปกเพลง</div>
@@ -507,6 +517,9 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <div class="h" style="margin-top:18px;font-size:15px">ส่งออกวิดีโอ</div>
    <div class="chips" id="vlen"><button data-l="0" class="on">ทั้งเพลง<small>เต็มความยาว</small></button><button data-l="0" data-reel="1">Reel ทั้งเพลง<small>แนวตั้ง 9:16 เต็มเพลง</small></button><button data-l="15">ฮุค 15 วิ<small>TikTok/Reels</small></button><button data-l="30">ฮุค 30 วิ<small>Reels/Shorts</small></button></div>
    <div class="chips" id="vf"><button data-f="916" class="on">แนวตั้ง<small>9:16 · TikTok</small></button><button data-f="169">แนวนอน<small>16:9 · YouTube</small></button><button data-f="11">จัตุรัส<small>1:1</small></button></div>
+   <div class="chips" id="vq"><button data-q="720">HD 720p<small>ไฟล์เล็ก · เครื่องช้า</small></button><button data-q="1080">Full HD 1080p<small>แนะนำ · คมชัด</small></button><button data-q="1080s">1080p 60fps<small>ลื่นสุด · เครื่องแรง</small></button></div>
+   <label class="tgl"><input type="checkbox" id="wm-on" checked><span>ลายน้ำแบรนด์ตลอดคลิป (โลโก้ SNS + SLOPE NORTH SIDE มุมจอ มีแสงวิ่งผ่านทุก 18 วิ)</span></label>
+   <div class="chips" id="wm-pos"><button data-p="auto">อัตโนมัติ<small>หลบปุ่ม TikTok</small></button><button data-p="tl">บนซ้าย</button><button data-p="tr">บนขวา</button><button data-p="bl">ล่างซ้าย</button><button data-p="br">ล่างขวา</button></div>
    <button class="cta" id="vgo">บันทึกวิดีโอเป็นไฟล์</button>
    <p class="mut" style="margin-top:10px">ระหว่างบันทึกอย่าปิดหน้านี้หรือสลับแอป และเปิดหน้าจอค้างไว้ เพื่อไม่ให้ภาพกับเสียงสะดุด</p>
    <button class="cta alt" id="go" style="margin-top:12px;min-height:44px;font-size:13px">หรือ ซ่อนปุ่มเพื่ออัดหน้าจอเอง</button>
@@ -537,7 +550,9 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
 <div id="cov" hidden><div class="pgw">
  <div class="pgh"><div class="h" style="margin:0">ทำปกเพลง</div><button class="cta alt" id="cv-close" style="width:auto;min-height:38px;padding:0 16px;font-size:13px">ปิด</button></div>
  <canvas id="cvc" width="1000" height="1000"></canvas>
- <div class="chips" id="cv-t"><button data-t="studio">✦ สไตล์ AI<small>ตามสไตล์ที่เลือก</small></button><button data-t="dark">มืดหม่น<small>รูป + ชื่อใหญ่</small></button><button data-t="orb">วงแสง<small>แสงกลาง</small></button><button data-t="glitch">กลิตช์<small>ชื่อซ้อน</small></button><button data-t="mark">โลโก้<small>มินิมอล</small></button></div>
+ <div class="chips" id="cv-t"><button data-t="studio">✦ สไตล์ AI<small>ตามสไตล์ที่เลือก</small></button><button data-t="dark">มืดหม่น<small>รูป + ชื่อใหญ่</small></button><button data-t="orb">วงแสง<small>แสงกลาง</small></button><button data-t="glitch">กลิตช์<small>ชื่อซ้อน</small></button><button data-t="mark">โลโก้<small>มินิมอล</small></button><button data-t="chrome">โครมเงา<small>เทรนด์ 2026</small></button><button data-t="lofi">ฟิล์มแสงล้น<small>เทรนด์ 2026</small></button><button data-t="y3k">Y3K โฮโลแกรม<small>เทรนด์ 2026</small></button><button data-t="thermal">กล้องความร้อน<small>เทรนด์ 2026</small></button><button data-t="night">ไนท์วิชั่น<small>เทรนด์ 2026</small></button><button data-t="type">ตัวอักษรยักษ์<small>เทรนด์ 2026</small></button><button data-t="glass">กระจกฝ้า<small>เทรนด์ 2026</small></button></div>
+ <p class="mut" id="cv-tip" style="font-size:12px;margin:6px 0 0"></p>
+ <div class="h" style="margin:12px 0 4px;font-size:13px">เช็กตอนปกเล็กในแอปสตรีม (ต้องยังอ่านชื่อออก)</div><div id="cv-thumbs" class="cvths"></div>
  <div class="chips" id="cv-mode" style="margin-top:8px"><button data-m="song" class="on">ปกเพลง</button><button data-m="album">ปกอัลบั้ม</button></div>
  <div class="two" id="cv-ai" style="margin:8px 0"><button class="cta alt" id="cv-gen" style="min-height:42px;font-size:13px">✦ AI วาดภาพปกใหม่</button><button class="cta alt" id="cv-shuf" style="min-height:42px;font-size:13px">สุ่มลายใหม่ (ไม่ใช้เน็ต)</button></div>
  <p class="mut" id="cv-aist" style="font-size:12px;margin:0 0 8px">AI วาดภาพจากชื่อเพลง แนว อารมณ์ และสไตล์ที่เลือก บนคอมของคุณเอง (เปิดผ่าน start.bat · ฟรี · คอมนี้ใช้ราว 1.5–3 นาทีต่อรูป ครั้งแรกหลังเปิดโปรแกรม ~6 นาที) · กดวาดใหม่ได้เรื่อยๆ รูปเก่าเก็บไว้ให้เลือกด้านบน</p>
@@ -552,6 +567,11 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
  <label class="tgl"><input type="checkbox" id="cv-lyr" checked><span>ใส่เนื้อท่อนฮุคบรรทัดแรก</span></label>
  <canvas id="cvs" width="540" height="960" style="width:100%;max-width:270px;display:block;margin:10px auto;border-radius:10px"></canvas>
  <button class="cta alt" id="cv-st">ดาวน์โหลดภาพสตอรี่ (.jpg)</button>
+ <div class="h" style="margin-top:20px">ชุดภาพโปรโมท (สร้างจากปกนี้)</div>
+ <div id="pk-grid" class="pkg"></div>
+ <button class="cta" id="pk-all" style="margin-top:10px">ดาวน์โหลดทั้งชุด (.zip) — ปก + 5 ขนาด</button>
+ <button class="cta alt" id="pk-canvas" style="margin-top:8px;min-height:44px;font-size:14px">สร้าง Spotify Canvas (วิดีโอวน 9:16 ไม่เกิน 8 วิ)</button>
+ <p class="mut" id="pk-st" style="font-size:12.5px"></p>
  <p class="mut" style="margin-top:10px">สีของปกตามธีมที่เลือกในขั้น 1 · ขนาด 3000×3000 ใช้ได้กับ Spotify, Apple Music, YouTube Music ผ่านผู้จัดจำหน่ายเพลง</p>
 </div></div>
 <div id="cd" hidden></div><div id="toast"></div>
@@ -702,7 +722,7 @@ function frame(){beat();var pn0=performance.now();
  els.forEach(function(e){var j=+e.dataset.i,on=T[j]<=t,c="l"+(on?" on v"+(j%4)+(j<k?" past":""):"");if(e.className!==c){var was=e.className.indexOf(" on")>-1;e.className=c;if(on&&!was&&!a.paused&&Math.abs(t-T[j])<.8)fx(j)}
   if(on){var ws=wordsOf(j),ch=e.children,q;for(q=0;q<ch.length;q++){var wc=ch[q].className,w0=wc.replace(" on",""),w1=t>=wordT(j,ws[q])?w0+" on":w0;if(w1!==wc)ch[q].className=w1}}});
  (function(){var mc=$("mvc");if(MV.on){var w0=innerWidth,h0=innerHeight;if(mc.width!==w0||mc.height!==h0){mc.width=w0;mc.height=h0}if(!drawMV(mc.getContext("2d"),w0,h0,t,k))mc.getContext("2d").clearRect(0,0,w0,h0);mc._on=true}else if(mc._on){mc.getContext("2d").clearRect(0,0,mc.width,mc.height);mc._on=false}})();
- (function(){var c=$("fxc");if(!c){c=document.createElement("canvas");c.id="fxc";document.body.appendChild(c)}var w=innerWidth,h=innerHeight;if(c.width!==w||c.height!==h){c.width=w;c.height=h}var x=c.getContext("2d");if(c._on)x.clearRect(0,0,w,h);c._on=false;if(lfxDraw(x,w,h,t))c._on=true;if(drawSketch(x,w,h,t))c._on=true;if(ENDC.on&&t>=endStart()){drawEnd(x,w,h,t);c._on=true}})();
+ (function(){var c=$("fxc");if(!c){c=document.createElement("canvas");c.id="fxc";document.body.appendChild(c)}var w=innerWidth,h=innerHeight;if(c.width!==w||c.height!==h){c.width=w;c.height=h}var x=c.getContext("2d");if(c._on)x.clearRect(0,0,w,h);c._on=false;if(lfxDraw(x,w,h,t))c._on=true;if(drawSketch(x,w,h,t))c._on=true;if(ENDC.on&&t>=endStart()){drawEnd(x,w,h,t);c._on=true}if(drawWM(x,w,h,t))c._on=true})();
  var es=ENDC.on&&t>=endStart();if($("endc").classList.contains("show")!==es){$("endc").classList.toggle("show",es);st.style.transition="opacity .6s";st.style.opacity=es?0:""}
  if(revStop&&!a.paused&&a.currentTime>=revStop){a.pause();revStop=0}
  var sk=$("sk");if(!drag)sk.value=a.currentTime;sk.max=dur();sk.style.setProperty("--p",(a.currentTime/dur()*100)+"%");
@@ -1298,11 +1318,7 @@ async function mvRun(idx){var smp=window.SNSX&&SNSX.ST&&SNSX.ST.sample,eng=mvEng
    if(st.result&&st.result.urls){var ch=false;Object.keys(st.result.urls).forEach(function(k){if(MV.urls[k]!==st.result.urls[k]){MV.urls[k]=st.result.urls[k];ch=true}});if(ch){mvSave();mvLoad();mvGrid();if(!MV.on){MV.on=true;$("mv-on").checked=true;mvSave()}}}
    if(st.status=="error")throw new Error(st.err);if(st.status=="done"){$("mv-st").textContent="วาดเสร็จ "+idx.length+" ฉาก · กดเล่นเพื่อดู MV";break}}}
  catch(e){$("mv-st").textContent="วาดไม่สำเร็จ: "+(e.message||e)}$("mv-go").disabled=false}
-function drawMV(x,W,H,t,k){if(!MV.on)return false;var g=k>=0?LN[k].g:0,sc=mvSceneOf(g),im=MVI[sc];if(!im||!im.complete||!im.naturalWidth){for(var q=sc;q>=0;q--){if(MVI[q]&&MVI[q].complete&&MVI[q].naturalWidth){im=MVI[q];sc=q;break}}}if(!im||!im.complete||!im.naturalWidth)return false;
- var gs=k>=0?k:0;while(gs>0&&LN[gs-1].g==g)gs--;var st0=k>=0?T[gs]:0,ge=gs;while(ge<N-1&&LN[ge+1].g==g)ge++;var en=ge+1<N?T[ge+1]:dur(),pp=Math.max(0,Math.min(1,(t-st0)/Math.max(1,en-st0)));
- var draw1=function(img,p,a,dir){var sc2=1.08+.1*(dir%2?p:1-p),r=Math.max(W/img.naturalWidth,H/img.naturalHeight)*sc2,w=img.naturalWidth*r,h=img.naturalHeight*r,px=(W-w)/2+(dir%3-1)*W*.03*(p-.5),py=(H-h)/2;x.save();x.globalAlpha=a;x.drawImage(img,px,py,w,h);x.restore()};
- draw1(im,pp,1,sc);var ft=t-st0;if(ft<1&&sc>0){var pv=MVI[sc-1];if(pv&&pv.complete&&pv.naturalWidth)draw1(pv,1,1-ft,sc-1)}
- x.save();var vg=x.createLinearGradient(0,0,0,H);vg.addColorStop(0,"rgba(0,0,0,.35)");vg.addColorStop(.5,"rgba(0,0,0,.5)");vg.addColorStop(1,"rgba(0,0,0,.65)");x.fillStyle=vg;x.fillRect(0,0,W,H);x.restore();return true}
+/* drawMV ย้ายไปอยู่ในส่วน SNS Pro */
 (function(){document.querySelectorAll("#mv-sty button").forEach(function(b){b.classList.toggle("on",b.dataset.s==MV.sty);b.onclick=function(){MV.sty=b.dataset.s;mvSave();document.querySelectorAll("#mv-sty button").forEach(function(z){z.classList.toggle("on",z==b)});mvGrid()}});
  $("mv-char").value=MV.char;$("mv-char").oninput=function(){MV.char=this.value;mvSave()};$("mv-script").value=MV.script;$("mv-script").oninput=function(){MV.script=this.value;mvSave();mvGrid()};
  $("mv-on").checked=MV.on;$("mv-on").onchange=function(){MV.on=this.checked;mvSave()};
@@ -1508,6 +1524,7 @@ function drawFrame(c,W,H,t){
  if(k>=0)drawBigFx(x,W,H,t,k);
  lfxDraw(x,W,H,t);drawSketch(x,W,H,t);
  if(ENDC.on)drawEnd(x,W,H,t);
+ drawWM(x,W,H,t);
  if(lineTile){x.fillStyle=x.createPattern(lineTile,"repeat");x.fillRect(0,0,W,H)}
  if(noiseTile){x.save();x.globalAlpha=.07;x.translate(-Math.random()*128,-Math.random()*128);x.fillStyle=x.createPattern(noiseTile,"repeat");x.fillRect(0,0,W+128,H+128);x.restore()}}
 var VLEN=0;
@@ -1557,7 +1574,7 @@ function snsFixMp4(u8){try{var dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLe
  od.setUint32(moov,dv.getUint32(moov)+20);od.setUint32(mvex,dv.getUint32(mvex)+20);return out}catch(e){return u8}}
 async function startVideo(){
  if(typeof MediaRecorder==="undefined"||!HTMLCanvasElement.prototype.captureStream){toast("เบราว์เซอร์นี้ยังบันทึกวิดีโอในแอปไม่ได้ ใช้ Chrome หรือ Safari รุ่นใหม่ หรือกดอัดหน้าจอเอง");return}
- var W=FMT[vfmt][0],H=FMT[vfmt][1],wl=null;
+ var _sz=expSize(vfmt),W=_sz[0],H=_sz[1],QQ=QUAL[PRO.q]||QUAL["1080"],wl=null;
  a.pause();
  try{await document.fonts.load("italic 900 40px Anton");await document.fonts.load("900 40px 'Noto Sans Thai'")}catch(e){}
  initAudio();if(!ac||!rdest){toast("เริ่มระบบเสียงไม่ได้ ลองกดเล่นเพลงหนึ่งครั้งก่อนแล้วลองใหม่");return}
@@ -1565,8 +1582,8 @@ async function startVideo(){
  makeTiles();var CL=clipRange();a.currentTime=CL?CL.s:0;
  var cvs=document.createElement("canvas");cvs.width=W;cvs.height=H;
  $("vov").hidden=false;$("vbox").innerHTML="";$("vbox").appendChild(cvs);$("vpb").hidden=false;$("vcancel").hidden=false;$("vact").innerHTML="";
- var mime=pickMime(),opts={videoBitsPerSecond:W*H>900000?6000000:4500000};if(mime)opts.mimeType=mime;
- var stream=cvs.captureStream(30);rdest.stream.getAudioTracks().forEach(function(tr){stream.addTrack(tr)});
+ var mime=pickMime(),opts={videoBitsPerSecond:QQ.br,audioBitsPerSecond:256000};if(mime)opts.mimeType=mime;
+ if(MV.on){$("vst").textContent="กำลังเตรียมจังหวะตัดภาพ...";try{await beatGrid()}catch(e){}}wmLogo();var stream=cvs.captureStream(QQ.fps);rdest.stream.getAudioTracks().forEach(function(tr){stream.addTrack(tr)});
  var mr,chunks=[],cancelled=false;
  try{mr=new MediaRecorder(stream,opts)}catch(e){try{mr=new MediaRecorder(stream)}catch(e2){$("vov").hidden=true;toast("เริ่มตัวบันทึกไม่ได้ในเบราว์เซอร์นี้");return}}
  mr.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
@@ -1737,7 +1754,7 @@ function spaced(x,txt,cx,y,sp){var ch=Array.from(txt),w=0,i;ch.forEach(function(
 function drawPhoto(x,S,f){var im=CV.photo;if(!im)return false;var r=Math.max(S/im.width,S/im.height),w=im.width*r,h=im.height*r;x.save();try{x.filter=f||"none"}catch(e){}x.drawImage(im,(S-w)/2,(S-h)/2,w,h);x.restore();return true}
 function grain(x,S,a){var n=document.createElement("canvas");n.width=n.height=256;var nx=n.getContext("2d"),id=nx.createImageData(256,256);for(var i=0;i<id.data.length;i+=4){var v=Math.random()*255;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255}nx.putImageData(id,0,0);
  x.save();x.globalAlpha=a;x.globalCompositeOperation="overlay";x.fillStyle=x.createPattern(n,"repeat");x.scale(S/1000,S/1000);x.fillRect(0,0,1000,1000);x.restore()}
-function drawCover(c,S){var x=c.getContext("2d"),T1=CV.title.toUpperCase(),A1=CV.artist.toUpperCase(),hot=TH.hot,gl=TH.gl,tx=TH.txt;
+function drawCover0(c,S){var x=c.getContext("2d"),T1=CV.title.toUpperCase(),A1=CV.artist.toUpperCase(),hot=TH.hot,gl=TH.gl,tx=TH.txt;
  x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.globalCompositeOperation="source-over";x.fillStyle="#060406";x.fillRect(0,0,S,S);x.textBaseline="alphabetic";
  var big="italic 900 $px Anton,'Noto Sans Thai',sans-serif",sm="700 $px 'Noto Sans Thai',sans-serif";
  if(CV.tpl=="studio"){var st=toneStyle(STY.filter(function(q){return q.id==STS.id})[0]||STY[0]);
@@ -1793,7 +1810,7 @@ function drawStory(c){var W=c.width,H=c.height,x=c.getContext("2d"),k=W/1080,cv=
  x.fillStyle=TH.hot;x.fillRect(W/2-40*k,H-150*k,80*k,5*k);
  x.font="700 "+(26*k)+"px 'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.6)";x.textAlign="center";spaced(x,"STREAM EVERYWHERE",W/2,H-95*k,6*k);
  grain(x,Math.max(W,H),.12)}
-function cvRender(){var c=$("cvc");drawCover(c,c.width);if($("cvs"))drawStory($("cvs"));document.querySelectorAll("#cv-t button").forEach(function(b){b.classList.toggle("on",b.dataset.t==CV.tpl)})}
+var pkT=0;function cvRender(){var c=$("cvc");drawCover(c,c.width);try{cvThumbs();var tp=$("cv-tip");if(tp)tp.textContent=CTIP[CV.tpl]||"";clearTimeout(pkT);pkT=setTimeout(function(){try{pkGrid()}catch(e){}},450)}catch(e){}if($("cvs"))drawStory($("cvs"));document.querySelectorAll("#cv-t button").forEach(function(b){b.classList.toggle("on",b.dataset.t==CV.tpl)})}
 async function cvOpen(){$("cov").hidden=false;cvModeUI();$("cv-title").value=CV.title;$("cv-artist").value=CV.artist;$("cv-logo").checked=CV.logo;$("cv-date").value=CV.date||"";$("cv-lyr").checked=CV.lyr!==false;
  try{await document.fonts.load("italic 900 80px Anton");await document.fonts.load("900 80px Anton");await document.fonts.load("700 40px 'Noto Sans Thai'")}catch(e){}
  if(!LOGO.complete)await new Promise(function(r){LOGO.onload=r;LOGO.onerror=r});cvRender()}
@@ -1833,6 +1850,281 @@ $("cv-st").onclick=function(){var b=this;b.disabled=true;toast("กำลัง�
 $("cv-photo").onchange=function(){var f=this.files[0];if(!f)return;var im=new Image();im.onload=function(){CV.photo=im;cvRender()};im.src=URL.createObjectURL(f)};
 $("cv-dl").onclick=function(){var b=this;b.disabled=true;toast("กำลังสร้างไฟล์ 3000×3000...");setTimeout(function(){var c=document.createElement("canvas");c.width=c.height=3000;drawCover(c,3000);
  c.toBlob(function(bl){b.disabled=false;if(!bl){toast("สร้างไฟล์ไม่ได้");return}var u=URL.createObjectURL(bl),l=document.createElement("a");l.href=u;l.download="cover-"+(CV.title||"song").replace(/[^\w฀-๿-]+/g,"-")+"-3000.jpg";document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},5000);toast("ดาวน์โหลดปกแล้ว")},"image/jpeg",.93)},50)};
+
+/*PRO-BEGIN*/
+/* ===================== SNS Pro: ส่งออกคมชัด + ลายน้ำ + MV ตัดต่อแบบมืออาชีพ + ปกเทรนด์ + ชุดโปรโมท + แพ็กส่งช่างตัดต่อ ===================== */
+var PRO={q:"1080",wm:true,wmPos:"auto",cam:"auto",cut:true,grade:"auto",lb:false};
+try{var pj0=JSON.parse(localStorage.getItem("bwpro")||"null");if(pj0)PRO=Object.assign(PRO,pj0)}catch(e){}
+function proSave(){try{localStorage.setItem("bwpro",JSON.stringify(PRO))}catch(e){}}
+var QUAL={"720":{fps:30,br:6e6,n:"720p"},"1080":{fps:30,br:12e6,n:"1080p"},"1080s":{fps:60,br:16e6,n:"1080p60"}};
+var FMT1080={"916":[1080,1920],"169":[1920,1080],"11":[1080,1080]};
+function expSize(f){return(PRO.q=="720"?FMT[f]:FMT1080[f])||FMT["916"]}
+function hexRgb(h){h=String(h||"#ff3347").replace("#","");if(h.length==3)h=h.replace(/./g,"$&$&");var n=parseInt(h,16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function sm01(v){v=clamp01(v);return v*v*(3-2*v)}
+function hsh(a,b){var q=Math.sin(a*127.1+b*311.7)*43758.5453;return q-Math.floor(q)}
+function dlBlob(bl,fn){var u=URL.createObjectURL(bl),l=document.createElement("a");l.href=u;l.download=fn;document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},8000)}
+function cBlob(c,type,q){return new Promise(function(r){c.toBlob(function(b){r(b)},type||"image/jpeg",q||.92)})}
+function safeName(s){return String(s||"song").trim().replace(/[^\w฀-๿-]+/g,"-").replace(/^-+|-+$/g,"")||"song"}
+function tc(s,fps){fps=fps||30;s=Math.max(0,s);var f=Math.round(s*fps),ff=f%fps,ss=Math.floor(f/fps),p=function(n){return(n<10?"0":"")+n};return p(Math.floor(ss/3600))+":"+p(Math.floor(ss/60)%60)+":"+p(ss%60)+":"+p(ff)}
+function srtT(s){s=Math.max(0,s);var ms=Math.round(s*1000),p=function(n,w){n=String(n);while(n.length<w)n="0"+n;return n};return p(Math.floor(ms/3600000),2)+":"+p(Math.floor(ms/60000)%60,2)+":"+p(Math.floor(ms/1000)%60,2)+","+p(ms%1000,3)}
+
+/* ---------- ZIP (เก็บไฟล์แบบไม่บีบอัด ใช้ได้ทุกเครื่อง) ---------- */
+var CRCT=null;
+function crc32(u){if(!CRCT){CRCT=new Uint32Array(256);for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;CRCT[n]=c>>>0}}var c2=-1;for(var i=0;i<u.length;i++)c2=CRCT[(c2^u[i])&255]^(c2>>>8);return(c2^-1)>>>0}
+function makeZip(files){var enc=new TextEncoder(),parts=[],cd=[],off2=0,dt=new Date(),dd=((dt.getFullYear()-1980)<<9)|((dt.getMonth()+1)<<5)|dt.getDate(),tt=(dt.getHours()<<11)|(dt.getMinutes()<<5);
+ files.forEach(function(f){var nm=enc.encode(f.name),d=f.data,c=crc32(d),h=new DataView(new ArrayBuffer(30));
+  h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,tt,true);h.setUint16(12,dd,true);h.setUint32(14,c,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
+  parts.push(new Uint8Array(h.buffer),nm,d);
+  var ce=new DataView(new ArrayBuffer(46));ce.setUint32(0,0x02014b50,true);ce.setUint16(4,20,true);ce.setUint16(6,20,true);ce.setUint16(8,0x0800,true);ce.setUint16(10,0,true);ce.setUint16(12,tt,true);ce.setUint16(14,dd,true);ce.setUint32(16,c,true);ce.setUint32(20,d.length,true);ce.setUint32(24,d.length,true);ce.setUint16(28,nm.length,true);ce.setUint32(42,off2,true);
+  cd.push(new Uint8Array(ce.buffer),nm);off2+=30+nm.length+d.length});
+ var cdl=cd.reduce(function(s,p){return s+p.length},0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdl,true);e.setUint32(16,off2,true);
+ return new Blob(parts.concat(cd,[new Uint8Array(e.buffer)]),{type:"application/zip"})}
+function zTxt(name,s){return{name:name,data:new TextEncoder().encode(s)}}
+async function zBlob(name,b){return{name:name,data:new Uint8Array(await b.arrayBuffer())}}
+
+/* ---------- จังหวะเพลง (BPM + ตำแหน่งห้อง) หาเองจากไฟล์เพลง ---------- */
+var BEAT=null,beatP=null;
+function beatGrid(){if(BEAT)return Promise.resolve(BEAT);if(beatP)return beatP;
+ beatP=(async function(){try{var c=JSON.parse(localStorage.getItem("bwbeat")||"null");if(c&&c.v==5&&Math.abs(c.d-dur())<.6){BEAT=c;return c}}catch(e){}
+  try{var buf=await getBuf(),ch=buf.getChannelData(0),ch2=buf.numberOfChannels>1?buf.getChannelData(1):null,sr=buf.sampleRate,FPS=200,hop=Math.round(sr/FPS),n=Math.floor(ch.length/hop),m=new Float32Array(n),i,j;
+  for(i=0;i<n;i++){var e=0,e0=i*hop,e1=e0+hop;for(j=e0;j<e1;j++)e+=Math.abs(ch2?(ch[j]+ch2[j])*.5:ch[j]);m[i]=e/hop}
+  var env=new Float32Array(n),mu=0,pv=0;for(i=0;i<n;i++){var sm=(m[i]+(m[i-1]||0)+(m[i-2]||0)+(m[i+1]||0))/4;env[i]=i?Math.max(0,sm-pv):0;pv=sm;mu+=env[i]}mu/=n;for(i=0;i<n;i++)env[i]-=mu;
+  /* หา BPM จาก autocorrelation (ไม่โดนหลอกจากจังหวะแฝงของไฟล์ MP3) */
+  function ac(L){var a0=Math.floor(L),f=L-a0,s=0;for(var q=0;q+a0+1<n;q++)s+=env[q]*(env[q+a0]*(1-f)+env[q+a0+1]*f);return s}
+  var bestL=0,bv=-1e30,L;for(L=Math.round(FPS*.33);L<=FPS;L++){var v=ac(L);if(v>bv){bv=v;bestL=L}}
+  var P=bestL/FPS,bpm0=60/P;while(bpm0<70){bpm0*=2;P/=2}while(bpm0>170){bpm0/=2;P*=2}
+  function ei(tq){var q=tq*FPS,a0=Math.floor(q),f=q-a0;return a0<0||a0+1>=n?0:env[a0]*(1-f)+env[a0+1]*f}
+  function comb(PP,ph){var s=0,c2=0;for(var tq=ph;tq<n/FPS-.05;tq+=PP){s+=ei(tq);c2++}return c2?s/c2:0}
+  /* ไล่หาความเร็วละเอียด: จังหวะที่ตรงกับเสียงกลองตลอดทั้งเพลงที่สุด */
+  var ph=0,pvv=-1e30,P0=P;for(var PP=P0*.985;PP<=P0*1.015;PP+=.0005){for(var p0=0;p0<PP;p0+=.005){var cv=comb(PP,p0);if(cv>pvv){pvv=cv;ph=p0;P=PP}}}
+  var b2={P:P,ph:ph};
+  var hk=-1;for(i=0;i<N;i++)if(LN[i].h){hk=i;break}var bo=0;if(hk>=0){var bi=Math.round((T[hk]-off-b2.ph)/b2.P);bo=((bi%4)+4)%4}
+  BEAT={v:5,bpm:Math.round(6000/b2.P)/100,p:b2.P,t0:b2.ph,bo:bo,d:dur()};try{localStorage.setItem("bwbeat",JSON.stringify(BEAT))}catch(e){}MVPL=null;beatUI();return BEAT}catch(e){beatP=null;return null}})();return beatP}
+function beatUI(){var el=$("mv-bpm");if(!el)return;el.textContent=BEAT?"จังหวะเพลง ~"+Math.round(BEAT.bpm)+" BPM · ตัดภาพตรงหัวห้อง ("+(4*BEAT.p).toFixed(2)+" วิ/ห้อง)":"กำลังหาจังหวะเพลง..."}
+
+/* ---------- แผนตัดต่อ MV (shot list) ---------- */
+var MVPL=null,FRM=[{z:1,fx:.5,fy:.5,n:"Wide"},{z:1.3,fx:.4,fy:.42,n:"Medium L"},{z:1.55,fx:.6,fy:.4,n:"Close R"},{z:1.22,fx:.5,fy:.34,n:"Medium high"},{z:1.75,fx:.5,fy:.5,n:"Close-up"},{z:1.38,fx:.3,fy:.55,n:"Medium low L"}];
+var MOV=["push","panR","pull","panL","tilt","drift"],MOVN={push:"Push in",pull:"Pull out",panL:"Pan left",panR:"Pan right",tilt:"Tilt down",drift:"Handheld drift"},TRN={black:"Fade from black",fade:"Cross dissolve",flash:"White flash",whip:"Whip pan",cut:"Hard cut (on beat)"};
+function lineAtT(t){var k=-1;for(var i=0;i<N;i++)if(T[i]<=t)k=i;else break;return k}
+function mvPlan(){var S=mvCount(),D=dur()+off+6,key=[N,T[0],T[N>>1],T[N-1],off,S,PRO.cam,PRO.cut,BEAT?BEAT.p+":"+BEAT.t0:0,dur(),LN.length].join("|");if(MVPL&&MVPL.key==key)return MVPL;
+ var st=[],i,sc;for(i=0;i<N;i++){sc=mvSceneOf(LN[i].g);if(!st[sc])st[sc]={t:sc==0?0:T[i],li:i,sc:sc}}
+ st=st.filter(Boolean);if(!st.length)st=[{t:0,li:0,sc:0}];st[0].t=0;
+ var B=BEAT,P=B?B.p:0,db0=B?B.t0+off+B.bo*P:0;
+ if(B)st.forEach(function(q,ix){if(!ix)return;var bq=q.t-((q.t-db0)/P-Math.floor((q.t-db0)/P))*P;if(q.t-bq<.28&&bq>st[ix-1].t+1)q.t=bq});
+ var shots=[],calm=PRO.cam=="calm",hype=PRO.cam=="hype";
+ st.forEach(function(q,ix){var s0=q.t,s1=ix+1<st.length?st[ix+1].t:D,li=q.li,l=LN[li]||{},tr="fade";
+  if(ix==0)tr="black";else if(l.h&&(li==0||LN[li-1].g!=l.g))tr="flash";else if(li>0&&l.s!=LN[li-1].s)tr="whip";
+  var cuts=[s0];if(PRO.cut&&B){var m0=Math.ceil((s0-db0)/(2*P)),last=s0;for(var m=m0;;m++){var g=db0+m*2*P;if(g>=s1-1)break;if(g<s0+(ix==0?2.5:1.2))continue;var kk=lineAtT(g),hk=kk>=0&&LN[kk].h,step=hk?(hype?1:2):(hype?2:(calm?8:4));if(calm&&hk)step=4;if(((m%step)+step)%step)continue;if(g-last<1.2)continue;cuts.push(g);last=g}}
+  var pf=-1;cuts.forEach(function(c0,j){var fr=j==0?(tr=="flash"?4:0):1+Math.floor(hsh(q.sc+1,j)*5);if(fr==pf)fr=fr%5+1;pf=fr;
+   var mv=MOV[Math.floor(hsh(q.sc*3+7,j+2)*MOV.length)];if(calm&&/pan/.test(mv)&&j%2)mv="drift";
+   shots.push({t0:c0,t1:j+1<cuts.length?cuts[j+1]:s1,sc:q.sc,fr:fr,mv:mv,tr:j==0?tr:"cut",li:li})})});
+ shots.forEach(function(s,ix){s.i=ix});MVPL={key:key,s:shots};return MVPL}
+function planAt(PL,t){var s=PL.s,lo=0,hi=s.length-1;if(!s.length)return null;while(lo<hi){var m=(lo+hi+1)>>1;if(s[m].t0<=t)lo=m;else hi=m-1}return s[lo]}
+
+/* ---------- เกรดสี (ทำครั้งเดียวต่อภาพ เก็บไว้ ไม่หนักเครื่อง) ---------- */
+var MVG={};
+function gradeOf(){return PRO.grade=="auto"?"cine":PRO.grade}
+function gradeCanvas(src,mode,maxW){var w0=src.naturalWidth||src.width,h0=src.naturalHeight||src.height,s=Math.min(1,(maxW||1600)/Math.max(w0,h0)),w=Math.max(1,Math.round(w0*s)),h=Math.max(1,Math.round(h0*s)),c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.drawImage(src,0,0,w,h);if(!mode||mode=="none")return c;
+ var d;try{d=x.getImageData(0,0,w,h)}catch(e){return c}var p=d.data,i,r,g,b,l,hr=hexRgb(TH.hot);
+ var LUT=null;if(mode=="thermal"){var MP=[[0,0,0,12],[.16,24,0,92],[.36,118,0,146],[.54,214,24,72],[.7,255,110,0],[.86,255,214,40],[1,255,255,236]];LUT=new Uint8Array(768);for(var v=0;v<256;v++){var f=v/255,j=1;while(j<MP.length-1&&f>MP[j][0])j++;var a0=MP[j-1],a1=MP[j],u=(f-a0[0])/(a1[0]-a0[0]);LUT[v*3]=a0[1]+(a1[1]-a0[1])*u;LUT[v*3+1]=a0[2]+(a1[2]-a0[2])*u;LUT[v*3+2]=a0[3]+(a1[3]-a0[3])*u}}
+ for(i=0;i<p.length;i+=4){r=p[i];g=p[i+1];b=p[i+2];l=(r*.299+g*.587+b*.114)/255;
+  if(mode=="cine"){var cc=function(q){return(q-128)*1.12+128};r=cc(r)+(l-.45)*38;g=cc(g)+(l-.45)*6+(l<.4?(.4-l)*22:0);b=cc(b)-(l-.45)*46+(l<.4?(.4-l)*34:0)}
+  else if(mode=="noir"){var red=clamp01((r-Math.max(g,b)-25)/70),gy=Math.max(0,Math.min(255,(l*255-128)*1.35+120));r=gy+(Math.min(255,r*1.15)-gy)*red;g=gy+(g*.6-gy)*red;b=gy+(b*.6-gy)*red}
+  else if(mode=="bleach"){var gy2=l*255;r=(r*.45+gy2*.55-128)*1.3+128;g=(g*.45+gy2*.55-128)*1.3+128;b=(b*.45+gy2*.55-128)*1.3+124}
+  else if(mode=="thermal"){var lv=Math.max(0,Math.min(255,Math.round(Math.pow(l,.85)*255)));r=LUT[lv*3];g=LUT[lv*3+1];b=LUT[lv*3+2]}
+  else if(mode=="night"){var nv=Math.min(255,Math.pow(l,.62)*290)+(Math.random()-.5)*26;r=nv*.22;g=nv;b=nv*.36}
+  else if(mode=="vhs"){var av=(r+g+b)/3;r=18+(av+(r-av)*1.35)*.9;g=14+(av+(g-av)*1.35)*.88;b=26+(av+(b-av)*1.35)*.86}
+  else if(mode=="duo"){var dl=sm01((l-.08)/.84);r=dl*255+(1-dl)*hr[0]*.22;g=dl*235+(1-dl)*hr[1]*.12;b=dl*228+(1-dl)*hr[2]*.18;if(dl<.55){var mm=(.55-dl)/.55;r=r*(1-mm*.3)+hr[0]*mm*.3;g=g*(1-mm*.3)+hr[1]*mm*.3;b=b*(1-mm*.3)+hr[2]*mm*.3}}
+  p[i]=r;p[i+1]=g;p[i+2]=b}
+ if(mode=="vhs"){var q2=new Uint8ClampedArray(p),dx=Math.max(2,Math.round(w*.004));for(var y=0;y<h;y++)for(var xx=0;xx<w;xx++){var o=(y*w+xx)*4,oa=(y*w+Math.min(w-1,xx+dx))*4,ob=(y*w+Math.max(0,xx-dx))*4;p[o]=q2[oa];p[o+2]=q2[ob+2]}}
+ x.putImageData(d,0,0);return c}
+function mvImg(sc){var im=MVI[sc];if(!im||!im.complete||!im.naturalWidth){im=null;for(var q=sc;q>=0;q--){var z=MVI[q];if(z&&z.complete&&z.naturalWidth){im=z;break}}if(!im)for(var k2 in MVI){var z2=MVI[k2];if(z2&&z2.complete&&z2.naturalWidth){im=z2;break}}}if(!im)return null;
+ var gr=gradeOf(),key=(im._u||im.src||"").length+":"+String(im._u||im.src).slice(-40)+"|"+gr+"|"+TH.hot;if(MVG[sc]&&MVG[sc].k==key)return MVG[sc].c;var c=gradeCanvas(im,gr,1600);MVG[sc]={k:key,c:c};return c}
+
+/* ---------- กล้อง + ทรานซิชัน ---------- */
+function drawShot(x,W,H,img,sh,t,hook,dx,zx){var len=Math.max(.2,sh.t1-sh.t0),q=clamp01((t-sh.t0)/len),F=FRM[sh.fr]||FRM[0],amp=PRO.cam=="calm"?.05:PRO.cam=="hype"?.12:.08,m=sh.mv,z=F.z,fx=F.fx,fy=F.fy;
+ z*=1+(m=="push"?amp*q:m=="pull"?amp*(1-q):amp*.5);if(m=="panL")fx+=amp*(.5-q)*.9;if(m=="panR")fx+=amp*(q-.5)*.9;if(m=="tilt")fy+=amp*(.5-q)*.7;if(m=="drift"){fx+=Math.sin(t*.35+sh.sc)*amp*.25;fy+=Math.cos(t*.3)*amp*.15}
+ if(BEAT&&PRO.cam!="calm"){var bt=(t-off-BEAT.t0)/BEAT.p,ph=bt-Math.floor(bt);z*=1+Math.exp(-ph*BEAT.p*7)*(hook?.028:.01)*(PRO.cam=="hype"?1.7:1)}
+ z*=zx||1;var iw=img.width,ih=img.height,r=Math.max(W/iw,H/ih)*z,w=iw*r,h=ih*r,px=W/2-fx*w,py=H/2-fy*h;px=Math.min(0,Math.max(W-w,px));py=Math.min(0,Math.max(H-h,py));
+ var hk=PRO.cam=="hype"?2:PRO.cam=="calm"?.5:1,M=Math.min(W,H);px+=(Math.sin(t*1.7+sh.sc)*.6+Math.sin(t*3.1)*.4)*M*.004*hk;py+=(Math.cos(t*1.3)*.6+Math.sin(t*2.3+1)*.4)*M*.003*hk;
+ x.save();if(PRO.cam=="hype"){x.translate(W/2,H/2);x.rotate(Math.sin(t*.9)*.006);x.translate(-W/2,-H/2)}x.drawImage(img,px+(dx||0),py,w,h);x.restore()}
+function mvHud(x,W,H,t,gr,yo){var M=Math.min(W,H),fs=M*.026,pad=M*.05,i,ty=pad+(yo||0);x.save();x.textBaseline="top";x.font="700 "+fs+"px ui-monospace,Menlo,Consolas,monospace";
+ if(gr=="night"||gr=="thermal"){x.strokeStyle="rgba(255,255,255,.7)";x.lineWidth=Math.max(1,M*.003);var L=M*.06;[[pad,pad,1,1],[W-pad,pad,-1,1],[pad,H-pad,1,-1],[W-pad,H-pad,-1,-1]].forEach(function(c){x.beginPath();x.moveTo(c[0],c[1]+L*c[3]);x.lineTo(c[0],c[1]);x.lineTo(c[0]+L*c[2],c[1]);x.stroke()});
+  x.beginPath();x.moveTo(W/2-M*.03,H/2);x.lineTo(W/2+M*.03,H/2);x.moveTo(W/2,H/2-M*.03);x.lineTo(W/2,H/2+M*.03);x.stroke();
+  if(Math.floor(t*1.6)%2==0){x.fillStyle="#ff2b2b";x.beginPath();x.arc(pad+M*.03,ty+M*.04,fs*.35,0,7);x.fill()}x.fillStyle="rgba(255,255,255,.85)";x.fillText("REC",pad+M*.05,ty+M*.025);x.textAlign="right";x.fillText(gr=="thermal"?(36+Math.sin(t*.7)*.6).toFixed(1)+"°C":"NV ×2",W-pad-M*.01,ty+M*.025);
+  x.fillText(tc(Math.max(0,t-off)),W-pad-M*.01,H-pad-fs*1.6);x.textAlign="left";
+  if(gr=="night"){x.globalAlpha=.08;x.fillStyle="#8f8";for(i=0;i<H;i+=4)x.fillRect(0,i,W,1)}}
+ else if(gr=="vhs"){x.fillStyle="rgba(255,255,255,.88)";x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=4;x.fillText("PLAY ▶",pad,ty);var dt=new Date();x.fillText(["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"][dt.getMonth()]+". "+String(dt.getDate()).padStart(2,"0")+" "+dt.getFullYear(),pad,H-pad-fs*1.4);x.shadowBlur=0;
+  var by=((t*.13)%1.2-.1)*H;x.globalAlpha=.16;x.fillStyle="#fff";x.fillRect(0,by,W,M*.02);x.globalAlpha=.06;for(i=0;i<H;i+=3)x.fillRect(0,i,W,1)}
+ x.restore()}
+function drawMV(x,W,H,t,k){if(!MV.on)return false;var PL=mvPlan(),sh=planAt(PL,t);if(!sh)return false;var img=mvImg(sh.sc);if(!img)return false;
+ var hook=k>=0&&LN[k].h,ft=t-sh.t0,trD={black:.8,fade:.85,flash:.5,whip:.34,cut:0}[sh.tr]||0,prev=sh.i>0?PL.s[sh.i-1]:null,pimg=prev?mvImg(prev.sc):null,gr=gradeOf();
+ x.save();x.globalAlpha=1;x.globalCompositeOperation="source-over";x.fillStyle="#000";x.fillRect(0,0,W,H);
+ if(trD&&ft>=0&&ft<trD){var u=ft/trD,e=sm01(u);
+  if(sh.tr=="fade"&&pimg){drawShot(x,W,H,pimg,prev,t,hook);x.globalAlpha=e;drawShot(x,W,H,img,sh,t,hook);x.globalAlpha=1}
+  else if(sh.tr=="whip"&&pimg){var ee=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;drawShot(x,W,H,pimg,prev,t,hook,-ee*W);drawShot(x,W,H,img,sh,t,hook,(1-ee)*W);var sp=Math.sin(u*Math.PI);if(sp>.05){x.globalAlpha=.22*sp;for(var s2=1;s2<=3;s2++)drawShot(x,W,H,img,sh,t,hook,(1-ee)*W+s2*W*.05*sp);x.globalAlpha=1}}
+  else if(sh.tr=="flash"){drawShot(x,W,H,img,sh,t,hook,0,1+.14*Math.pow(1-u,2));x.fillStyle="rgba(255,255,255,"+(Math.pow(1-u,2)*.92)+")";x.fillRect(0,0,W,H)}
+  else{drawShot(x,W,H,img,sh,t,hook);x.fillStyle="rgba(0,0,0,"+(1-e)+")";x.fillRect(0,0,W,H)}}
+ else drawShot(x,W,H,img,sh,t,hook);
+ if(gr=="night"||gr=="thermal"||gr=="vhs")mvHud(x,W,H,t,gr,PRO.wm&&wmPos(W,H).charAt(0)=="t"?Math.min(W,H)*.14:0);
+ var vg=x.createLinearGradient(0,0,0,H);vg.addColorStop(0,"rgba(0,0,0,.3)");vg.addColorStop(.5,"rgba(0,0,0,.42)");vg.addColorStop(1,"rgba(0,0,0,.6)");x.fillStyle=vg;x.fillRect(0,0,W,H);
+ if(PRO.lb&&W>H*1.2){var bh=Math.max(0,(H-W/2.39)/2);x.fillStyle="#000";x.fillRect(0,0,W,bh);x.fillRect(0,H-bh,W,bh)}
+ x.restore();return true}
+
+/* ---------- ลายน้ำแบรนด์ ---------- */
+var WML=null;
+function wmLogo(){if(WML)return WML;if(!LOGO.complete||!LOGO.naturalWidth)return null;var S=256,c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.drawImage(LOGO,0,0,S,S);try{var d=x.getImageData(0,0,S,S),p=d.data;for(var i=0;i<p.length;i+=4){var l=(p[i]+p[i+1]+p[i+2])/3,al=p[i+3]/255*clamp01((150-l)/90);p[i]=p[i+1]=p[i+2]=255;p[i+3]=al*255}x.putImageData(d,0,0)}catch(e){}WML=c;return c}
+function wmPos(W,H){return PRO.wmPos=="auto"?(H>W*1.2?"tl":"br"):PRO.wmPos}
+function drawWM(x,W,H,t){if(!PRO.wm)return false;var L=wmLogo(),M=Math.min(W,H),s=M*.068,pad=M*.045,fo=1;if(ENDC.on){var ea=t-endStart();if(ea>-.6)fo=clamp01(-ea/.6)}if(t<.4)fo*=clamp01(t/.4);if(fo<=.01)return false;
+ var pos=wmPos(W,H),right=pos=="tr"||pos=="br",bottom=pos=="br"||pos=="bl";if(H>W*1.2&&bottom)pad=M*.045;
+ var lx=right?W-pad-s:pad,ly=bottom?H-pad-s-(H>W*1.2?H*.07:0):pad+(H>W*1.2?H*.035:0),fsz=s*.2,txt="SLOPE NORTH SIDE";
+ x.save();x.globalAlpha=fo;x.shadowColor="rgba(0,0,0,.65)";x.shadowBlur=s*.18;if(L){x.globalAlpha=fo*.78;x.drawImage(L,lx,ly,s,s)}
+ x.font="600 "+fsz+"px Montserrat,'Noto Sans Thai',sans-serif";x.textBaseline="middle";var sp=fsz*.28,tw=0,ch=Array.from(txt);ch.forEach(function(c){tw+=x.measureText(c).width+sp});tw-=sp;
+ var tx0=right?lx-s*.14-tw:lx+s+s*.14,ty=ly+s*.44;x.globalAlpha=fo*.66;x.fillStyle="#fff";var cur=tx0;ch.forEach(function(c){x.fillText(c,cur,ty);cur+=x.measureText(c).width+sp});
+ x.shadowBlur=0;x.globalAlpha=fo*.9;x.fillStyle=TH.hot;x.fillRect(right?tx0+tw-s*.34:tx0,ty+fsz*.95,s*.34,Math.max(1,s*.03));
+ var gp=(t%18)/1.3;if(gp<1){var gx=tx0-tw*.3+gp*tw*1.6,gg=x.createLinearGradient(gx-fsz*3,0,gx+fsz*3,0);gg.addColorStop(0,"rgba(255,255,255,0)");gg.addColorStop(.5,"rgba(255,255,255,1)");gg.addColorStop(1,"rgba(255,255,255,0)");x.globalAlpha=fo*.9;x.fillStyle=gg;cur=tx0;ch.forEach(function(c){x.fillText(c,cur,ty);cur+=x.measureText(c).width+sp})}
+ x.restore();return true}
+
+/* ---------- ปกเทรนด์ปีนี้ ---------- */
+var CTIP={studio:"ใช้ภาพ AI/ลายตามสไตล์ที่เลือก",dark:"รูปขาวดำมืด + ชื่อใหญ่",orb:"แสงกลางจอ มินิมอล",glitch:"ชื่อซ้อนแบบกลิตช์",mark:"โลโก้แบรนด์ พื้นสว่าง",
+ chrome:"เทรนด์ 2026: ตัวอักษรโครมเงา + กริดแบบนีโอบรูทัล ดูแพง แข็ง ทันสมัย",lofi:"เทรนด์ 2026: ฟิล์มแอนะล็อก แสงล้น เกรนหนา ขอบฟิล์ม ต้านความเนี้ยบของดิจิทัล",y3k:"เทรนด์ 2026: Y3K โฮโลแกรมรุ้งเหลือบ ล้ำอนาคต",
+ thermal:"เทรนด์ 2026: ภาพกล้องความร้อนแบบ found footage เข้ากับแร็พ/แทร็ป",night:"เทรนด์ 2026: กล้องไนท์วิชั่นเขียว ดิบ จริง",type:"เทรนด์ 2026: ตัวอักษรยักษ์เป็นภาพหลัก รูปอยู่ในตัวหนังสือ",glass:"เทรนด์ 2026: กระจกฝ้าโปร่งแสง (glassmorphism) นุ่ม ลึก"};
+function cvSource(S){var c=document.createElement("canvas");c.width=c.height=S;var x=c.getContext("2d");x.fillStyle="#08060a";x.fillRect(0,0,S,S);
+ var im=CV.photo||(CV.ai&&CV.ai.naturalWidth?CV.ai:null);if(!im)for(var k in MVI){var m=MVI[k];if(m&&m.complete&&m.naturalWidth){im=m;break}}
+ if(im){var w=im.naturalWidth||im.width,h=im.naturalHeight||im.height,r=Math.max(S/w,S/h);x.drawImage(im,(S-w*r)/2,(S-h*r)/2,w*r,h*r)}
+ else{try{stBg(x,S,S,toneStyle(curStyle()),CV.seed||7)}catch(e){var g=x.createRadialGradient(S*.6,S*.4,0,S*.6,S*.4,S*.8);g.addColorStop(0,"rgb("+TH.gl+")");g.addColorStop(1,"#050305");x.fillStyle=g;x.fillRect(0,0,S,S)}}
+ return c}
+function spacedL(x,txt,x0,y,sp){x.textAlign="left";var cur=x0;Array.from(txt).forEach(function(c){x.fillText(c,cur,y);cur+=x.measureText(c).width+sp})}
+function rrect(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+function tLines(T1,maxRows){var w=T1.split(/\s+/).filter(Boolean);if(w.length>=2&&w.length<=maxRows)return w;if(w.length>maxRows){var out=[],per=Math.ceil(w.length/maxRows);for(var i=0;i<w.length;i+=per)out.push(w.slice(i,i+per).join(" "));return out}
+ var a=Array.from(T1);if(a.length>=7){var h=Math.ceil(a.length/2);return[a.slice(0,h).join(""),a.slice(h).join("")]}return[T1]}
+function drawCoverPro(c,S){var x=c.getContext("2d"),tp=CV.tpl,T1=(CV.title||" ").toUpperCase(),A1=(CV.artist||" ").toUpperCase(),hot=TH.hot,i;
+ if(!/^(chrome|lofi|y3k|thermal|night|type|glass)$/.test(tp))return false;
+ x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.globalCompositeOperation="source-over";x.shadowBlur=0;x.filter="none";x.fillStyle="#060406";x.fillRect(0,0,S,S);x.textBaseline="alphabetic";
+ var src=cvSource(Math.min(S,1600)),mono="ui-monospace,Menlo,Consolas,'Noto Sans Thai',monospace",L=wmLogo();
+ if(tp=="chrome"){x.filter="grayscale(1) contrast(1.35) brightness(.48)";x.drawImage(src,0,0,S,S);x.filter="none";
+  x.strokeStyle="rgba(255,255,255,.1)";x.lineWidth=Math.max(1,S*.0012);for(i=1;i<10;i++){x.beginPath();x.moveTo(S*i/10,0);x.lineTo(S*i/10,S);x.moveTo(0,S*i/10);x.lineTo(S,S*i/10);x.stroke()}
+  var f="900 $px Anton,'Noto Sans Thai',sans-serif",fs=fitFont(x,T1,f,S*.26,S*.9);x.save();x.translate(S/2,S*.64);x.scale(1,1.18);x.textAlign="center";
+  var g=x.createLinearGradient(0,-fs*.82,0,fs*.05);[[0,"#ffffff"],[.22,"#c4cad2"],[.44,"#30343a"],[.5,"#0c0d10"],[.56,"#5a6068"],[.74,"#f4f7fa"],[.88,"#9aa1aa"],[1,"#e9edf2"]].forEach(function(q){g.addColorStop(q[0],q[1])});
+  x.shadowColor="rgba("+TH.gl+",.75)";x.shadowBlur=S*.05;x.fillStyle=g;x.fillText(T1,0,0);x.shadowBlur=0;x.lineWidth=Math.max(1,fs*.012);x.strokeStyle="rgba(255,255,255,.55)";x.strokeText(T1,0,0);x.restore();
+  var bw=S*.06;x.fillStyle=hot;x.fillRect(S*.06,S*.06,bw,bw);x.font="700 "+S*.026+"px "+mono;x.fillStyle="#fff";x.textAlign="left";x.fillText(A1,S*.06+bw+S*.025,S*.06+bw*.68);
+  x.strokeStyle="#fff";x.lineWidth=Math.max(1,S*.002);x.strokeRect(S*.06,S*.83,S*.88,S*.11);x.font="600 "+S*.02+"px "+mono;x.fillText("SNS—"+String(new Date().getFullYear()).slice(2)+"/"+String((CV.seed||7)%1000).padStart(3,"0"),S*.08,S*.895);x.textAlign="right";x.fillText("SLOPE NORTH SIDE",S*.92,S*.895);
+  x.fillStyle="#fff";for(i=0;i<34;i++){var bx=S*.4+i*S*.0072;if(hsh(i,3)>.35)x.fillRect(bx,S*.852,S*(hsh(i,5)>.6?.0042:.002),S*.07)}
+  if(CV.logo&&L)x.drawImage(L,S*.85,S*.05,S*.09,S*.09)}
+ else if(tp=="lofi"){x.fillStyle="#efe9df";x.fillRect(0,0,S,S);var m=S*.06,iw=S-2*m,ih=S*.76;x.save();x.beginPath();x.rect(m,m,iw,ih);x.clip();
+  var r0=Math.max(iw/src.width,ih/src.height);x.filter="brightness(1.22) contrast(.86) saturate(.62) sepia(.22)";x.drawImage(src,m+(iw-src.width*r0)/2,m+(ih-src.height*r0)/2,src.width*r0,src.height*r0);
+  x.filter="blur("+Math.round(S*.012)+"px) brightness(1.3)";x.globalCompositeOperation="screen";x.globalAlpha=.32;x.drawImage(src,m+(iw-src.width*r0)/2,m+(ih-src.height*r0)/2,src.width*r0,src.height*r0);x.filter="none";x.globalAlpha=1;
+  [[m,m+ih*.75,S*.5,"255,120,40",.65],[m+iw,m,S*.45,TH.gl,.5],[m+iw*.2,m,S*.3,"255,220,170",.4]].forEach(function(q){var gg=x.createRadialGradient(q[0],q[1],0,q[0],q[1],q[2]);gg.addColorStop(0,"rgba("+q[3]+","+q[4]+")");gg.addColorStop(1,"rgba("+q[3]+",0)");x.fillStyle=gg;x.fillRect(m,m,iw,ih)});
+  x.globalCompositeOperation="source-over";grain(x,S,.32);var dt=new Date(),ds="'"+String(dt.getFullYear()).slice(2)+" "+String(dt.getMonth()+1).padStart(2," ")+" "+String(dt.getDate()).padStart(2,"0");
+  x.font="700 "+S*.034+"px "+mono;x.textAlign="right";x.fillStyle="#ff8a2a";x.shadowColor="rgba(255,120,30,.9)";x.shadowBlur=S*.01;x.fillText(ds,m+iw-S*.03,m+ih-S*.03);x.restore();
+  x.textAlign="left";var tl=(CV.title||"").toLowerCase();fitFont(x,tl,"italic 500 $px 'Playfair Display','Noto Sans Thai',serif",S*.07,iw*.75);x.fillStyle="#1d1a17";x.fillText(tl,m,m+ih+S*.1);
+  x.font="500 "+S*.022+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="#6b625a";x.fillText((CV.artist||"").toLowerCase(),m,m+ih+S*.145);if(CV.logo&&LOGO.complete){x.globalAlpha=.85;x.drawImage(LOGO,S-m-S*.07,m+ih+S*.065,S*.07,S*.07);x.globalAlpha=1}}
+ else if(tp=="y3k"){var sm=document.createElement("canvas");sm.width=sm.height=96;var sx=sm.getContext("2d"),cg=sx.createConicGradient?sx.createConicGradient(hsh(CV.seed||7,1)*6,48,48):null;
+  if(cg){[[0,hot],[.18,"#9fe8ff"],[.36,"#dcc8ff"],[.52,"#f6f6f6"],[.7,"#ffb6dc"],[.86,"#8ad8ff"],[1,hot]].forEach(function(q){cg.addColorStop(q[0],q[1])});sx.fillStyle=cg}else sx.fillStyle=hot;sx.fillRect(0,0,96,96);
+  x.imageSmoothingQuality="high";x.drawImage(sm,0,0,S,S);x.globalCompositeOperation="luminosity";x.globalAlpha=.8;x.filter="contrast(1.2)";x.drawImage(src,0,0,S,S);x.filter="none";x.globalAlpha=1;x.globalCompositeOperation="screen";
+  var sh2=x.createLinearGradient(0,0,S,S);sh2.addColorStop(.3,"rgba(255,255,255,0)");sh2.addColorStop(.45,"rgba(255,255,255,.35)");sh2.addColorStop(.52,"rgba(255,255,255,0)");sh2.addColorStop(.62,"rgba(255,255,255,.18)");sh2.addColorStop(.7,"rgba(255,255,255,0)");x.fillStyle=sh2;x.fillRect(0,0,S,S);x.globalCompositeOperation="source-over";
+  var vg=x.createRadialGradient(S/2,S/2,S*.3,S/2,S/2,S*.75);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(10,0,20,.55)");x.fillStyle=vg;x.fillRect(0,0,S,S);
+  x.strokeStyle="rgba(255,255,255,.55)";x.lineWidth=Math.max(1,S*.0016);for(i=0;i<3;i++){x.beginPath();x.ellipse(S/2,S*.47,S*(.36+i*.05),S*(.12+i*.03),-.25,0,7);x.stroke()}
+  var fy="800 $px Montserrat,'Noto Sans Thai',sans-serif";fitFont(x,T1,fy,S*.11,S*.66);var tg=x.createLinearGradient(S*.2,0,S*.8,0);tg.addColorStop(0,"#ffffff");tg.addColorStop(.35,"#dff6ff");tg.addColorStop(.55,"#ffd9f0");tg.addColorStop(.8,"#e9e1ff");tg.addColorStop(1,"#ffffff");
+  x.fillStyle=tg;x.shadowColor="rgba(160,120,255,.8)";x.shadowBlur=S*.03;spaced(x,T1,S/2,S*.84,S*.022);x.shadowBlur=0;x.font="600 "+S*.022+"px "+mono;x.fillStyle="rgba(255,255,255,.88)";spaced(x,A1,S/2,S*.9,S*.012);
+  x.textAlign="left";x.fillText("Y3K // "+new Date().getFullYear(),S*.05,S*.07);x.textAlign="right";x.fillText("+ + +",S*.95,S*.07);if(CV.logo&&L)x.drawImage(L,S*.455,S*.05,S*.09,S*.09)}
+ else if(tp=="thermal"||tp=="night"){var gc=gradeCanvas(src,tp,Math.min(S,1600));x.drawImage(gc,0,0,S,S);
+  if(tp=="night"){var nvg=x.createRadialGradient(S/2,S/2,S*.32,S/2,S/2,S*.72);nvg.addColorStop(0,"rgba(0,0,0,0)");nvg.addColorStop(1,"rgba(0,0,0,.92)");x.fillStyle=nvg;x.fillRect(0,0,S,S)}
+  mvHud(x,S,S,7.3,tp);if(tp=="thermal"){var sg=x.createLinearGradient(0,S*.3,0,S*.7);["#ffffeb","#ffd628","#ff6e00","#d61848","#760092","#18005c","#00000c"].forEach(function(cc,ix){sg.addColorStop(ix/6,cc)});x.fillStyle=sg;x.fillRect(S*.93,S*.3,S*.018,S*.4);x.strokeStyle="rgba(255,255,255,.7)";x.strokeRect(S*.93,S*.3,S*.018,S*.4)}
+  x.textAlign="left";x.font="700 "+S*.024+"px "+mono;x.fillStyle="rgba(255,255,255,.85)";x.fillText(A1,S*.07,S*.78);fitFont(x,T1,"800 $px "+mono,S*.1,S*.8);x.fillStyle="#fff";x.shadowColor=tp=="night"?"rgba(80,255,120,.9)":"rgba(255,140,0,.9)";x.shadowBlur=S*.02;x.fillText(T1,S*.07,S*.87);x.shadowBlur=0;if(CV.logo&&L){x.globalAlpha=.85;x.drawImage(L,S*.84,S*.82,S*.08,S*.08);x.globalAlpha=1}}
+ else if(tp=="type"){x.fillStyle="#0a0709";x.fillRect(0,0,S,S);var rows=tLines(T1,3),n=rows.length,top=S*.08,avail=S*.78,rh=avail/n,tf="900 $px Anton,'Noto Sans Thai',sans-serif",lay=document.createElement("canvas");lay.width=lay.height=S;var lx=lay.getContext("2d");lx.textAlign="center";lx.textBaseline="alphabetic";
+  rows.forEach(function(rw,ix){var fs3=fitFont(lx,rw,tf,rh*1.18,S*.94);lx.save();var mw=lx.measureText(rw).width,sy=Math.min(1.5,(rh*.98)/(fs3*.78));lx.translate(S/2,top+rh*(ix+1)-rh*.04);lx.scale(Math.min(1.25,(S*.94)/Math.max(1,mw)),sy);lx.fillStyle="#fff";lx.fillText(rw,0,0);lx.restore()});
+  x.save();x.globalAlpha=.85;x.translate(S*.007,S*.007);var tmp=document.createElement("canvas");tmp.width=tmp.height=S;var tx2=tmp.getContext("2d");tx2.drawImage(lay,0,0);tx2.globalCompositeOperation="source-in";tx2.fillStyle=hot;tx2.fillRect(0,0,S,S);x.drawImage(tmp,0,0);x.restore();
+  lx.globalCompositeOperation="source-in";lx.filter="contrast(1.25) saturate(1.1)";lx.drawImage(src,0,0,S,S);lx.filter="none";x.drawImage(lay,0,0);
+  x.font="700 "+S*.026+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="#fff";spacedL(x,A1,S*.06,S*.955,S*.01);x.fillStyle=hot;x.fillRect(S*.06,S*.915,S*.05,S*.008);if(CV.logo&&L)x.drawImage(L,S*.87,S*.88,S*.075,S*.075)}
+ else if(tp=="glass"){x.filter="blur("+Math.round(S*.004)+"px) saturate(1.2) brightness(.8)";x.drawImage(src,0,0,S,S);x.filter="none";
+  var cx=S*.09,cy=S*.56,cw=S*.82,ch2=S*.32,cr=S*.045;x.save();rrect(x,cx,cy,cw,ch2,cr);x.clip();x.filter="blur("+Math.round(S*.03)+"px) brightness(1.25) saturate(1.3)";x.drawImage(src,-S*.05,-S*.05,S*1.1,S*1.1);x.filter="none";x.fillStyle="rgba(255,255,255,.13)";x.fillRect(cx,cy,cw,ch2);
+  var hg=x.createLinearGradient(0,cy,0,cy+ch2);hg.addColorStop(0,"rgba(255,255,255,.28)");hg.addColorStop(.35,"rgba(255,255,255,0)");x.fillStyle=hg;x.fillRect(cx,cy,cw,ch2);x.restore();
+  rrect(x,cx,cy,cw,ch2,cr);x.strokeStyle="rgba(255,255,255,.5)";x.lineWidth=Math.max(1,S*.0018);x.stroke();
+  x.textAlign="left";x.font="600 "+S*.026+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.85)";x.fillText(A1,cx+S*.05,cy+S*.09);fitFont(x,CV.title||"","800 $px Montserrat,'Noto Sans Thai',sans-serif",S*.12,cw-S*.1);x.fillStyle="#fff";x.shadowColor="rgba(0,0,0,.25)";x.shadowBlur=S*.01;x.fillText(CV.title||"",cx+S*.05,cy+S*.24);x.shadowBlur=0;
+  var pw=S*.25,ph2=S*.065;x.save();rrect(x,S*.09,S*.08,pw,ph2,ph2/2);x.clip();x.filter="blur("+Math.round(S*.02)+"px) brightness(1.3)";x.drawImage(src,0,0,S,S);x.filter="none";x.fillStyle="rgba(255,255,255,.16)";x.fillRect(0,0,S,S);x.restore();rrect(x,S*.09,S*.08,pw,ph2,ph2/2);x.stroke();
+  x.font="700 "+S*.022+"px Montserrat,sans-serif";x.fillStyle="#fff";x.textAlign="center";x.fillText((CV.mode=="album"?"NEW ALBUM":"NEW SINGLE"),S*.09+pw/2,S*.08+ph2*.64);x.fillStyle=hot;x.beginPath();x.arc(cx+cw-S*.06,cy+S*.075,S*.012,0,7);x.fill();if(CV.logo&&L)x.drawImage(L,S*.84,S*.07,S*.08,S*.08)}
+ if(tp!="lofi")grain(x,S,tp=="glass"?.08:.15);return true}
+
+function cvThumbs(){var w=$("cv-thumbs");if(!w)return;var src=$("cvc");[[96,"หน้าเพลย์ลิสต์"],[56,"รายการเพลง"],[34,"จอล็อก/แจ้งเตือน"]].forEach(function(q,ix){var c=w.querySelector('canvas[data-i="'+ix+'"]');if(!c){var d=document.createElement("div");d.className="cvth";c=document.createElement("canvas");c.dataset.i=ix;var s=document.createElement("small");s.textContent=q[1];d.appendChild(c);d.appendChild(s);w.appendChild(d)}
+  var dpr=Math.min(3,window.devicePixelRatio||1);c.width=c.height=Math.round(q[0]*dpr);c.style.width=c.style.height=q[0]+"px";var x=c.getContext("2d");x.imageSmoothingQuality="high";x.drawImage(src,0,0,c.width,c.height)})}
+
+/* ---------- ชุดภาพโปรโมท ---------- */
+var PK=[{id:"post",n:"โพสต์ IG/FB 4:5",w:1080,h:1350},{id:"thumb",n:"ภาพปกคลิป YouTube",w:1280,h:720},{id:"banner",n:"แบนเนอร์ช่อง YouTube",w:2560,h:1440},{id:"story",n:"สตอรี่ 9:16",w:1080,h:1920},{id:"sq",n:"โพสต์จัตุรัส 1:1",w:1080,h:1080}];
+function pkBg(x,W,H,cv,dark){x.save();x.filter="blur("+Math.round(Math.max(W,H)*.035)+"px) brightness("+(dark||.42)+") saturate(1.2)";var s=Math.max(W,H)*1.15;x.drawImage(cv,(W-s)/2,(H-s)/2,s,s);x.restore();x.filter="none"}
+function drawPk(id,c){var W=c.width,H=c.height,x=c.getContext("2d"),cv=document.createElement("canvas");cv.width=cv.height=1200;drawCover(cv,1200);var T1=(CV.title||"").toUpperCase(),A1=(CV.artist||"").toUpperCase(),hot=TH.hot,k;
+ x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.globalCompositeOperation="source-over";x.shadowBlur=0;x.fillStyle="#050305";x.fillRect(0,0,W,H);x.textBaseline="alphabetic";
+ if(id=="story"){drawStory(c);return}
+ if(id=="post"||id=="sq"){k=W/1080;pkBg(x,W,H,cv);var cs=id=="post"?880*k:760*k,cy=id=="post"?150*k:110*k;x.save();x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=60*k;x.drawImage(cv,(W-cs)/2,cy,cs,cs);x.restore();
+  x.font="700 "+26*k+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.8)";spaced(x,CV.mode=="album"?"NEW ALBUM":"NEW SINGLE",W/2,cy-42*k,10*k);
+  var big=(CV.date||"OUT NOW").toUpperCase();fitFont(x,big,"italic 900 $px Anton,'Noto Sans Thai',sans-serif",(id=="post"?120:84)*k,W*.84);x.textAlign="center";x.fillStyle=TH.txt;x.shadowColor="rgba("+TH.gl+",.9)";x.shadowBlur=26*k;x.fillText(big,W/2,cy+cs+(id=="post"?150:105)*k);x.shadowBlur=0;
+  x.font="600 "+22*k+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.6)";spaced(x,"STREAM EVERYWHERE",W/2,H-(id=="post"?82:56)*k,6*k);
+  x.fillStyle=hot;x.fillRect(W/2-36*k,H-(id=="post"?60:40)*k,72*k,5*k)}
+ else if(id=="thumb"){k=W/1280;pkBg(x,W,H,cv,.38);var g=x.createRadialGradient(W*.27,H*.5,0,W*.27,H*.5,W*.45);g.addColorStop(0,"rgba("+TH.gl+",.55)");g.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=g;x.fillRect(0,0,W,H);
+  var s=H*.78;x.save();x.translate(W*.27,H/2);x.rotate(-.045);x.shadowColor="rgba(0,0,0,.7)";x.shadowBlur=50*k;x.drawImage(cv,-s/2,-s/2,s,s);x.restore();
+  var lx=W*.53,mw=W*.43;x.textAlign="left";var fs=fitFont(x,T1,"italic 900 $px Anton,'Noto Sans Thai',sans-serif",190*k,mw);x.fillStyle="#fff";x.shadowColor="rgba("+TH.gl+",.9)";x.shadowBlur=30*k;x.fillText(T1,lx,H*.56);x.shadowBlur=0;
+  x.font="700 "+30*k+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.88)";x.fillText(A1,lx,H*.56-fs*.95);
+  var lab=(MV.on?"OFFICIAL MUSIC VIDEO":"OFFICIAL LYRIC VIDEO");x.font="800 "+24*k+"px Montserrat,sans-serif";var lw=x.measureText(lab).width+36*k;x.fillStyle=hot;x.fillRect(lx,H*.56+28*k,lw,50*k);x.fillStyle="#fff";x.fillText(lab,lx+18*k,H*.56+62*k)}
+ else if(id=="banner"){k=W/2560;pkBg(x,W,H,cv,.32);var sw=1546*k,shh=423*k,sx=(W-sw)/2,sy=(H-shh)/2;var bg=x.createLinearGradient(0,sy,0,sy+shh);bg.addColorStop(0,"rgba(0,0,0,0)");bg.addColorStop(.5,"rgba(0,0,0,.35)");bg.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=bg;x.fillRect(0,sy-60*k,W,shh+120*k);
+  var cs2=shh*.86;x.save();x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=40*k;x.drawImage(cv,sx+sw-cs2,sy+(shh-cs2)/2,cs2,cs2);x.restore();var L=wmLogo();if(L)x.drawImage(L,sx,sy+shh*.12,shh*.36,shh*.36);
+  x.textAlign="left";fitFont(x,"SLOPE NORTH SIDE","900 $px Anton,sans-serif",130*k,sw-cs2-60*k);x.fillStyle="#fff";x.shadowColor="rgba("+TH.gl+",.8)";x.shadowBlur=24*k;x.fillText("SLOPE NORTH SIDE",sx,sy+shh*.78);x.shadowBlur=0;
+  x.font="700 "+30*k+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle=hot;x.fillText("NEW — "+(CV.title||"")+" · "+(CV.artist||""),sx+shh*.42,sy+shh*.3)}
+ grain(x,Math.max(W,H),.1)}
+function pkGrid(){var g=$("pk-grid");if(!g)return;g.innerHTML="";PK.forEach(function(p){var d=document.createElement("div");d.className="pk";var c=document.createElement("canvas"),sc=Math.min(1,320/Math.max(p.w,p.h));c.width=Math.round(p.w*sc);c.height=Math.round(p.h*sc);try{drawPk(p.id,c)}catch(e){}
+  var b=document.createElement("button");b.className="cta alt";b.textContent="ดาวน์โหลด";b.onclick=async function(){b.disabled=true;var cc=document.createElement("canvas");cc.width=p.w;cc.height=p.h;drawPk(p.id,cc);dlBlob(await cBlob(cc),p.id+"-"+safeName(CV.title)+"-"+p.w+"x"+p.h+".jpg");b.disabled=false};
+  var s=document.createElement("small");s.textContent=p.n+" · "+p.w+"×"+p.h;d.appendChild(c);d.appendChild(s);d.appendChild(b);g.appendChild(d)})}
+async function pkAll(){var st=$("pk-st");st.textContent="กำลังสร้างทั้งชุด...";await new Promise(function(r){setTimeout(r,30)});var files=[],c=document.createElement("canvas");c.width=c.height=3000;drawCover(c,3000);files.push(await zBlob("cover-3000x3000.jpg",await cBlob(c,"image/jpeg",.93)));
+ for(var i=0;i<PK.length;i++){var p=PK[i],cc=document.createElement("canvas");cc.width=p.w;cc.height=p.h;drawPk(p.id,cc);files.push(await zBlob(p.id+"-"+p.w+"x"+p.h+".jpg",await cBlob(cc)));st.textContent="กำลังสร้าง "+(i+2)+"/"+(PK.length+1)}
+ files.push(zTxt("อ่านก่อน.txt","ชุดภาพโปรโมท: "+(CV.title||"")+" — "+(CV.artist||"")+"\r\n\r\ncover-3000x3000.jpg  ปกสำหรับส่งผู้จัดจำหน่าย (Spotify/Apple/YouTube Music)\r\npost-1080x1350.jpg   โพสต์ IG/FB แนวตั้ง 4:5 (เห็นเต็มฟีดที่สุด)\r\nsq-1080x1080.jpg     โพสต์จัตุรัส\r\nstory-1080x1920.jpg  สตอรี่ IG/FB/TikTok\r\nthumb-1280x720.jpg   ภาพปกคลิป YouTube (Custom thumbnail)\r\nbanner-2560x1440.jpg แบนเนอร์ช่อง YouTube (ข้อความอยู่ในโซนปลอดภัย 1546×423 กลางภาพ เห็นครบทุกจอ)\r\n\r\nสร้างด้วย Slope North Side\r\n"));
+ dlBlob(makeZip(files),"promo-"+safeName(CV.title)+".zip");st.textContent="ดาวน์โหลดทั้งชุดแล้ว ("+files.length+" ไฟล์)"}
+function pickVMime(){var c=["video/mp4;codecs=avc1.640028","video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm"];for(var i=0;i<c.length;i++){try{if(MediaRecorder.isTypeSupported(c[i]))return c[i]}catch(e){}}return""}
+async function pkCanvas(){var st=$("pk-st"),b=$("pk-canvas");if(typeof MediaRecorder==="undefined"){toast("เบราว์เซอร์นี้บันทึกวิดีโอไม่ได้");return}b.disabled=true;await beatGrid();
+ var W=720,H=1280,P=BEAT?BEAT.p:.5,LEN=BEAT?Math.max(3,Math.min(8,Math.floor(8/(4*P))*4*P)):8,c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d"),src=cvSource(1400),dust=[];for(var i=0;i<46;i++)dust.push([hsh(i,1),hsh(i,2),hsh(i,3)]);
+ function fr(t){var u=t/LEN,a2=u*Math.PI*2;x.setTransform(1,0,0,1,0,0);x.fillStyle="#000";x.fillRect(0,0,W,H);var z=1.1+.05*Math.sin(a2),s=H*z;x.drawImage(src,(W-s)/2+Math.sin(a2)*W*.04,(H-s)/2+Math.cos(a2)*H*.012,s,s);
+  if(BEAT){var bt=(t)/P,ph=bt-Math.floor(bt),pu=Math.exp(-ph*P*6);x.fillStyle="rgba("+TH.gl+","+(pu*.16)+")";x.fillRect(0,0,W,H)}
+  var gx=((u*1.0)%1)*W*2.4-W*.7,gg=x.createLinearGradient(gx-W*.3,0,gx+W*.3,H*.35);gg.addColorStop(0,"rgba(255,255,255,0)");gg.addColorStop(.5,"rgba(255,255,255,.14)");gg.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=gg;x.fillRect(0,0,W,H);
+  dust.forEach(function(d){var yy=((d[1]-u*(.3+d[2]*.5))%1+1)%1*H,xx=d[0]*W+Math.sin(a2+d[2]*6)*14;x.fillStyle="rgba(255,240,230,"+(.15+d[2]*.45)+")";x.beginPath();x.arc(xx,yy,1+d[2]*2.4,0,7);x.fill()});
+  var vg=x.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.75);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.7)");x.fillStyle=vg;x.fillRect(0,0,W,H);
+  if(lineTile){x.fillStyle=x.createPattern(lineTile,"repeat");x.fillRect(0,0,W,H)}}
+ makeTiles();var mime=pickVMime(),stream=c.captureStream(30),mr,ch=[];try{mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:8e6}:{videoBitsPerSecond:8e6})}catch(e){mr=new MediaRecorder(stream)}
+ mr.ondataavailable=function(e){if(e.data&&e.data.size)ch.push(e.data)};fr(0);mr.start(500);var t0=performance.now();
+ await new Promise(function(res){function lp(){var t=(performance.now()-t0)/1000;if(t>=LEN){res();return}fr(t);st.textContent="กำลังสร้าง Spotify Canvas "+t.toFixed(1)+" / "+LEN.toFixed(1)+" วิ";requestAnimationFrame(lp)}lp()});
+ fr(0);await new Promise(function(r){setTimeout(r,120)});await new Promise(function(r){mr.onstop=r;mr.stop()});stream.getTracks().forEach(function(t){t.stop()});
+ var type=mr.mimeType||mime||"video/webm",vb=new Blob(ch,{type:type});if(/mp4/.test(type)){try{vb=new Blob([snsFixMp4(new Uint8Array(await vb.arrayBuffer()))],{type:type})}catch(e){}}
+ dlBlob(vb,"spotify-canvas-"+safeName(CV.title)+(/mp4/.test(type)?".mp4":".webm"));st.textContent="Spotify Canvas เสร็จ: "+LEN.toFixed(1)+" วิ วนต่อกันพอดี"+(BEAT?" ("+Math.round(BEAT.bpm)+" BPM)":"")+" · อัปโหลดใน Spotify for Artists › เพลง › Canvas"+(/mp4/.test(type)?"":" (ไฟล์เป็น .webm ต้องแปลงเป็น MP4 ก่อน)");b.disabled=false}
+
+/* ---------- แพ็กส่งช่างตัดต่อ ---------- */
+async function mvPack(){var st=$("mv-st"),b=$("mv-pack");b.disabled=true;st.textContent="กำลังเตรียมแพ็กส่งช่างตัดต่อ...";try{await beatGrid();MVPL=null;var PL=mvPlan(),D=dur(),ti=(ENDC.title||CV.title||"song"),files=[],i;
+ var srt=[],lrc=["[ti:"+ti+"]","[ar:"+(ENDC.artist||CV.artist||"")+"]","[by:Slope North Side]"];
+ for(i=0;i<N;i++){var s0=T[i]-off,e0=(E&&E[i]!=null?E[i]:(i+1<N?T[i+1]-.05:T[i]+3))-off;if(i+1<N)e0=Math.min(e0,T[i+1]-off-.02);var txt=mainTxt(i)||LN[i].t;srt.push((i+1)+"\r\n"+srtT(s0)+" --> "+srtT(Math.max(s0+.3,e0))+"\r\n"+txt+"\r\n");var mm=Math.floor(Math.max(0,s0)/60),ss=(Math.max(0,s0)%60).toFixed(2).padStart(5,"0");lrc.push("["+String(mm).padStart(2,"0")+":"+ss+"]"+txt)}
+ files.push(zTxt("lyrics.srt","﻿"+srt.join("\r\n")));files.push(zTxt("lyrics.lrc",lrc.join("\r\n")+"\r\n"));
+ var q=function(s){s=String(s==null?"":s);return/[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s},rows=[["Shot","TC In","TC Out","Duration (s)","Section","Singer","Lyric","MV Scene","Framing","Camera","Transition In"].join(",")];
+ PL.s.forEach(function(s,ix){var a0=Math.max(0,s.t0-off),a1=Math.min(D,s.t1-off);if(a1<=a0)return;var kk=lineAtT(s.t0+.05),l=kk>=0?LN[kk]:null,ly=kk>=0&&T[kk]+.05>=s.t0-.3?(mainTxt(kk)||l.t):(l?"(ต่อ) "+(mainTxt(kk)||l.t):"(อินโทร)");
+  rows.push([ix+1,tc(a0),tc(a1),(a1-a0).toFixed(2),l?(l.h?"Hook":"Verse"):"Intro",l&&SG[l.s]?SG[l.s].n:"",ly,"Scene "+(s.sc+1),FRM[s.fr].n,MOVN[s.mv],TRN[s.tr]].map(q).join(","))});
+ files.push(zTxt("shotlist.csv","﻿"+rows.join("\r\n")));
+ var edl=["TITLE: "+ti+" - markers","FCM: NON-DROP FRAME",""],mk=0,addM=function(t,col,name){mk++;var a=tc(3600+Math.max(0,t)),b2=tc(3600+Math.max(0,t)+1/30);edl.push(String(mk).padStart(3,"0")+"  001      V     C        "+a+" "+b2+" "+a+" "+b2+"  ");edl.push(" |C:"+col+" |M:"+name.replace(/\|/g,"/")+" |D:1");edl.push("")};
+ for(i=0;i<N;i++)if(i==0||LN[i].g!=LN[i-1].g)addM(T[i]-off,LN[i].h?"ResolveColorRed":"ResolveColorBlue",(LN[i].h?"HOOK":"VERSE")+(SG[LN[i].s]?" · "+SG[LN[i].s].n:"")+" — "+(mainTxt(i)||LN[i].t).slice(0,40));
+ PL.s.forEach(function(s){if(s.tr!="cut")addM(s.t0-off,"ResolveColorYellow","Scene "+(s.sc+1)+" · "+TRN[s.tr])});
+ files.push(zTxt("markers-resolve.edl",edl.join("\r\n")));
+ if(BEAT){var bl=["beat,time_sec,timecode,downbeat"],bt=BEAT.t0,j=0;while(bt<D){bl.push([j+1,bt.toFixed(3),tc(bt),((j-BEAT.bo)%4+4)%4==0?"1":""].join(","));bt+=BEAT.p;j++}files.push(zTxt("beats.csv",bl.join("\r\n")))}
+ st.textContent="กำลังเตรียมภาพฉาก...";var S=mvCount(),nImg=0;for(var sc=0;sc<S;sc++){var im=MVI[sc];if(!im||!im.complete||!im.naturalWidth)continue;var c=document.createElement("canvas");c.width=1920;c.height=1080;var x=c.getContext("2d"),r=Math.max(1920/im.naturalWidth,1080/im.naturalHeight);x.drawImage(im,(1920-im.naturalWidth*r)/2,(1080-im.naturalHeight*r)/2,im.naturalWidth*r,im.naturalHeight*r);files.push(await zBlob("scenes/scene-"+String(sc+1).padStart(2,"0")+".jpg",await cBlob(c,"image/jpeg",.92)));
+  var g2=gradeCanvas(c,gradeOf(),1920);files.push(await zBlob("scenes-graded/scene-"+String(sc+1).padStart(2,"0")+"-"+gradeOf()+".jpg",await cBlob(g2,"image/jpeg",.92)));nImg++}
+ var cc=document.createElement("canvas");cc.width=cc.height=3000;drawCover(cc,3000);files.push(await zBlob("cover-3000.jpg",await cBlob(cc,"image/jpeg",.93)));
+ var wl=wmLogo();if(wl){var lc=document.createElement("canvas");lc.width=lc.height=1024;lc.getContext("2d").drawImage(wl,0,0,1024,1024);files.push(await zBlob("brand/sns-logo-white.png",await cBlob(lc,"image/png")))}
+ var cuts=PL.s.filter(function(s){return s.tr=="cut"}).length;
+ files.push(zTxt("อ่านก่อน-README.txt",["แพ็กส่งช่างตัดต่อ — "+ti+" ("+(ENDC.artist||CV.artist||"")+")","","ไฟล์ในแพ็ก","- lyrics.srt       เนื้อเพลงตามเวลา (ลากใส่ Premiere / CapCut / DaVinci เป็นซับไตเติลได้เลย)","- lyrics.lrc       เนื้อเพลงตามเวลาแบบ LRC (Apple Music / Musixmatch / เครื่องเล่นเพลง)","- shotlist.csv     ลิสต์ช็อตทั้งเพลง: เวลาเข้า-ออก ท่อน คนร้อง เนื้อ ฉาก มุมกล้อง การเคลื่อนกล้อง ทรานซิชัน (เปิดด้วย Excel/Google Sheets)","- markers-resolve.edl  มาร์กเกอร์ท่อนเพลง/ฉาก สำหรับ DaVinci Resolve (Timeline › Import › Timeline Markers from EDL) ไทม์ไลน์เริ่ม 01:00:00:00, 30fps","- beats.csv        ตำแหน่งบีตทุกจังหวะ (ช่อง downbeat = หัวห้อง ใช้ตัดตามจังหวะ)","- scenes/          ภาพฉาก MV 1920×1080 (ภาพดิบ)","- scenes-graded/   ภาพฉากที่เกรดสีแล้ว ("+gradeOf()+")","- cover-3000.jpg   ปกเพลง","- brand/           โลโก้ Slope North Side สีขาวพื้นใส สำหรับลายน้ำ","","สรุปการตัดต่อ","- ความยาวเพลง "+fmt(D)+" · "+(BEAT?"~"+Math.round(BEAT.bpm)+" BPM (ห้องละ "+(4*BEAT.p).toFixed(2)+" วิ)":"ยังไม่ได้หาจังหวะ"),"- "+PL.s.length+" ช็อต จาก "+nImg+" ภาพฉาก · ตัดตามบีต "+cuts+" ครั้ง","- สไตล์กล้อง: "+({auto:"อัตโนมัติ (ท่อนร้องตัดทุก 2 ห้อง ฮุคตัดทุกห้อง)",calm:"นิ่ง ละมุน",hype:"ดุ ตัดไว"}[PRO.cam]||PRO.cam),"- ทรานซิชัน: เปิดเพลงเฟดจากดำ · ฮุคเข้า = แฟลชขาว · เปลี่ยนคนร้อง = whip pan · เปลี่ยนฉากปกติ = cross dissolve · ในฉาก = hard cut ตรงหัวห้อง","","ส่งออกที่แนะนำ: 1080×1920 (Reels/TikTok/Shorts) และ 1920×1080 (YouTube) · H.264 · 30fps · 12–16 Mbps · เสียง AAC 320 kbps · ความดังอ้างอิง -14 LUFS","","สร้างด้วย Slope North Side"].join("\r\n")));
+ st.textContent="กำลังรวมไฟล์...";dlBlob(makeZip(files),"edit-pack-"+safeName(ti)+".zip");st.textContent="แพ็กส่งช่างตัดต่อพร้อมแล้ว: "+files.length+" ไฟล์ · "+PL.s.length+" ช็อต"}catch(e){st.textContent="สร้างแพ็กไม่สำเร็จ: "+(e.message||e)}b.disabled=false}
+
+/* ---------- ผูกปุ่ม ---------- */
+(function(){function chips(id,key,attr,after){document.querySelectorAll("#"+id+" button").forEach(function(b){b.classList.toggle("on",b.dataset[attr]==PRO[key]);b.onclick=function(){PRO[key]=b.dataset[attr];proSave();document.querySelectorAll("#"+id+" button").forEach(function(z){z.classList.toggle("on",z==b)});if(after)after()}})}
+ function tg(id,key,after){var e=$(id);if(!e)return;e.checked=!!PRO[key];e.onchange=function(){PRO[key]=e.checked;proSave();if(after)after()}}
+ chips("vq","q","q");chips("wm-pos","wmPos","p");tg("wm-on","wm");chips("mv-cam","cam","c",function(){MVPL=null;beatGrid()});chips("mv-grade","grade","g",function(){MVG={}});tg("mv-cut","cut",function(){MVPL=null;beatGrid()});tg("mv-lb","lb");
+ if($("mv-pack"))$("mv-pack").onclick=mvPack;if($("pk-all"))$("pk-all").onclick=pkAll;if($("pk-canvas"))$("pk-canvas").onclick=pkCanvas;
+ var mo=$("mv-on");if(mo)mo.addEventListener("change",function(){if(mo.checked)beatGrid()});setTimeout(beatGrid,MV.on?2500:6000);beatUI();if(BEAT)beatUI();
+ document.querySelectorAll("#cv-t button").forEach(function(b){b.addEventListener("click",function(){var e=$("cv-tip");if(e)e.textContent=CTIP[CV.tpl]||""})})})();
+function drawCover(c,S){if(drawCoverPro(c,S))return;drawCover0(c,S)}
+window.__snsPro={beatGrid:beatGrid,mvPlan:mvPlan,PRO:PRO,proSave:proSave,drawFrame:function(c,W,H,t){drawFrame(c,W,H,t)},drawCover:function(c,S){drawCover(c,S)},drawPk:drawPk,mvPack:mvPack,pkAll:pkAll,MV:function(){return MV},MVI:function(){return MVI},CV:function(){return CV},expSize:expSize,setMV:function(o){Object.assign(MV,o);MVPL=null;MVG={}},mvRunLocal:function(){mvRunLocal()},BEAT:function(){return BEAT}};
+/*PRO-END*/
 
 setTimeout(function(){ensureSyl()},1200);
 window.__bw={skWindows:function(){return skWindows()},skScenes:function(){return skScenes()},lfxEvents:lfxEvents,endStart:endStart,ENDC:function(){return ENDC},revShow:function(i){revShow(i)},revShift:function(d){revShift(d)},mainTxt:mainTxt,faApply:function(F){var r=faApply({S:T.slice(),E:(E||T).slice(),conf:(CONF||T.map(function(){return 0})).slice(),fa:F});T=r.S;E=r.E;CONF=r.conf;VER=[];synced=true;save();if(rowsEl.length)buildList();return T.length},setFA:function(u){UT=u;WTC={};save()},mixSyl:mixSyl,ensureSyl:ensureSyl,getSYL:function(){return SYL},wordsOf:wordsOf,wordTOld:function(i,p){var en=Math.max(T[i]+.3,lineEnd(i)-.35),cap=LN[i].t.replace(/\s/g,"").length*.16+.5;en=Math.min(en,T[i]+cap);return T[i]+(en-T[i])*p.f},snapStarts:snapStarts,wordTimes:wordTimes,vMis:vMis,flagged:flagged,drawStory:drawStory,clipRange:clipRange,setVLEN:function(v){VLEN=v},SEC:function(){return SEC},HINT:function(){return HINT},hintsFrom:hintsFrom,parseSecs:parseSecs,secsToRaw:secsToRaw,CV:CV,drawCover:drawCover,cvOpen:cvOpen,fuseTimes:fuseTimes,audioOnsets:audioOnsets,getBufX:getBuf,wordT:wordT,MS:MS,msPick:msPick,lufsOf:lufsOf,renderMaster:renderMaster,getBuf:getBuf,peakOf:peakOf,applyMaster:applyMaster,drawFrame:drawFrame,makeTiles:makeTiles,autoAlign:autoAlign,getT:function(){return T},N:N};

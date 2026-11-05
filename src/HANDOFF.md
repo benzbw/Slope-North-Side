@@ -15,6 +15,15 @@
 - `app/start.py`, `app/mixer.py`, `app/img_gen.py`, `fa/fa.py` — เซิร์ฟเวอร์และ AI บนคอม
 - `data/fused_fa5.json` — เวลาซิงค์ของ Dangerous (S,E,C,Q,Y,U)
 
+## ส่วน SNS Pro ใน new.html (เซสชัน "SNS · MV & ภาพ", 5 พ.ย. 18:20)
+- อยู่ระหว่าง `/*PRO-BEGIN*/` … `/*PRO-END*/` (ก่อน `setTimeout(function(){ensureSyl()},1200)`) — ตั้งค่าเก็บใน localStorage `bwpro`, จังหวะเพลงใน `bwbeat`
+- ส่งออก 720p/1080p/1080p60 (`QUAL`, `expSize`), ลายน้ำแบรนด์ `drawWM` (วาดทั้งพรีวิว fxc และวิดีโอ)
+- จังหวะเพลง `beatGrid()` (autocorrelation + ไล่ความเร็วละเอียด; Dangerous ≈ 76.6 BPM — อย่าใช้ comb อย่างเดียว เพราะโดนจังหวะแฝง 115 หลอก)
+- MV: `drawMV` ใหม่ ใช้แผนช็อต `mvPlan()` (ตัดตามหัวห้อง, กรอบภาพ FRM, กล้อง MOV, ทรานซิชัน black/fade/flash/whip/cut) + เกรดสี `gradeCanvas` (cine/noir/bleach/vhs/thermal/night) + HUD
+- ปก: `drawCover` = `drawCoverPro` (chrome/lofi/y3k/thermal/night/type/glass) แล้วค่อย `drawCover0` (แบบเดิม), ตัวอย่างปกเล็ก `cvThumbs`
+- ชุดโปรโมท `PK`/`drawPk`/`pkAll` (zip), Spotify Canvas `pkCanvas`, แพ็กส่งช่างตัดต่อ `mvPack` (SRT/LRC/shotlist.csv/markers EDL/beats.csv/ภาพฉาก/ปก)
+- ทดสอบได้ผ่าน `window.__snsPro`
+
 ## ข้อมูลผู้ใช้
 - ผู้ใช้: ศิลปินไทย Bedupbiw (แบรนด์ Slope North Side, ID แบรนด์ Slopenorthside44) — พูดไทย, เป็นงานอดิเรก, อยากได้งานระดับโลก
 - เพลงตัวอย่าง: "Dangerous" Bedupbiw ft. Killmonker (ธีมแดงมืดแบบ The Weeknd)
