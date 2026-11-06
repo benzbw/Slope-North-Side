@@ -216,14 +216,14 @@ async function home(){if(S.crashed){toastS("เปิดโปรเจกต์
  '<section class="sx-sec"><div class="sx-sech"><h2>เพลงทั้งหมด</h2><span id="sx-cnt"></span></div><div class="sx-grid" id="sx-grid"></div></section>'+
  (BRANDED?'':'<section class="sx-sec"><div class="sx-sech"><h2>ตัวอย่างผลงานจากแอป</h2><span>เปิดดูได้ แก้ได้ แต่ไม่บันทึก</span></div><div class="sx-grid" id="sx-demo"></div></section>')+
  '<section class="sx-sec"><div class="sx-sech"><h2>เทรนด์ & โอกาสแมส</h2><span>ชาร์ตไทย/โลก · ฮิปฮอป · แนวที่กำลังมา</span></div><p class="sx-sub" style="margin:0 0 12px">เลือกศิลปิน แอปจำสไตล์ไว้ แล้วบอกว่าเพลงมีโอกาสแมสกี่ % เพราะอะไร และควรปรับตรงไหน</p><button class="sx-btn" type="button" onclick="window.SNSTrend&&SNSTrend.open()">เปิดหน้าเทรนด์</button></section>'+
- '<section class="sx-sec" id="sx-lan"></section>'+
+ '<section class="sx-sec" id="sx-write"></section>'+'<section class="sx-sec" id="sx-lan"></section>'+
  '<section class="sx-sec"><div class="sx-sech"><h2>ขั้นตอนทำเพลง 1 เพลง</h2><span>เรียงตามลำดับในแอป</span></div><div class="sx-steps">'+
   STEPS.map(function(s){return'<div class="sx-step"><b>'+s[0]+'</b><p>'+s[1]+'</p><em>'+s[2]+'</em></div>'}).join("")+'</div></section>'+
  '<div class="sx-foot"><span>© Slope North Side</span><span>'+(ST.mode=="cloud"?"ซิงค์กับบัญชี claude.ai":"โหมดเครื่องนี้ · ฟีเจอร์ AI ใช้ได้เมื่อเปิดเซิร์ฟเวอร์บนคอม")+'</span></div>');
  $("sx-new").onclick=newDialog;$("sx-guide").onclick=guide;$("sx-help").onclick=function(){bot.open()};
  $("sx-me").onclick=function(ev){menuAt(ev.currentTarget,[["ออกจากระบบ",logout]].concat(BRANDED?[["ดูปัญหาที่แจ้งเข้ามา",function(){bot.open();bot.say("ai","รายการแจ้งปัญหาและข้อผิดพลาดทั้งหมดถูกเก็บไว้ในระบบ Claude จะเข้ามาตรวจและแก้ให้ตามรอบตรวจอัตโนมัติ หรือสั่งในแชทว่า \"ตรวจปัญหาที่แจ้งเข้ามา\" ได้เลย")}]]:[]),true)};
  if(!BRANDED){var dg=$("sx-demo");var dp={id:"demo",name:"Dangerous",artist:"Bedupbiw",feat:"Killmonker",info:{theme:0,synced:true}};dg.appendChild(card(dp,true))}
- renderGrid();lanCard();
+ renderGrid();lanCard();writeCard();
  try{PROJ=await Store.list();renderGrid()}catch(e){Store.log("error",{msg:"list: "+(e&&e.message||e)});$("sx-cnt").textContent="โหลดรายการไม่สำเร็จ ลองรีเฟรช"}}
 function renderGrid(){var g=$("sx-grid");if(!g)return;g.innerHTML="";
  PROJ.forEach(function(p){g.appendChild(card(p))});
@@ -350,6 +350,9 @@ async function lanPin(){if(!LANORIGIN)return;try{var j=await (await fetch("/api/
  var m=modal('<h3>ใส่ PIN ของคอม</h3><p class="sx-note">ดู PIN 6 หลักได้ที่หน้าแรกของแอปบนคอม (การ์ด "ใช้ในมือถือ") หรือในหน้าต่างดำของ start.bat ใส่ครั้งเดียว ระบบจำไว้</p><form class="sx-f" id="sx-pf"><input class="sx-in" id="sx-pin" inputmode="numeric" maxlength="12" autocomplete="one-time-code" placeholder="PIN 6 หลัก"><div class="sx-err" id="sx-pe"></div><button class="sx-btn" type="submit">เชื่อมต่อคอม</button></form>');
  $("sx-pf").onsubmit=async function(e){e.preventDefault();var v=$("sx-pin").value.trim();var t=await fetch("/api/mixhist",{headers:{"X-Key":v}}).catch(function(){return{ok:false}});
   if(!t.ok){$("sx-pe").textContent="PIN ไม่ถูกต้อง";return}S.raw.set("bwkey",v);var ak=$("akey");if(ak)ak.value=v;m.remove();toastS("เชื่อมต่อคอมแล้ว ใช้ AI ได้")}}catch(e){}}
+var WRITE_URL="https://claude.ai/artifact/5howytgf8NkaPtrVWWxH6n";
+function writeCard(){var host=$("sx-write");if(!host)return;var url=ST.mode=="cloud"?WRITE_URL:(LOCALHOST||location.protocol=="http:")?"write.html":WRITE_URL;
+ host.innerHTML='<div class="sx-sech"><h2>แต่งเพลง & หาบีต</h2><span>เริ่มเพลงใหม่ก่อนเข้าโปรเจกต์</span></div><a class="sx-lanc" id="sx-wl" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div style="font:400 34px/1 var(--sx-disp);color:var(--sx-hot)">✎</div><div style="min-width:0;flex:1"><b style="font-size:16px">เปิดหน้าแต่งเพลง</b><p class="sx-note" style="margin:4px 0 0">หาแรงบันดาลใจ · หาบีตฟรี/เสียเงินพร้อมราคา · สมุดเนื้อเพลงพร้อมเล่นบีต แล้วส่งเนื้อเข้าแอปนี้</p></div><span class="sx-pill">เปิด ↗</span></a>';$("sx-wl").href=url}
 async function lanCard(){if(!LOCALHOST||location.protocol=="file:")return;try{var j=await (await fetch("/api/lan")).json();if(!j||!j.url)return;var host=$("sx-lan");if(!host)return;
  host.innerHTML='<div class="sx-sech"><h2>ใช้ในมือถือที่บ้าน (AI เต็มรูปแบบ)</h2><span>มือถือต่อ Wi-Fi เดียวกับคอมนี้</span></div><div class="sx-lanc"><div id="sx-qr" aria-hidden="true"></div><div style="min-width:0"><div class="sx-note">เปิดในมือถือ</div><div class="sx-big" id="sx-lu"></div><div class="sx-note" style="margin-top:8px">PIN</div><div class="sx-big" id="sx-lp"></div><p class="sx-note" style="margin-top:8px">มือถือจะใช้พลังคอมนี้วาด MV/ปก ซิงค์ และมิกซ์ได้ เปิด start.bat ค้างไว้ ถ้า Windows ถามเรื่อง Firewall ให้กด Allow</p></div></div>';
  $("sx-lu").textContent=j.url;$("sx-lp").textContent=j.pin;
