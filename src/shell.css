@@ -130,3 +130,9 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
 #sx-qr{background:#fff;padding:8px;border-radius:10px;line-height:0}#sx-qr:empty{display:none}
 .sx-big{font:600 20px/1.2 var(--sx-lab);letter-spacing:.02em;word-break:break-all;font-variant-numeric:tabular-nums}
 #sx-lan:empty{display:none}
+
+.sx-sub{position:sticky;top:0;z-index:3;display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin:0 0 4px;background:inherit;scrollbar-width:none}
+.sx-sub::-webkit-scrollbar{display:none}
+.sx-sub button{flex:none;min-height:40px;padding:0 16px;border-radius:99px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);color:#f6eff1;font:600 14px 'Noto Sans Thai',sans-serif;cursor:pointer;white-space:nowrap}
+.sx-sub button.on{background:#ff3347;border-color:#ff3347;color:#fff}
+.sx-subd{margin:0 0 12px;color:#a9989e;font:400 13px 'Noto Sans Thai',sans-serif}

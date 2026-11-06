@@ -329,7 +329,7 @@ function setSave(t){saveEl.forEach(function(e){e.textContent=t})}
 function addBar(host){if(!host||host.querySelector(".sx-back"))return;var b=h('<button class="sx-back" type="button"></button>');b.textContent="‹ "+(META?META.name:(S.demo?"ตัวอย่าง":"โปรเจกต์"));b.title="กลับหน้าโปรเจกต์ทั้งหมด";b.onclick=goHome;host.insertBefore(b,host.firstChild);
  var q=h('<button class="sx-back" type="button" style="margin:0 0 0 6px">?</button>');q.title="ผู้ช่วย";q.onclick=function(){bot.open()};var chip=host.querySelector("#chip");if(chip)chip.parentNode.insertBefore(q,chip);else host.appendChild(q);
  var s=h('<span class="sx-save"></span>');b.after(s);saveEl.push(s)}
-async function enterProject(){var r=$("sx");if(r)r.hidden=true;lanPin();
+async function enterProject(){var r=$("sx");if(r)r.hidden=true;lanPin();uiSimplify();
  if(S.demo){META={name:"Dangerous (ตัวอย่าง)"};var bn=h('<div class="sx-demo"><span>ตัวอย่างผลงาน · '+(S.silent?'ไม่มีเสียงเพลงในเว็บสาธารณะ':'แก้ได้แต่ไม่บันทึก')+'</span><button>ทำเพลงของคุณ</button></div>');document.body.appendChild(bn);bn.querySelector("button").onclick=function(){goHome()}}
  else{try{META=await Store.meta(S.pid)}catch(e){META=null}if(!META){toastS("ไม่พบโปรเจกต์นี้ในบัญชี");setTimeout(function(){location.hash="";location.reload()},1200);return}}
  addBar($("top"));addBar(document.querySelector("#pg1 .pgh"));try{document.title=(META.name||"")+" · Slope North Side"}catch(e){}
@@ -360,6 +360,32 @@ async function lanCard(){if(!LOCALHOST||location.protocol=="file:")return;try{va
 
 function needAudio(){if($("sx-na"))return;var bn=h('<div class="sx-demo" id="sx-na"><span>ยังไม่มีเสียงเพลงในเครื่องนี้</span><button>เลือกไฟล์เพลง</button></div>');document.body.appendChild(bn);
  bn.querySelector("button").onclick=function(){var fi=$("fi");if(fi)fi.click()};var fi2=$("fi");if(fi2)fi2.addEventListener("change",function(){if(this.files[0])bn.remove()})}
+
+/* ---------- แบ่งหน้าเป็นแท็บย่อย ให้ใช้ง่าย ---------- */
+var SUBT={
+ pg1:{host:function(){return document.querySelector("#pg1 .pgw")},tabs:[
+  {k:"song",n:"เพลง & เนื้อ",d:"ใส่ไฟล์เพลง เนื้อเพลง แยกท่อน และคนร้อง",m:/^(เพลง|เนื้อเพลง)/},
+  {k:"look",n:"สไตล์ & ธีม",d:"สไตล์ศิลปิน อัลบั้ม ธีมสี ตัวหนังสือ และภาพช่วงดนตรี",m:/^(สตูดิโอสไตล์|อัลบั้ม|ธีมสี|การขึ้นของตัวหนังสือ|ช่วงก่อนเพลงขึ้น)/}]},
+ over:{host:function(){return document.getElementById("p-over")},tabs:[
+  {k:"vid",n:"ส่งออกวิดีโอ",d:"บันทึกวิดีโอทั้งเพลง หรือคลิป Reel/TikTok 15–30 วิ",m:/^ส่งออกวิดีโอ/},
+  {k:"mv",n:"MV & ปก",d:"วาดฉาก MV ตัดต่อแบบโปร ปกเพลง และฉากจบ",m:/^(MV|ตัดต่อ|ปกเพลง|ฉากจบ)/},
+  {k:"aud",n:"เสียง",d:"มิกซ์เสียงร้อง+บีต และมาสเตอร์ให้ดังพร้อมลงสตรีม",m:/^(สตูดิโอมิกซ์|เสียง)/},
+  {k:"rel",n:"ปล่อยเพลง",d:"สิทธิ์บีต ราคา ชื่อเพลง แคปชัน วัน-เวลาปล่อย และโปรโมท",m:/^ปล่อยเพลง/}]}};
+function subTabs(id){var C=SUBT[id],host=C&&C.host();if(!host||host.querySelector(".sx-sub"))return;
+ var kids=[].slice.call(host.children),grp=null,map=[];
+ kids.forEach(function(el){var hd=el.classList.contains("h")?el:el.querySelector(":scope > .h, :scope > .hd .h");var tx=hd?hd.textContent.trim():"";
+  C.tabs.forEach(function(t){if(tx&&t.m.test(tx))grp=t.k});map.push([el,grp])});
+ var first=map.findIndex(function(x){return x[1]});if(first<0)return;
+ var bar=document.createElement("div");bar.className="sx-sub";bar.setAttribute("role","tablist");
+ var note=document.createElement("p");note.className="sx-subd";
+ C.tabs.forEach(function(t){var b=document.createElement("button");b.type="button";b.textContent=t.n;b.dataset.k=t.k;b.setAttribute("role","tab");b.onclick=function(){show(t.k);try{host.scrollIntoView({block:"start"})}catch(e){}};bar.appendChild(b)});
+ host.insertBefore(note,map[first][0]);host.insertBefore(bar,note);
+ function show(k){try{localStorage.setItem("sns:sub:"+id,k)}catch(e){}bar.querySelectorAll("button").forEach(function(b){var on=b.dataset.k==k;b.classList.toggle("on",on);b.setAttribute("aria-selected",on)});
+  map.forEach(function(x){if(x[1])x[0].hidden=x[1]!=k});var t=C.tabs.filter(function(t){return t.k==k})[0];note.textContent=t?t.d:""}
+ var last=null;try{last=localStorage.getItem("sns:sub:"+id)}catch(e){}show(C.tabs.some(function(t){return t.k==last})?last:C.tabs[0].k);
+ window["snsSub_"+id]=show}
+function dockNames(){var L={1:"1 เพลง & สไตล์",3:"3 สร้าง & ปล่อย"};document.querySelectorAll('#dock nav button[data-s]').forEach(function(b){var t=L[b.dataset.s];if(!t)return;for(var i=b.childNodes.length-1;i>=0;i--){var n=b.childNodes[i];if(n.nodeType==3&&n.textContent.trim()){n.textContent=t;break}}})}
+function uiSimplify(){try{subTabs("pg1");subTabs("over");dockNames()}catch(e){Store.log("error",{msg:"subtabs: "+e})}}
 /* ---------- เริ่ม ---------- */
 async function start(){if(S.pid)document.documentElement.classList.add("sx-inproj");
  if(!S.pid)splash();
