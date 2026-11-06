@@ -30,7 +30,13 @@
 - เปิดด้วย `SNSTrend.open(tab)` (tab: chart/me/next) · ศิลปินเก็บใน localStorage `sns:artists` (+ db `data/users/<uid>/trend` ในลิงก์ claude.ai)
 - ข้อมูลชาร์ต/ประเด็นข่าวฝังใน `SNAP`, `GENRES`, `TOPICS` (ณ 6 พ.ย. 2569: Spotify ไทย/Global จาก kworb, iTunes ไทยหมวด Hip-Hop/Rap) ต้องอัปเดตเป็นระยะ · ชาร์ตสด: start.py `/api/trends` (kworb Spotify ไทย/Global + iTunes RSS `itunes.apple.com/<cc>/rss/topsongs/limit=100/genre=18/json`, cache 6 ชม. ใน cache/trends.json) — `rss.applemarketingtools.com` ตอบ 504 แล้ว อย่าใช้
 - start.py ใน repo = v24 ของคอมผู้ใช้ (มีค้นบีต YouTube จากเซสชันแต่งเพลง) + เทรนด์ · **write.html และหน้าแต่งเพลงใน index.html บนคอมยังไม่อยู่ใน src/** (อยู่ในเซสชัน "SNS · แต่งเพลง & หาบีต")
-- **ยังไม่ได้ลง artifact** (เซสชันที่ทำปิดเครือข่าย แก้ artifact ไม่ได้) → เซสชันถัดไป: build แล้ว publish `artifact/slope-north-side.html` ทับลิงก์หลัก
+- ลง artifact แล้ว (version 14, 6 พ.ย. 11:40 โดยเซสชัน "SNS Studio · แอปหลัก")
+
+## คลิป Reel/ฮุค (เซสชัน "SNS Studio · แอปหลัก", 6 พ.ย.)
+- `VSEC` เลือกท่อน (`#vsec`, `secList()`), `VEND` ตอนจบ (`#vend`: auto/echo/fade/stop/loop) — `clipRange()` คืน `{s,e,mode,te,lw,tail}`
+- กราฟเสียง `EF` (highpass/lowpass/bandpass→delay feedback) ต่อระหว่าง `mo` กับ `an`/`rdest`; `efReset()` หลังบันทึก · ต้นคลิปไล่ lowpass 700→20k Hz 1.1 วิ
+- echo: ที่ `te` (2-3 คำท้าย) ไฮพาส 650 Hz + ส่งเข้า delay 0.42 วิ แล้วหยุดเพลง บันทึกหางเสียงต่อ 2.8 วิ (ไม่มีไฟล์เสียงร้องแยก จึงตัดบีตด้วยฟิลเตอร์)
+- **index.html บนคอมมีโหมดแต่งเพลงที่ไม่อยู่ใน src/** → แก้คอมด้วยการ patch ไฟล์บนคอมโดยตรง ห้ามส่ง pc/index.html จาก build ทับ
 
 ## ข้อมูลผู้ใช้
 - ผู้ใช้: ศิลปินไทย Bedupbiw (แบรนด์ Slope North Side, ID แบรนด์ Slopenorthside44) — พูดไทย, เป็นงานอดิเรก, อยากได้งานระดับโลก
