@@ -14,4 +14,6 @@ m=json.load(open('/home/claude/app/manifest.json')); m.update({"name":"Slope Nor
 json.dump(m,open(out+'/manifest.json','w'),ensure_ascii=False)
 for f in ('icon-192.png','icon-512.png'): shutil.copy('/home/claude/app/'+f,out+'/'+f)
 open(out+'/.nojekyll','w').write('')
+WR=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','write.html')
+if os.path.exists(WR): shutil.copy(WR,out+'/write.html')  # หน้าแต่งเพลง & หาบีต (ในแอปเดียวกัน)
 print('web ok',len(z))
