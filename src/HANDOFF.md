@@ -28,7 +28,8 @@
 - โมดูลอยู่ที่ `src/trend.html` (style + `#trd` + script) — build.py แทรกต่อจาก shell.js (`TREND=` ชี้ไฟล์ได้, ค่าเริ่ม `/tmp/w/trend.html`)
 - `window.SNSSong()` ใน new.html (ก่อน `go(1);`) ส่งเนื้อ/เวลา/ความยาว/แนว/feat ให้โมดูล · หน้าแรกมีการ์ด + STEPS ข้อแรกใน shell.js
 - เปิดด้วย `SNSTrend.open(tab)` (tab: chart/me/next) · ศิลปินเก็บใน localStorage `sns:artists` (+ db `data/users/<uid>/trend` ในลิงก์ claude.ai)
-- ข้อมูลชาร์ต/ประเด็นข่าวฝังใน `SNAP`, `GENRES`, `TOPICS` (ณ 5 พ.ย. 2569) ต้องอัปเดตเป็นระยะ · ชาร์ตสด: start.py v23 `/api/trends` (Apple Music RSS th/us + kworb Spotify, cache 6 ชม. ใน cache/trends.json)
+- ข้อมูลชาร์ต/ประเด็นข่าวฝังใน `SNAP`, `GENRES`, `TOPICS` (ณ 6 พ.ย. 2569: Spotify ไทย/Global จาก kworb, iTunes ไทยหมวด Hip-Hop/Rap) ต้องอัปเดตเป็นระยะ · ชาร์ตสด: start.py `/api/trends` (kworb Spotify ไทย/Global + iTunes RSS `itunes.apple.com/<cc>/rss/topsongs/limit=100/genre=18/json`, cache 6 ชม. ใน cache/trends.json) — `rss.applemarketingtools.com` ตอบ 504 แล้ว อย่าใช้
+- start.py ใน repo = v24 ของคอมผู้ใช้ (มีค้นบีต YouTube จากเซสชันแต่งเพลง) + เทรนด์ · **write.html และหน้าแต่งเพลงใน index.html บนคอมยังไม่อยู่ใน src/** (อยู่ในเซสชัน "SNS · แต่งเพลง & หาบีต")
 - **ยังไม่ได้ลง artifact** (เซสชันที่ทำปิดเครือข่าย แก้ artifact ไม่ได้) → เซสชันถัดไป: build แล้ว publish `artifact/slope-north-side.html` ทับลิงก์หลัก
 
 ## ข้อมูลผู้ใช้

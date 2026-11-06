@@ -52,24 +52,25 @@ function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch
 function JS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 
 /* ---------- ข้อมูลชาร์ต ณ วันที่เก็บ (อัปเดตสดได้เมื่อเปิดผ่าน start.bat บนคอม) ---------- */
-var SNAP={at:"5 พ.ย. 2569",lists:{
- global:{src:"Billboard Global 200 · สัปดาห์ 7 พ.ย. 2026",items:[
-  ["Housewife","Tate McRae","Pop"],["BbY WOW","Karol G, Judeline & rusowsky","Latin"],["Nicole Kidman","ADÉLA","Pop"],["Expectations","Olivia Rodrigo & Chappell Roan","Pop"],["Stop The Wedding!","Ashe","Pop"],
-  ["Ain't In LA","ADÉLA","Pop"],["Choosin' Texas","Ella Langley","Country"],["The Cure","Olivia Rodrigo","Pop rock"],["Lies","Zach Bryan ft. Lana Del Rey","Country/Folk"],["Babydoll","Jamie Miller","Pop"]]},
- th:{src:"EFM 94 Top Chart · 31 ต.ค. 2569",items:[
-  ["ตกใจหมด มากอดเค้าเลย","marr team","ป๊อป"],["พระจันทร์ที่ไม่เต็มดวง","Klear","ป๊อปร็อก"],["CHECKLIST","BILLKIN","T-pop"],["จำได้ว่าลืม","William Jakrapatr","ป๊อปบัลลาด"],["Sweet เหมือนก่อน","ETC.","ป๊อป/โซล"],
-  ["นาฬิกาทราย","BOWKYLION","ป๊อปบัลลาด"],["รักนะ แต่ว่า (OST)","ณเดชน์ คูกิมิยะ","ป๊อป OST"],["เขียว เหลือง แดง (Get high)","PUN, THE TOYS","ป๊อป"],["ขึ้นใจ (3am call)","Mirrr ft. BLVCKHEART","R&B ป๊อป"],["ที่ที่ปลอดภัย","Yes'Sir Days","อินดี้"]]},
+var SNAP={at:"6 พ.ย. 2569",lists:{
+ global:{src:"Spotify Global รายวัน · 4 พ.ย. 2026 (kworb.net)",items:[
+  ["Housewife","Tate McRae","Pop"],["BbY WOW","KAROL G w/ Judeline, rusowsky","Latin"],["Nicole Kidman","ADÉLA","Pop"],["Stop The Wedding!","Ashe","Pop"],["Ain't In LA","ADÉLA","Pop"],
+  ["the cure","Olivia Rodrigo","Pop rock"],["back to friends","sombr","Alt pop"],["Earrings","Malcolm Todd","Alt R&B"],["Babydoll","Jamie Miller","Pop"],["The One That Got Away","Katy Perry","Pop (เพลงเก่ากลับมา)"]]},
+ th:{src:"Spotify ไทย รายวัน · 3 พ.ย. 2569 (kworb.net)",items:[
+  ["อย่ามากกว่าฉันก็พอ (Jealous)","GAVIN:D w/ Violette Wautier","ป๊อป/R&B"],["ได้แค่เดินมาส่ง (The Last Walk)","GAVIN:D w/ BLVCKHEART","R&B"],["ขึ้นใจ (3am call)","Mirrr w/ BLVCKHEART","R&B"],["เมื่อไหร่จะมี (มีใจให้กัน)","BLVCKHEART","R&B"],["เขียว เหลือง แดง (Get high)","PUN w/ THE TOYS","ป๊อป"],
+  ["รอ SIS (TER)","DICEBLUE w/ DICE","ป๊อป"],["กลัวว่าฉันจะไม่เสียใจ (Fear)","PURPEECH","อินดี้ป๊อป"],["ไม่รักดีกว่า","Z9","ป๊อป"],["ไม่ได้เลวขนาดนั้น","PORZAX","Hip-hop"],["Living Death","PUN","ร็อก"]]},
  global_hip:{src:"ARIA Hip Hop/R&B Singles (ออสเตรเลีย) · 2 พ.ย. 2026 + Billboard Hot Rap Songs",note:"อันดับ 1 Hot Rap Songs ของอเมริกาคือ Janice STFU (Drake) ครอง 23 สัปดาห์",items:[
   ["Earrings","Malcolm Todd","Alt R&B"],["Love Me Not","Ravyn Lenae","R&B"],["Where Is My Husband!","Raye","R&B/Soul"],["Raindance","Dave, Tems","UK rap"],["Cinderella","Mac Miller ft. Ty Dolla $ign","Hip-hop"],
   ["Noble","F3miii","Hip-hop"],["oh yeah?","Steve Lacy","Alt R&B"],["Janice STFU","Drake","Melodic rap"],["Dai Dai","Shakira, Burna Boy","Afro/Latin"],["Girls","The Kid Laroi","Pop rap"]]},
- th_hip:{src:"รวบรวมจากชาร์ต/ข่าวปี 2569 (ยังไม่มีชาร์ตฮิปฮอปไทยทางการ)",note:"ตอนนี้ยืนยันได้ไม่ครบ 10 เพลง เปิดแอปผ่าน start.bat แล้วกด 'อัปเดตชาร์ตสด' จะคัดเพลงแนว Hip-Hop/Rap จากชาร์ต Apple Music ไทยให้ครบ 10",items:[
-  ["ใจฉันตามเธอไป","YOUNGOHM","Hip-hop/R&B · ขึ้นท็อป 2 สตรีมมิ่งไทยปีนี้"],["ขึ้นใจ (3am call)","Mirrr ft. BLVCKHEART","R&B · อันดับ 1 Official Thailand Chart ก.ย."],["ล็อกเป้า (LOCK PAO)","DICERED","แร็ป · EFM อันดับ 12"],["เราก็เหมือนกัน (We're The Same)","ILLSLICK x YOUNGOHM","แร็ปเมโลดี้"],["ตายตาหลับ","ILLSLICK x YOUNGOHM","แร็ปเมโลดี้"]]}
+ th_hip:{src:"iTunes ไทย หมวด Hip-Hop/Rap · 6 พ.ย. 2569 (คัดเฉพาะศิลปินไทย)",note:"ยังไม่มีชาร์ตสตรีมมิ่งฮิปฮอปไทยทางการ ลิสต์นี้มาจากยอดซื้อบน iTunes ส่วนชาร์ต Spotify ไทยมี PORZAX ติดอันดับ 9",items:[
+  ["ยิ้มอันตราย","PORZAX","Hip-hop"],["ไม่ได้เลวขนาดนั้น","PORZAX","Hip-hop"],["RAIN ZONE (feat. Z9)","Maiyarap","Hip-hop"],["A Rocket to the Moon","GAVIN:D","Hip-hop"],["สิ้นสุดความพยายาม","PORZAX","Hip-hop"],
+  ["เสือสิ้นลาย (feat. YOUNGOHM, P-HOT & Fymme)","F.HERO","Hip-hop"],["แฟนใหม่หน้าคุ้น (feat. MILLI)","Maiyarap","Hip-hop"],["กรุงเทพมหานคร","YOUNGOHM","Hip-hop"],["แค่เธอแค่เธอ","YOUNGOHM & KT KRATAE","Hip-hop"],["แล้วแต่เธอ (feat. TL)","P9D","Hip-hop"]]}
 }};
 /* แนวเพลง: แรงส่งตอนนี้ (0-100) + หลักฐาน */
 var GENRES=[
- {k:"pop",n:"Pop / ป๊อปบัลลาด",th:90,gl:92,trTh:"hot",trGl:"hot",why:"ไทย: ท็อป 10 เกือบทั้งหมดเป็นป๊อป/บัลลาดเรื่องรัก · โลก: นักร้องหญิงสายป๊อปทางเลือกครองชาร์ต (Tate McRae, Olivia Rodrigo, ADÉLA)"},
- {k:"rnb",n:"R&B / Alt R&B",th:85,gl:86,trTh:"up",trGl:"up",why:"ไทย: ขึ้นใจ (3am call) อันดับ 1 Official Thailand Chart · โลก: ท็อป 3 ชาร์ตฮิปฮอป/R&B ออสเตรเลียเป็น R&B ทั้งหมด"},
- {k:"hiphop",n:"Melodic hip-hop (แร็ป + ฮุคร้อง)",th:78,gl:80,trTh:"up",trGl:"hot",why:"ไทย: YOUNGOHM ขึ้นท็อป 2 สตรีมมิ่ง · โลก: Janice STFU ครองอันดับ 1 Hot Rap Songs 23 สัปดาห์"},
+ {k:"pop",n:"Pop / ป๊อปบัลลาด",th:90,gl:92,trTh:"hot",trGl:"hot",why:"ไทย: ท็อป 10 Spotify ส่วนใหญ่เป็นป๊อป/R&B เรื่องรัก · โลก: นักร้องหญิงสายป๊อปทางเลือกครองชาร์ต (Tate McRae, Olivia Rodrigo, ADÉLA)"},
+ {k:"rnb",n:"R&B / Alt R&B",th:85,gl:86,trTh:"up",trGl:"up",why:"ไทย: BLVCKHEART อยู่ใน 3 จาก 4 อันดับแรกของ Spotify ไทย (ขึ้นใจ, ได้แค่เดินมาส่ง, เมื่อไหร่จะมี) · โลก: ท็อป 3 ชาร์ตฮิปฮอป/R&B ออสเตรเลียเป็น R&B ทั้งหมด"},
+ {k:"hiphop",n:"Melodic hip-hop (แร็ป + ฮุคร้อง)",th:78,gl:80,trTh:"up",trGl:"hot",why:"ไทย: PORZAX ติดท็อป 10 Spotify ไทย และมี 3 เพลงในท็อป 5 iTunes ฮิปฮอป, YOUNGOHM ขึ้นท็อป 2 สตรีมมิ่งปีนี้ · โลก: Janice STFU ครองอันดับ 1 Hot Rap Songs 23 สัปดาห์"},
  {k:"indie",n:"Indie pop / Indie rock",th:85,gl:72,trTh:"hot",trGl:"",why:"ไทย: PURPEECH ครองอันดับ 1 นานสุดของปี, FREEHAND, Yes'Sir Days ติดท็อป"},
  {k:"rock",n:"Rock / Emo ย้อนยุค",th:65,gl:74,trTh:"",trGl:"up",why:"โลก: The Black Parade ของ My Chemical Romance ขึ้นอันดับ 1 อัลบั้มหลังออก 20 ปี (กระแสคิดถึงอดีต)"},
  {k:"country",n:"Country / Folk",th:55,gl:84,trTh:"",trGl:"hot",why:"อเมริกา: Choosin' Texas ครองอันดับ 1 Hot 100 นานเป็นประวัติการณ์ (26 สัปดาห์)"},
@@ -131,7 +132,7 @@ function renderChart(){var L=lists(),key=REG+(KIND=="hip"?"_hip":""),C=L[key];
  h+='<div class="tr-card"><h4>'+(REG=="th"?"ไทย":"ทั่วโลก")+' Top 10 · '+(KIND=="hip"?"ฮิปฮอป/แร็ป":"ทุกแนว")+'</h4><p class="tr-note" style="margin:0 0 6px">'+esc(C.src)+' · '+(C.live?'<span style="color:#7ee2a0">อัปเดตสด '+esc(C.upd)+'</span>':'ข้อมูล ณ '+esc(C.upd))+'</p>'+
   C.items.slice(0,10).map(function(x){return'<div class="tr-li"><b>'+x.p+'</b><div><strong>'+esc(x.t)+'</strong><span>'+esc(x.a)+'</span></div>'+((x.g&&x.g[0])?'<span class="tr-tag">'+esc(x.g[0])+'</span>':'')+'</div>'}).join("")+
   (C.note?'<p class="tr-note">'+esc(C.note)+'</p>':'')+'</div>';
- h+='<button class="cta alt" id="tr-live" style="min-height:44px;font-size:14px">อัปเดตชาร์ตสด (ต้องเปิดแอปผ่าน start.bat บนคอม)</button>';
+ h+='<button class="cta alt" id="tr-live" style="min-height:44px;font-size:14px">อัปเดตชาร์ตสด (เปิดแอปผ่าน start.bat บนคอม)</button>';
  h+='<div class="tr-card"><h4>เทียบกับคุณ</h4>'+compare(L)+'</div>';
  $("tr-chart").innerHTML=h;
  $("tr-chart").querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){REG=b.dataset.r;renderChart()}});
@@ -149,7 +150,7 @@ function compare(L){var a=art(),out=[];
 async function liveUpdate(){var b=$("tr-live");b.disabled=true;b.textContent="กำลังดึงชาร์ตล่าสุด…";
  try{var r=await fetch("/api/trends?force=1",{cache:"no-store"});if(!r.ok)throw new Error(r.status==404?"เซิร์ฟเวอร์บนคอมยังเป็นรุ่นเก่า ดับเบิลคลิก start.bat ใหม่":"HTTP "+r.status);var j=await r.json();
   if(!j.ok)throw new Error((j.err||[]).join(", ")||"ดึงไม่ได้");LIVE=j;JS("sns:trends:live",j);renderChart();toastT("อัปเดตชาร์ตแล้ว "+j.at)}
- catch(e){b.disabled=false;b.textContent="อัปเดตชาร์ตสด (ต้องเปิดแอปผ่าน start.bat บนคอม)";toastT(/Failed to fetch|NetworkError|Unexpected token|JSON/.test(String(e))?"ต้องเปิดแอปผ่าน start.bat บนคอม (หรือมือถือที่ต่อคอม) ถึงจะดึงชาร์ตสดได้ ตอนนี้แสดงข้อมูลที่เก็บไว้":"อัปเดตไม่สำเร็จ: "+(e.message||e))}}
+ catch(e){b.disabled=false;b.textContent="อัปเดตชาร์ตสด (เปิดแอปผ่าน start.bat บนคอม)";toastT(/Failed to fetch|NetworkError|Unexpected token|JSON/.test(String(e))?"ต้องเปิดแอปผ่าน start.bat บนคอม (หรือมือถือที่ต่อคอม) ถึงจะดึงชาร์ตสดได้ ตอนนี้แสดงข้อมูลที่เก็บไว้":"อัปเดตไม่สำเร็จ: "+(e.message||e))}}
 
 /* ---------- วิเคราะห์เพลงของฉัน ---------- */
 var ME=J("sns:trend:me",{src:"proj",lyr:"",genre:"",bpm:"",hook:"",len:"",feat:""});
@@ -254,7 +255,7 @@ function aiAvail(){try{var X=window.SNSX;return !!(X&&X.ST&&X.ST.sample)}catch(e
 async function aiDeep(r){var X=window.SNSX,S=X.ST.sample,a=art(),b=$("tr-aigo"),w=$("tr-ai");b.disabled=true;w.textContent="กำลังวิเคราะห์…";
  var sg=ME.src=="proj"?song():null,lyr=sg?sg.lines.map(function(l){return(l.h?"§ ":"")+l.t}).join("\n"):ME.lyr;
  var ctx="คุณคือ A&R และโปรดิวเซอร์เพลงฮิปฮอปไทยที่ตามชาร์ตใกล้ชิด ตอบเป็นภาษาไทย กระชับ ใช้หัวข้อสั้นๆ\n\nศิลปิน: "+a.name+"\nสไตล์ที่ศิลปินเล่าไว้: "+(a.style||"-")+"\nไอดอล: "+(a.idols||"-")+"\nวิธีเล่าเรื่องที่ชอบ: "+(a.story||"-")+"\nคำประจำตัว: "+(a.words||"-")+"\nสิ่งที่ไม่อยากทำ: "+(a.avoid||"-")+
- "\n\nชาร์ตไทยตอนนี้ (Top 10): "+SNAP.lists.th.items.map(function(x){return x[0]+" - "+x[1]}).join("; ")+"\nชาร์ตโลก (Top 10): "+SNAP.lists.global.items.map(function(x){return x[0]+" - "+x[1]}).join("; ")+
+ "\n\nชาร์ต Spotify ไทยตอนนี้ (Top 10): "+SNAP.lists.th.items.map(function(x){return x[0]+" - "+x[1]}).join("; ")+"\nชาร์ตโลก (Top 10): "+SNAP.lists.global.items.map(function(x){return x[0]+" - "+x[1]}).join("; ")+
  "\nประเด็นที่คนพูดถึงตอนนี้: "+TOPICS.map(function(t){return t.n+" ("+t.ang+")"}).join(" | ")+
  "\n\nผลคำนวณเบื้องต้น: โอกาสแมสไทย "+r.th+"%, โลก "+r.gl+"% · คะแนนย่อย: "+r.F.map(function(f){return f.n+" "+f.th}).join(", ")+
  "\n\nเนื้อเพลง (§ = ท่อนฮุค):\n"+String(lyr||"").slice(0,3000)+
@@ -266,7 +267,7 @@ async function aiDeep(r){var X=window.SNSX,S=X.ST.sample,a=art(),b=$("tr-aigo"),
 function renderNext(){var a=art(),mk=function(reg){var key=reg=="th"?"th":"gl",tk=reg=="th"?"trTh":"trGl";
   return GENRES.slice().sort(function(x,y){return y[key]-x[key]}).map(function(g){var t=g[tk],lab=t=="hot"?'<span class="tr-tag hot">แรงอยู่</span>':t=="up"?'<span class="tr-tag up">กำลังขึ้น</span>':t=="dn"?'<span class="tr-tag dn">ชะลอ</span>':'';
    return'<div class="tr-bar"><div><b>'+esc(g.n)+' '+lab+'</b><span>'+g[key]+'</span></div><i><u style="width:'+g[key]+'%;background:'+(g[key]>=80?"#ff3347":g[key]>=65?"#ffb300":"#666")+'"></u></i><p class="tr-note" style="margin-top:4px">'+esc(g.why)+'</p></div>'}).join("")};
- var h='<div class="tr-card"><h4>คาดการณ์: แนวที่กำลังจะมา</h4><div class="tr-tip"><b>ไทย:</b> R&B และ melodic hip-hop ที่ร้องเป็นเมโลดี้กำลังไต่ขึ้นมาแทรกป๊อปบัลลาด (ขึ้นใจ อันดับ 1, YOUNGOHM ท็อป 2) · เพลงคู่ข้ามแนวยังแรง</div>'+
+ var h='<div class="tr-card"><h4>คาดการณ์: แนวที่กำลังจะมา</h4><div class="tr-tip"><b>ไทย:</b> R&B และ melodic hip-hop ที่ร้องเป็นเมโลดี้กำลังไต่ขึ้นมาแทรกป๊อปบัลลาด (BLVCKHEART 3 เพลงในท็อป 4 Spotify, PORZAX ติดท็อป 10) · เพลงคู่ข้ามแนวยังแรง</div>'+
  '<div class="tr-tip"><b>โลก:</b> R&B ทางเลือกกำลังขึ้น (ท็อป 3 ชาร์ตฮิปฮอป/R&B ออสเตรเลียเป็น R&B) · กระแสคิดถึงอดีตแรง (อัลบั้ม 20 ปีกลับขึ้นอันดับ 1) · ฝั่งโปรดิวเซอร์ส่งสัญญาณ UK/speed garage, hyperpop และ rage จะลามเข้าเพลงกระแสหลักปี 2027</div>'+
  '<p class="tr-note">คาดการณ์จากชาร์ตและรายงานเทรนด์ ณ '+SNAP.at+' ไม่ใช่ข้อมูลแน่นอน</p></div>';
  if(a){var best=GENRES.map(function(g){var fit=a.genres.indexOf(g.k)>=0?1:(/eminem/i.test(a.idols+a.style)&&(g.k=="hiphop"||g.k=="rnb"||g.k=="rock"))?.8:.4;return{g:g,s:(g.th*.6+g.gl*.4)*fit}}).sort(function(x,y){return y.s-x.s}).slice(0,3);

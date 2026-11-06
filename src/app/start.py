@@ -355,13 +355,18 @@ def _get(url, timeout=15):
     import urllib.request
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (SlopeNorthSide trends)"})
     return urllib.request.urlopen(req, timeout=timeout).read().decode("utf-8", "replace")
-def _apple(cc, n=100):
-    d = json.loads(_get("https://rss.applemarketingtools.com/api/v2/%s/music/most-played/%d/songs.json" % (cc, n)))
-    out = []
-    for i, r in enumerate((d.get("feed") or {}).get("results") or []):
-        g = [x.get("name", "") for x in (r.get("genres") or []) if x.get("name") and x.get("name") != "Music"]
-        out.append({"p": i + 1, "t": r.get("name", ""), "a": r.get("artistName", ""), "g": g[:2]})
-    return out, (d.get("feed") or {}).get("updated", "")
+def _itunes(cc, genre=None, n=100):
+    # ชาร์ตเพลงขายดี iTunes (มีหมวดเพลง) · rss.applemarketingtools ตอบ 504 แล้ว จึงใช้ฟีดนี้แทน
+    u = "https://itunes.apple.com/%s/rss/topsongs/limit=%d%s/json" % (cc, n, "/genre=%s" % genre if genre else "")
+    d = json.loads(_get(u)); f = d.get("feed") or {}; out = []
+    for i, e in enumerate(f.get("entry") or []):
+        g = ((e.get("category") or {}).get("attributes") or {}).get("label", "")
+        out.append({"p": i + 1, "t": (e.get("im:name") or {}).get("label", ""), "a": (e.get("im:artist") or {}).get("label", ""), "g": [g] if g else []})
+    return out, (f.get("updated") or {}).get("label", "")[:16].replace("T", " ")
+_THAI_RAP = ("GAVIN:D", "P9D", "F.HERO", "YOUNGOHM", "MILLI", "ILLSLICK", "PORZAX", "MAIYARAP", "DICERED", "SPRITE", "GUYGEEGEE", "TWOPEE", "1MILL", "JOEY BOY", "THAITANIUM", "YOUNGGU", "GUNNER", "LAZYLOXY", "UNDERDOG", "BEDUPBIW", "KILLMONKER")
+def _thai(x):
+    import re
+    return bool(re.search(r"[ก-๙]", x["t"] + x["a"])) or any(k in x["a"].upper() for k in _THAI_RAP)
 def _kworb(path):
     import re, html as H
     s = _get("https://kworb.net/spotify/country/%s" % path)
@@ -372,6 +377,8 @@ def _kworb(path):
         at = next((c for c in cells if " - " in c), None)
         if not at: continue
         a, t = at.split(" - ", 1)
+        m = re.search(r"\s*\(w/ ([^)]*)\)\s*$", t)
+        if m: t = t[:m.start()]; a = a.strip() + " w/ " + m.group(1)
         out.append({"p": int(cells[0]), "t": t.strip(), "a": a.strip(), "g": []})
         if len(out) >= 200: break
     return out
@@ -385,26 +392,26 @@ def trends(force=False):
             _TR["d"] = json.load(open(fp, encoding="utf-8")); _TR["t"] = os.path.getmtime(fp); return _TR["d"]
         except Exception: pass
     res = {"ok": True, "at": time.strftime("%Y-%m-%d %H:%M"), "err": [], "lists": {}}
-    th = us = None
+    def rank(lst): return [dict(x, p=i + 1) for i, x in enumerate(lst[:10])]
     try:
-        th, up = _apple("th"); res["lists"]["th"] = {"src": "Apple Music · เพลงฮิตไทย (เล่นมากสุด)", "upd": up, "items": th[:10]}
-        h = _hip(th)
-        if h: res["lists"]["th_hip"] = {"src": "Apple Music ไทย · คัดเฉพาะ Hip-Hop/Rap", "upd": up, "items": [dict(x, p=i + 1, rank=x["p"]) for i, x in enumerate(h[:10])]}
-    except Exception as e: res["err"].append("apple th: " + str(e)[:80])
+        t = _kworb("th_daily.html")
+        if t: res["lists"]["th"] = {"src": "Spotify ไทย รายวัน (kworb.net)", "upd": res["at"], "items": t[:10]}
+    except Exception as e: res["err"].append("spotify th: " + str(e)[:80])
     try:
         g = _kworb("global_daily.html")
         if g: res["lists"]["global"] = {"src": "Spotify Global รายวัน (kworb.net)", "upd": res["at"], "items": g[:10]}
     except Exception as e: res["err"].append("spotify global: " + str(e)[:80])
     try:
-        us, up = _apple("us")
-        h = _hip(us)
-        if h: res["lists"]["global_hip"] = {"src": "Apple Music US · คัดเฉพาะ Hip-Hop/Rap", "upd": up, "items": [dict(x, p=i + 1, rank=x["p"]) for i, x in enumerate(h[:10])]}
-        if "global" not in res["lists"]: res["lists"]["global"] = {"src": "Apple Music US (สำรอง)", "upd": up, "items": us[:10]}
-    except Exception as e: res["err"].append("apple us: " + str(e)[:80])
+        h, up = _itunes("th", 18)
+        th = [x for x in h if _thai(x)]
+        if len(th) >= 5: res["lists"]["th_hip"] = {"src": "iTunes ไทย หมวด Hip-Hop/Rap (คัดศิลปินไทย)", "upd": up, "items": rank(th)}
+        if "th" not in res["lists"]:
+            a, up2 = _itunes("th"); res["lists"]["th"] = {"src": "iTunes ไทย เพลงขายดี (สำรอง)", "upd": up2, "items": a[:10]}
+    except Exception as e: res["err"].append("itunes th: " + str(e)[:80])
     try:
-        t2 = _kworb("th_daily.html")
-        if t2: res["lists"]["th_spotify"] = {"src": "Spotify ไทย รายวัน (kworb.net)", "upd": res["at"], "items": t2[:10]}
-    except Exception as e: res["err"].append("spotify th: " + str(e)[:80])
+        h, up = _itunes("us", 18)
+        if h: res["lists"]["global_hip"] = {"src": "iTunes US หมวด Hip-Hop/Rap (ยอดซื้อ)", "upd": up, "items": rank(h)}
+    except Exception as e: res["err"].append("itunes us: " + str(e)[:80])
     res["ok"] = bool(res["lists"])
     if res["ok"]:
         _TR["d"] = res; _TR["t"] = time.time()
@@ -542,6 +549,89 @@ def _run(jid, body):
         J.update(status="error", err=str(e)[:300] or e.__class__.__name__)
 
 
+# ---------- ค้นบีตจาก YouTube (yt-dlp) แล้วคัดฟรี/เสียเงิน ----------
+import re as _re
+_BEAT_CACHE = {}
+_BEAT_LOCK = threading.Lock()
+_FFP = _re.compile(r"free\s*(for|4|to\s*use\s*for)\s*profit|\bffp\b|free\s*for\s*commercial|royalty[\s-]*free|ใช้ฟรี.{0,12}หารายได้", _re.I)
+_NP = _re.compile(r"non[\s-]*profit|not\s*for\s*profit|free\s*for\s*non|free\s*download|\[free\]|\(free\)|^free\b|\bfree\b.{0,20}\btype beat", _re.I)
+_BUYHOST = _re.compile(r"https?://(?:www\.)?(?:beatstars\.com|bsta\.rs|airbit\.com|traktrain\.com|soundee\.com|player\.beatstars\.com|infinity\.airbit\.com|[a-z0-9-]+\.beatstars\.com)[^\s)\]]*", _re.I)
+_PRICE = _re.compile(r"(?:\$\s?(\d{1,4}(?:\.\d{1,2})?))|(?:(\d{1,4}(?:\.\d{1,2})?)\s?(?:usd|\$))", _re.I)
+_BPM = _re.compile(r"(\d{2,3})\s?bpm", _re.I)
+_KEY = _re.compile(r"\b([A-G](?:#|b|♯|♭)?\s?(?:m|min|minor|maj|major)?)\s*(?:key)?\b(?=[^a-z]|$)")
+_KEY2 = _re.compile(r"key[:\s]+([A-G](?:#|b)?\s?(?:m|min|minor|maj|major)?)", _re.I)
+
+
+def _beat_info(v):
+    title = v.get("title") or ""
+    desc = v.get("description") or ""
+    txt = title + "\n" + desc
+    head = title + "\n" + desc[:600]
+    free = None
+    if _FFP.search(head): free = "profit"
+    elif _NP.search(title) or _re.search(r"non[\s-]*profit|not\s*for\s*profit|free\s*for\s*non", desc[:800], _re.I): free = "np"
+    buy = _BUYHOST.findall(desc)
+    buy = [b.rstrip(".,") for b in buy]
+    prices = []
+    for a, b in _PRICE.findall(desc[:3000]):
+        try:
+            p = float(a or b)
+            if 5 <= p <= 5000: prices.append(p)
+        except Exception: pass
+    prices = sorted(set(prices))[:8]
+    bpm = None
+    m = _BPM.search(txt)
+    if m and 50 <= int(m.group(1)) <= 220: bpm = int(m.group(1))
+    key = None
+    m = _KEY2.search(txt)
+    if m: key = m.group(1).strip()
+    credit = bool(_re.search(r"credit|prod\.?\s*by|\(prod|must\s+include", desc[:1500], _re.I))
+    paid = bool(buy or prices or _re.search(r"purchase|buy\s|lease|exclusive|untagged|license", desc[:2000], _re.I))
+    vid = v.get("id") or ""
+    return {"id": vid, "title": title[:140], "channel": (v.get("channel") or v.get("uploader") or "")[:60],
+            "url": v.get("webpage_url") or ("https://www.youtube.com/watch?v=" + vid), "thumb": "https://i.ytimg.com/vi/%s/mqdefault.jpg" % vid if vid else "",
+            "dur": v.get("duration"), "views": v.get("view_count"), "date": v.get("upload_date"),
+            "free": free, "paid": paid, "buy": buy[0] if buy else "", "prices": prices, "bpm": bpm, "key": key, "credit": credit}
+
+
+def beat_search(q, n=12, force=False):
+    q = (q or "").strip()[:120]
+    if not q: return {"ok": False, "err": "ใส่คำค้นก่อน"}
+    ck = q.lower() + "|" + str(n)
+    with _BEAT_LOCK:
+        c = _BEAT_CACHE.get(ck)
+        if c and not force and time.time() - c[0] < 6 * 3600: return c[1]
+    try:
+        import yt_dlp
+    except Exception:
+        return {"ok": False, "need": "yt-dlp", "err": "ยังไม่ได้ติดตั้งตัวค้น YouTube ปิดหน้าต่างดำแล้วดับเบิลคลิก start.bat ใหม่ (จะติดตั้ง yt-dlp ให้เอง)"}
+    base = {"quiet": True, "no_warnings": True, "skip_download": True, "noplaylist": True, "socket_timeout": 15}
+    try:
+        with yt_dlp.YoutubeDL(dict(base, extract_flat="in_playlist")) as y:
+            r = y.extract_info("ytsearch%d:%s" % (min(n + 6, 30), q), download=False) or {}
+        flat = [e for e in (r.get("entries") or []) if e and e.get("id")]
+        flat = [e for e in flat if not e.get("duration") or 60 <= e["duration"] <= 600][:n]
+    except Exception as e:
+        return {"ok": False, "err": "ค้น YouTube ไม่สำเร็จ: " + str(e)[:160]}
+    out = [None] * len(flat)
+    def one(i, e):
+        try:
+            with yt_dlp.YoutubeDL(base) as y:
+                v = y.extract_info("https://www.youtube.com/watch?v=" + e["id"], download=False, process=False) or {}
+        except Exception:
+            v = dict(e)
+        out[i] = _beat_info(v)
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        list(ex.map(lambda a: one(*a), enumerate(flat)))
+    res = {"ok": True, "q": q, "t": int(time.time()), "items": [x for x in out if x]}
+    with _BEAT_LOCK:
+        _BEAT_CACHE[ck] = (time.time(), res)
+        if len(_BEAT_CACHE) > 60:
+            for k in sorted(_BEAT_CACHE, key=lambda k: _BEAT_CACHE[k][0])[:20]: _BEAT_CACHE.pop(k, None)
+    return res
+
+
 class H(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass
 
@@ -579,8 +669,8 @@ class H(http.server.SimpleHTTPRequestHandler):
         if not self._local():
             pth = self.path.split("?")[0]
             if pth.endswith("/") and pth != "/": return self.send_error(403)
-            if (pth.startswith("/api/mixhist") or pth.startswith("/api/oembed") or pth.startswith("/api/job")) and not self._auth(): return
-        if self.path.startswith("/api/ping"): return self._json({"ok": True, "auth": bool(KEY) or not self._local(), "lan": not self._local(), "model": DEFAULT_MODEL, "v": 23, "trends": True, "mv": True, "report": True, "oembed": True, "queue": len(_Q), "mix": True, "img": __import__("importlib.util").util.find_spec("diffusers") is not None, "sep": __import__("importlib.util").util.find_spec("demucs") is not None})
+            if (pth.startswith("/api/mixhist") or pth.startswith("/api/beats") or pth.startswith("/api/oembed") or pth.startswith("/api/job")) and not self._auth(): return
+        if self.path.startswith("/api/ping"): return self._json({"ok": True, "auth": bool(KEY) or not self._local(), "lan": not self._local(), "model": DEFAULT_MODEL, "v": 24, "beats": True, "trends": True, "mv": True, "report": True, "oembed": True, "queue": len(_Q), "mix": True, "img": __import__("importlib.util").util.find_spec("diffusers") is not None, "sep": __import__("importlib.util").util.find_spec("demucs") is not None})
         if self.path.startswith("/api/trends"):
             try: return self._json(trends("force=1" in self.path))
             except Exception as e: return self._json({"ok": False, "err": [str(e)[:160]]}, 502)
@@ -608,6 +698,13 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json({"ok": True, "src": src, "title": d.get("title", ""), "author": d.get("author_name", ""), "thumb": d.get("thumbnail_url", "")})
             except Exception as e:
                 return self._json({"ok": False, "err": "อ่านลิงก์ไม่ได้: " + str(e)[:120]}, 502)
+        if self.path.startswith("/api/beats"):
+            import urllib.parse
+            qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+            try: n = max(4, min(20, int(qs.get("n", ["12"])[0])))
+            except Exception: n = 12
+            try: return self._json(beat_search(qs.get("q", [""])[0], n, qs.get("force", ["0"])[0] == "1"))
+            except Exception as e: return self._json({"ok": False, "err": str(e)[:200]}, 500)
         if self.path.startswith("/api/job"):
             if not self._auth(): return
             return self._json(JOBS.get(self.path.split("id=")[-1], {"status": "error", "err": "ไม่พบงาน"}))
