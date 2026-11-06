@@ -196,7 +196,7 @@ function artFor(cv,p){var TH=(window.THEMES||[])[p.info&&p.info.theme||0]||{hot:
  c.fillStyle=TH.hot;c.fillRect(30,30,26,4);c.font="700 10px Montserrat, sans-serif";c.fillStyle="rgba(255,255,255,.6)";c.fillText("SLOPE NORTH SIDE",64,35)}
 
 /* ---------- หน้าแรก ---------- */
-var STEPS=[["สร้างโปรเจกต์","ตั้งชื่อเพลง ใส่ไฟล์เพลงและเนื้อเพลง แยกท่อนร้อง/ฮุค และคนร้อง","ทุกเครื่อง"],
+var STEPS=[["เช็กเทรนด์ & วางแนว","ดูชาร์ตไทย/โลก Top 10 ทั้งทุกแนวและฮิปฮอป แนวที่กำลังมา และประเมินโอกาสแมสตามสไตล์ศิลปิน","ทุกเครื่อง"],["สร้างโปรเจกต์","ตั้งชื่อเพลง ใส่ไฟล์เพลงและเนื้อเพลง แยกท่อนร้อง/ฮุค และคนร้อง","ทุกเครื่อง"],
  ["ซิงค์เนื้อกับเสียง","AI จับจังหวะคำร้องทีละคำ แล้วปรับเองได้ทีละบรรทัด","แม่นสุดบนคอม"],
  ["สไตล์ · ปก · MV","เลือกสไตล์ 60 แบบ ธีมสี เอฟเฟกต์ ภาพวาดอินโทร ปกเพลง และฉาก MV","ปก/MV ด้วย AI บนคอม"],
  ["ส่งออกวิดีโอ","YouTube 16:9, Reels/TikTok 9:16 ทั้งเพลงหรือท่อนฮุค 15–30 วิ","ทุกเครื่อง"],
@@ -215,6 +215,7 @@ async function home(){if(S.crashed){toastS("เปิดโปรเจกต์
   '<button class="sx-btn" id="sx-new">+ เพลงใหม่</button></div>'+
  '<section class="sx-sec"><div class="sx-sech"><h2>เพลงทั้งหมด</h2><span id="sx-cnt"></span></div><div class="sx-grid" id="sx-grid"></div></section>'+
  (BRANDED?'':'<section class="sx-sec"><div class="sx-sech"><h2>ตัวอย่างผลงานจากแอป</h2><span>เปิดดูได้ แก้ได้ แต่ไม่บันทึก</span></div><div class="sx-grid" id="sx-demo"></div></section>')+
+ '<section class="sx-sec"><div class="sx-sech"><h2>เทรนด์ & โอกาสแมส</h2><span>ชาร์ตไทย/โลก · ฮิปฮอป · แนวที่กำลังมา</span></div><p class="sx-sub" style="margin:0 0 12px">เลือกศิลปิน แอปจำสไตล์ไว้ แล้วบอกว่าเพลงมีโอกาสแมสกี่ % เพราะอะไร และควรปรับตรงไหน</p><button class="sx-btn" type="button" onclick="window.SNSTrend&&SNSTrend.open()">เปิดหน้าเทรนด์</button></section>'+
  '<section class="sx-sec" id="sx-lan"></section>'+
  '<section class="sx-sec"><div class="sx-sech"><h2>ขั้นตอนทำเพลง 1 เพลง</h2><span>เรียงตามลำดับในแอป</span></div><div class="sx-steps">'+
   STEPS.map(function(s){return'<div class="sx-step"><b>'+s[0]+'</b><p>'+s[1]+'</p><em>'+s[2]+'</em></div>'}).join("")+'</div></section>'+

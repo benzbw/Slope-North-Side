@@ -1,0 +1,293 @@
+<style>
+#trd{position:fixed;inset:0;z-index:66;overflow:auto;background:#050305;-webkit-overflow-scrolling:touch}
+#trd .pgw{padding-bottom:90px}
+.tr-seg{display:flex;gap:6px;margin:10px 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
+.tr-seg button{flex:1;border:0;background:none;color:var(--mut);font-size:13.5px;font-weight:700;padding:9px 4px;border-radius:10px;cursor:pointer}
+.tr-seg button.on{background:rgba(255,51,71,.16);color:var(--ink)}
+.tr-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}
+.tr-card h4{margin:0 0 6px;font-size:15px}
+.tr-li{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.tr-li:first-of-type{border-top:0}
+.tr-li b{width:26px;text-align:right;font:700 16px/1 system-ui;color:var(--mut);flex:none}
+.tr-li div{min-width:0;flex:1}.tr-li strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr-li span{font-size:12px;color:var(--mut)}
+.tr-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mut);margin:2px 4px 2px 0}
+.tr-tag.hot{border-color:rgba(255,51,71,.6);color:#ff8b97}.tr-tag.up{border-color:rgba(126,226,160,.5);color:#7ee2a0}.tr-tag.dn{color:#888}
+.tr-art{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.tr-art button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer}
+.tr-art button.on{border-color:var(--red);background:rgba(255,51,71,.16)}
+.tr-art button.add{color:var(--mut);font-weight:500}
+.tr-f{display:block;margin:8px 0 0}.tr-f>span{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+.tr-f textarea,.tr-f input,.tr-f select{width:100%;box-sizing:border-box;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);padding:10px 12px;font:14px/1.5 inherit;font-family:inherit}
+.tr-f textarea{min-height:72px;resize:vertical}
+.tr-gs{display:flex;gap:10px;margin:8px 0}
+.tr-g{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}
+.tr-g em{display:block;font-style:normal;font-size:12px;color:var(--mut)}
+.tr-g b{display:block;font:400 44px/1.1 Anton,system-ui,sans-serif;margin:4px 0}
+.tr-g small{font-size:12px;font-weight:700}
+.tr-bar{margin:9px 0}.tr-bar div{display:flex;justify-content:space-between;font-size:12.5px}.tr-bar div span{color:var(--mut)}
+.tr-bar i{display:block;height:6px;border-radius:6px;background:rgba(255,255,255,.1);margin-top:4px;overflow:hidden}.tr-bar i u{display:block;height:100%;border-radius:6px}
+.tr-tip{padding:9px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6}.tr-tip:first-of-type{border-top:0}
+.tr-tip b{color:#ffd24a}.tr-tip.good b{color:#7ee2a0}
+.tr-note{font-size:11.5px;color:var(--mut);line-height:1.5;margin:6px 0 0}
+#tr-ai{white-space:pre-wrap;font-size:13.5px;line-height:1.65}
+</style>
+<div id="trd" hidden><div class="pgw">
+ <div class="pgh"><div class="h" style="margin:0">เทรนด์ & โอกาสแมส</div><button class="cta alt" id="tr-close" style="width:auto;min-height:38px;padding:0 16px;font-size:13px">ปิด</button></div>
+ <p class="mut" style="font-size:12.5px">เลือกศิลปินก่อน แอปจะจำสไตล์ของแต่ละคน แล้วเทียบเพลงกับชาร์ตไทย/โลกตอนนี้</p>
+ <div class="tr-art" id="tr-arts"></div>
+ <div id="tr-prof" class="tr-card" hidden></div>
+ <div class="tr-seg" id="tr-tabs"><button data-t="chart" class="on">ชาร์ตตอนนี้</button><button data-t="me">เพลงของฉัน</button><button data-t="next">แนวที่กำลังมา</button></div>
+ <div id="tr-chart"></div>
+ <div id="tr-me" hidden></div>
+ <div id="tr-next" hidden></div>
+</div></div>
+<script>/* ===== Slope North Side · เทรนด์เพลง + ประเมินโอกาสแมส + จำสไตล์ศิลปิน ===== */
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function toastT(m){try{(window.toast||alert)(m)}catch(e){}}
+function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function JS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+/* ---------- ข้อมูลชาร์ต ณ วันที่เก็บ (อัปเดตสดได้เมื่อเปิดผ่าน start.bat บนคอม) ---------- */
+var SNAP={at:"5 พ.ย. 2569",lists:{
+ global:{src:"Billboard Global 200 · สัปดาห์ 7 พ.ย. 2026",items:[
+  ["Housewife","Tate McRae","Pop"],["BbY WOW","Karol G, Judeline & rusowsky","Latin"],["Nicole Kidman","ADÉLA","Pop"],["Expectations","Olivia Rodrigo & Chappell Roan","Pop"],["Stop The Wedding!","Ashe","Pop"],
+  ["Ain't In LA","ADÉLA","Pop"],["Choosin' Texas","Ella Langley","Country"],["The Cure","Olivia Rodrigo","Pop rock"],["Lies","Zach Bryan ft. Lana Del Rey","Country/Folk"],["Babydoll","Jamie Miller","Pop"]]},
+ th:{src:"EFM 94 Top Chart · 31 ต.ค. 2569",items:[
+  ["ตกใจหมด มากอดเค้าเลย","marr team","ป๊อป"],["พระจันทร์ที่ไม่เต็มดวง","Klear","ป๊อปร็อก"],["CHECKLIST","BILLKIN","T-pop"],["จำได้ว่าลืม","William Jakrapatr","ป๊อปบัลลาด"],["Sweet เหมือนก่อน","ETC.","ป๊อป/โซล"],
+  ["นาฬิกาทราย","BOWKYLION","ป๊อปบัลลาด"],["รักนะ แต่ว่า (OST)","ณเดชน์ คูกิมิยะ","ป๊อป OST"],["เขียว เหลือง แดง (Get high)","PUN, THE TOYS","ป๊อป"],["ขึ้นใจ (3am call)","Mirrr ft. BLVCKHEART","R&B ป๊อป"],["ที่ที่ปลอดภัย","Yes'Sir Days","อินดี้"]]},
+ global_hip:{src:"ARIA Hip Hop/R&B Singles (ออสเตรเลีย) · 2 พ.ย. 2026 + Billboard Hot Rap Songs",note:"อันดับ 1 Hot Rap Songs ของอเมริกาคือ Janice STFU (Drake) ครอง 23 สัปดาห์",items:[
+  ["Earrings","Malcolm Todd","Alt R&B"],["Love Me Not","Ravyn Lenae","R&B"],["Where Is My Husband!","Raye","R&B/Soul"],["Raindance","Dave, Tems","UK rap"],["Cinderella","Mac Miller ft. Ty Dolla $ign","Hip-hop"],
+  ["Noble","F3miii","Hip-hop"],["oh yeah?","Steve Lacy","Alt R&B"],["Janice STFU","Drake","Melodic rap"],["Dai Dai","Shakira, Burna Boy","Afro/Latin"],["Girls","The Kid Laroi","Pop rap"]]},
+ th_hip:{src:"รวบรวมจากชาร์ต/ข่าวปี 2569 (ยังไม่มีชาร์ตฮิปฮอปไทยทางการ)",note:"ตอนนี้ยืนยันได้ไม่ครบ 10 เพลง เปิดแอปผ่าน start.bat แล้วกด 'อัปเดตชาร์ตสด' จะคัดเพลงแนว Hip-Hop/Rap จากชาร์ต Apple Music ไทยให้ครบ 10",items:[
+  ["ใจฉันตามเธอไป","YOUNGOHM","Hip-hop/R&B · ขึ้นท็อป 2 สตรีมมิ่งไทยปีนี้"],["ขึ้นใจ (3am call)","Mirrr ft. BLVCKHEART","R&B · อันดับ 1 Official Thailand Chart ก.ย."],["ล็อกเป้า (LOCK PAO)","DICERED","แร็ป · EFM อันดับ 12"],["เราก็เหมือนกัน (We're The Same)","ILLSLICK x YOUNGOHM","แร็ปเมโลดี้"],["ตายตาหลับ","ILLSLICK x YOUNGOHM","แร็ปเมโลดี้"]]}
+}};
+/* แนวเพลง: แรงส่งตอนนี้ (0-100) + หลักฐาน */
+var GENRES=[
+ {k:"pop",n:"Pop / ป๊อปบัลลาด",th:90,gl:92,trTh:"hot",trGl:"hot",why:"ไทย: ท็อป 10 เกือบทั้งหมดเป็นป๊อป/บัลลาดเรื่องรัก · โลก: นักร้องหญิงสายป๊อปทางเลือกครองชาร์ต (Tate McRae, Olivia Rodrigo, ADÉLA)"},
+ {k:"rnb",n:"R&B / Alt R&B",th:85,gl:86,trTh:"up",trGl:"up",why:"ไทย: ขึ้นใจ (3am call) อันดับ 1 Official Thailand Chart · โลก: ท็อป 3 ชาร์ตฮิปฮอป/R&B ออสเตรเลียเป็น R&B ทั้งหมด"},
+ {k:"hiphop",n:"Melodic hip-hop (แร็ป + ฮุคร้อง)",th:78,gl:80,trTh:"up",trGl:"hot",why:"ไทย: YOUNGOHM ขึ้นท็อป 2 สตรีมมิ่ง · โลก: Janice STFU ครองอันดับ 1 Hot Rap Songs 23 สัปดาห์"},
+ {k:"indie",n:"Indie pop / Indie rock",th:85,gl:72,trTh:"hot",trGl:"",why:"ไทย: PURPEECH ครองอันดับ 1 นานสุดของปี, FREEHAND, Yes'Sir Days ติดท็อป"},
+ {k:"rock",n:"Rock / Emo ย้อนยุค",th:65,gl:74,trTh:"",trGl:"up",why:"โลก: The Black Parade ของ My Chemical Romance ขึ้นอันดับ 1 อัลบั้มหลังออก 20 ปี (กระแสคิดถึงอดีต)"},
+ {k:"country",n:"Country / Folk",th:55,gl:84,trTh:"",trGl:"hot",why:"อเมริกา: Choosin' Texas ครองอันดับ 1 Hot 100 นานเป็นประวัติการณ์ (26 สัปดาห์)"},
+ {k:"latin",n:"Latin / Afro",th:45,gl:80,trTh:"",trGl:"hot",why:"โลก: Karol G อันดับ 2 Global 200, Dai Dai (Shakira, Burna Boy) ติดชาร์ต"},
+ {k:"garage",n:"UK garage / Speed garage",th:50,gl:72,trTh:"up",trGl:"up",why:"สัญญาณล่วงหน้า: คนทำเพลงค้นหา speed garage บน Splice เพิ่มกว่า 160% (รายงานเทรนด์ 2027)"},
+ {k:"rage",n:"Rage / Hyperpop sound",th:45,gl:62,trTh:"",trGl:"up",why:"สัญญาณล่วงหน้า: แท็ก rage โตแรงสุดในกลุ่มย่อย, เสียงร้องแต่งหนักแบบ hyperpop กำลังลามไปแนวอื่น (Splice)"},
+ {k:"thaiban",n:"ไทบ้าน / ลูกทุ่งร่วมสมัย",th:80,gl:20,trTh:"hot",trGl:"",why:"ไทย: ดอกกระเจียวบาน (ก้อง ห้วยไร่) ติดท็อป 5 สตรีมมิ่งตั้งแต่ต้นปี ทำสถิติยูทูบ"},
+ {k:"trap",n:"Trap / Drill ดุดัน",th:50,gl:60,trTh:"dn",trGl:"",why:"ยังมีฐานแฟน แต่ท็อปชาร์ตตอนนี้เอียงไปทางเมโลดี้และ R&B มากกว่า"}
+];
+var GENMAP={any:"hiphop",hiphop:"hiphop",trap:"trap",drill:"trap",rage:"rage",emo:"rock",rnb:"rnb","alt-rnb":"rnb",pop:"pop",indie:"indie",lofi:"rnb",rock:"rock",synth:"pop",phonk:"rage",electronic:"garage",folk:"country",conscious:"hiphop"};
+/* ประเด็นที่คนพูดถึงตอนนี้ (ต้นพ.ย. 2569) + คำที่ใช้จับในเนื้อ */
+var TOPICS=[
+ {k:"love",n:"ความรัก / อกหัก / คิดถึง",heat:95,where:"ไทย",ang:"ธีมหลักของท็อปชาร์ตไทยเกือบทุกเพลง เล่าให้เฉพาะเจาะจง เช่น โทรตอนตี 3 ข้อความที่ไม่กล้าส่ง",w:/รัก|คิดถึง|เธอ|หัวใจ|อกหัก|เลิก|ทิ้ง|กอด|จูบ|แฟน|ใจ|love|miss|heart|baby/gi},
+ {k:"comfort",n:"ที่ปลอดภัย / ฮีลใจ / ตี 3",heat:80,where:"ไทย",ang:"เพลงอย่าง ที่ที่ปลอดภัย และ 3am call ติดท็อป คนอยากได้เพลงที่เป็นที่พักใจ",w:/ปลอดภัย|พัก|เหนื่อย|ตีสาม|ตี 3|3am|นอนไม่หลับ|ไม่เป็นไร|กอดตัวเอง|heal|safe/gi},
+ {k:"money",n:"ค่าครองชีพ / น้ำมันแพง / หนี้",heat:85,where:"ไทย",ang:"ข่าวต้นพ.ย. พูดถึงราคาน้ำมัน ต้นทุนขนส่ง และหนี้ครัวเรือน เล่าผ่านชีวิตคนหาเช้ากินค่ำ ไม่ต้องพูดตัวเลข",w:/เงิน|หนี้|ค่าเช่า|น้ำมัน|จน|รวย|เงินเดือน|งาน|ดิ้นรน|ผ่อน|บัตร|money|cash|rent|broke|hustle/gi},
+ {k:"trust",n:"ความไว้ใจที่พัง / มิจฉาชีพ / ถูกหลอก",heat:80,where:"ไทย",ang:"ข่าวคดีโกงเงินบริจาคและแก๊งหลอกลวงอยู่ในกระแส ใช้เป็นภาพเปรียบ เช่น รักที่หลอกเหมือนคอลเซ็นเตอร์",w:/หลอก|โกง|โกหก|ไว้ใจ|ทรยศ|หักหลัง|มิจฉา|scam|fake|lie|liar|betray/gi},
+ {k:"society",n:"สังคม / การเมือง / ความยุติธรรม",heat:70,where:"ไทย",ang:"การเมืองร้อน (นิรโทษกรรม, ปมอำนาจ กกต.) เล่าผ่านคนธรรมดา ไม่เอ่ยชื่อพรรคหรือบุคคล เพลงจะไม่ถูกแบ่งฝ่าย",w:/ระบบ|อำนาจ|ยุติธรรม|ประเทศ|สังคม|ผู้ใหญ่|นักการเมือง|โกงกิน|เสียงประชาชน|system|power|justice/gi},
+ {k:"nostalgia",n:"คิดถึงอดีต / ย้อนวัย",heat:75,where:"โลก",ang:"อัลบั้มอายุ 20 ปีกลับขึ้นอันดับ 1 และเพลงเก่ากลับมาฮิต ใช้ภาพวัยรุ่น 2000s หรือแซมเปิลเพลงเก่า",w:/เมื่อก่อน|วันเก่า|ตอนเด็ก|ความทรงจำ|ย้อน|อดีต|เคย|remember|old days|back then|nostalgia/gi},
+ {k:"self",n:"สู้ชีวิต / พิสูจน์ตัวเอง",heat:72,where:"ไทย+โลก",ang:"ธีมแร็ปคลาสสิก แรงขึ้นเมื่อมีเรื่องจริงของตัวเอง (แบบ MILLI 'หนูทำเอง')",w:/ฝัน|สู้|พิสูจน์|ล้ม|ลุก|ไม่ยอม|จากศูนย์|ทำเอง|dream|grind|prove|rise|nobody/gi},
+ {k:"dark",n:"ด้านมืด / ปีศาจในใจ",heat:55,where:"โลก",ang:"มีฐานแฟนแน่น แต่ต้องมีฮุคที่ร้องตามง่ายถึงจะแมส",w:/มืด|ปีศาจ|ตาย|เลือด|นรก|บ้า|อันตราย|demon|dark|dead|blood|hell|dangerous|crazy/gi}
+];
+
+/* ---------- จำสไตล์ศิลปิน ---------- */
+var AK="sns:artists";
+function seed(){return [
+ {id:"bedupbiw",name:"Bedupbiw",idols:"Eminem",style:"คลั่ง Eminem มาก ทำสไตล์ Eminem ผสมสไตล์ใหม่ๆ ไม่จำเป็นต้องแนว Eminem ตลอด เพลงช้าก็ได้ แต่ต้องมีกลิ่น Eminem",genres:["hiphop","rnb"],story:"",words:"",avoid:"",hist:[],ok:true},
+ {id:"illslick",name:"Illslick",idols:"",style:"",genres:["hiphop"],story:"",words:"",avoid:"",hist:[],ok:false}]}
+var ARTS=J(AK,null);if(!ARTS||!ARTS.length){ARTS=seed();JS(AK,ARTS)}
+var CUR=localStorage.getItem("sns:artist:cur")||"";if(!ARTS.some(function(a){return a.id==CUR}))CUR="";
+function art(){return ARTS.find(function(a){return a.id==CUR})||null}
+function saveArts(){JS(AK,ARTS);cloudSave()}
+function cloudSave(){try{var X=window.SNSX,ST=X&&X.ST;if(ST&&ST.mode=="cloud"&&ST.db&&ST.uid)ST.db.doc("data/users/"+ST.uid+"/trend").set({artists:ARTS,cur:CUR,t:Date.now()}).catch(function(){})}catch(e){}}
+async function cloudLoad(){try{var X=window.SNSX,ST=X&&X.ST;if(!(ST&&ST.mode=="cloud"&&ST.db&&ST.uid))return;var s=await ST.db.doc("data/users/"+ST.uid+"/trend").get();if(s.exists){var d=s.data();if(d&&d.artists&&d.artists.length){ARTS=JSON.parse(JSON.stringify(d.artists));JS(AK,ARTS);if(d.cur&&!CUR)CUR=d.cur;renderArts()}}}catch(e){}}
+function renderArts(){var h=ARTS.map(function(a){return'<button data-id="'+esc(a.id)+'" class="'+(a.id==CUR?"on":"")+'">'+esc(a.name)+(a.ok?"":" ·?")+'</button>'}).join("")+'<button class="add" data-id="+">+ เพิ่มศิลปิน</button>';
+ var el=$("tr-arts");el.innerHTML=h;el.querySelectorAll("button").forEach(function(b){b.onclick=function(){var id=b.dataset.id;if(id=="+"){addArt();return}
+  if(CUR==id){profOpen(!$("tr-prof").hidden?false:true);return}CUR=id;localStorage.setItem("sns:artist:cur",CUR);renderArts();profOpen(!art().ok);if(TAB=="me")renderMe();if(TAB=="next")renderNext()}});
+ if(!CUR)$("tr-prof").hidden=true}
+function addArt(){var n=prompt("ชื่อศิลปิน");if(!n||!n.trim())return;n=n.trim().slice(0,40);var id=n.toLowerCase().replace(/[^a-z0-9ก-๙]+/g,"-")+"-"+Date.now().toString(36).slice(-3);
+ ARTS.push({id:id,name:n,idols:"",style:"",genres:["hiphop"],story:"",words:"",avoid:"",hist:[],ok:false});CUR=id;localStorage.setItem("sns:artist:cur",CUR);saveArts();renderArts();profOpen(true)}
+function profOpen(on){var p=$("tr-prof"),a=art();if(!a||!on){p.hidden=true;return}p.hidden=false;
+ p.innerHTML='<h4>สไตล์ของ '+esc(a.name)+'</h4><p class="tr-note" style="margin:0 0 4px">แอปจำไว้ใช้ทุกครั้งที่วิเคราะห์ ยิ่งเล่าละเอียด คำแนะนำยิ่งตรงตัว</p>'+
+ fld("idols","ไอดอล / อิทธิพล","เช่น Eminem, Kendrick")+fld("style","เล่าสไตล์ตัวเอง","เช่น แร็ปเร็ว เล่าเรื่องจริง เพลงช้าได้แต่ต้องมีกลิ่น Eminem",1)+
+ '<label class="tr-f"><span>แนวที่ทำ (เลือกได้หลายแนว)</span><div class="tr-art" id="tr-pg" style="margin:0">'+GENRES.map(function(g){return'<button data-k="'+g.k+'" class="'+(a.genres.indexOf(g.k)>=0?"on":"")+'" style="font-size:12.5px;padding:6px 11px">'+esc(g.n)+'</button>'}).join("")+'</div></label>'+
+ fld("story","วิธีเล่าเรื่องที่ชอบ","เช่น เล่าเป็นจดหมาย, เล่าบุคคลที่หนึ่ง, หักมุมตอนจบ",1)+fld("words","คำ/วลีประจำตัว","เช่น north side, slope (คั่นด้วย ,)")+fld("avoid","สิ่งที่ไม่อยากทำ","เช่น ไม่อยากทำเพลงแดนซ์")+
+ '<div class="two"><button class="cta" id="tr-psave">บันทึกสไตล์</button><button class="cta alt" id="tr-pdel" style="max-width:120px">ลบ</button></div>';
+ p.querySelectorAll("#tr-pg button").forEach(function(b){b.onclick=function(e){e.preventDefault();b.classList.toggle("on")}});
+ $("tr-psave").onclick=function(){["idols","style","story","words","avoid"].forEach(function(k){a[k]=$("tr-p-"+k).value.trim().slice(0,600)});a.genres=[].map.call(p.querySelectorAll("#tr-pg button.on"),function(b){return b.dataset.k});if(!a.genres.length)a.genres=["hiphop"];
+  a.ok=!!(a.style||a.idols);saveArts();renderArts();p.hidden=true;toastT("จำสไตล์ของ "+a.name+" แล้ว");if(TAB=="me")renderMe();if(TAB=="next")renderNext()};
+ $("tr-pdel").onclick=function(){if(!confirm("ลบศิลปิน "+a.name+" และประวัติการวิเคราะห์?"))return;ARTS=ARTS.filter(function(x){return x!==a});CUR="";localStorage.removeItem("sns:artist:cur");saveArts();renderArts();p.hidden=true;if(TAB!="chart")setTab(TAB)};
+ function fld(k,l,ph,ta){return'<label class="tr-f"><span>'+l+'</span>'+(ta?'<textarea id="tr-p-'+k+'" placeholder="'+esc(ph)+'">'+esc(a[k])+'</textarea>':'<input id="tr-p-'+k+'" placeholder="'+esc(ph)+'" value="'+esc(a[k])+'">')+'</label>'}}
+
+/* ---------- ชาร์ต ---------- */
+var TAB="chart",REG="th",KIND="all",LIVE=J("sns:trends:live",null);
+function lists(){var o={};Object.keys(SNAP.lists).forEach(function(k){var L=SNAP.lists[k];o[k]={src:L.src,upd:SNAP.at,note:L.note||"",items:L.items.map(function(x,i){return{p:i+1,t:x[0],a:x[1],g:[x[2]]}}),live:false}});
+ if(LIVE&&LIVE.lists)Object.keys(LIVE.lists).forEach(function(k){var L=LIVE.lists[k],key=k=="th_spotify"?null:k;if(key&&L.items&&L.items.length)o[key]={src:L.src,upd:L.upd||LIVE.at,note:"",items:L.items,live:true}});return o}
+function renderChart(){var L=lists(),key=REG+(KIND=="hip"?"_hip":""),C=L[key];
+ var h='<div class="tr-seg"><button data-r="th" class="'+(REG=="th"?"on":"")+'">ไทย</button><button data-r="global" class="'+(REG=="global"?"on":"")+'">ทั่วโลก</button></div>'+
+ '<div class="tr-seg"><button data-k="all" class="'+(KIND=="all"?"on":"")+'">ทุกแนว</button><button data-k="hip" class="'+(KIND=="hip"?"on":"")+'">ฮิปฮอป</button></div>';
+ h+='<div class="tr-card"><h4>'+(REG=="th"?"ไทย":"ทั่วโลก")+' Top 10 · '+(KIND=="hip"?"ฮิปฮอป/แร็ป":"ทุกแนว")+'</h4><p class="tr-note" style="margin:0 0 6px">'+esc(C.src)+' · '+(C.live?'<span style="color:#7ee2a0">อัปเดตสด '+esc(C.upd)+'</span>':'ข้อมูล ณ '+esc(C.upd))+'</p>'+
+  C.items.slice(0,10).map(function(x){return'<div class="tr-li"><b>'+x.p+'</b><div><strong>'+esc(x.t)+'</strong><span>'+esc(x.a)+'</span></div>'+((x.g&&x.g[0])?'<span class="tr-tag">'+esc(x.g[0])+'</span>':'')+'</div>'}).join("")+
+  (C.note?'<p class="tr-note">'+esc(C.note)+'</p>':'')+'</div>';
+ h+='<button class="cta alt" id="tr-live" style="min-height:44px;font-size:14px">อัปเดตชาร์ตสด (ต้องเปิดแอปผ่าน start.bat บนคอม)</button>';
+ h+='<div class="tr-card"><h4>เทียบกับคุณ</h4>'+compare(L)+'</div>';
+ $("tr-chart").innerHTML=h;
+ $("tr-chart").querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){REG=b.dataset.r;renderChart()}});
+ $("tr-chart").querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){KIND=b.dataset.k;renderChart()}});
+ $("tr-live").onclick=liveUpdate}
+function compare(L){var a=art(),out=[];
+ var th=L.th.items,love=th.filter(function(x){return /รัก|ใจ|ลืม|กอด|คิดถึง|เธอ|sweet|love|call|ปลอดภัย|เหมือนก่อน/i.test(x.t)}).length;
+ out.push('<div class="tr-tip"><b>ชาร์ตไทยตอนนี้:</b> '+love+' ใน '+th.length+' เพลงเป็นเรื่องความรัก/ความสัมพันธ์ ส่วนใหญ่เป็นป๊อป/บัลลาด ร้องเป็นเมโลดี้ ชื่อเพลงสั้น หลายเพลงมีชื่อภาษาอังกฤษในวงเล็บ</div>');
+ out.push('<div class="tr-tip"><b>ชาร์ตโลกตอนนี้:</b> นำโดยป๊อปเสียงผู้หญิง คันทรี และลาติน ฝั่งฮิปฮอปที่อยู่ได้นานคือ melodic rap ที่ฮุคร้องตามได้ (Janice STFU ใช้ท่อนฮุคจากเพลงเก่าที่คนคุ้น)</div>');
+ if(!a){out.push('<div class="tr-tip">เลือกศิลปินด้านบน เพื่อดูว่าแนวของคุณอยู่ตรงไหนของชาร์ต</div>');return out.join("")}
+ var gs=a.genres.map(function(k){return GENRES.find(function(g){return g.k==k})}).filter(Boolean);
+ gs.forEach(function(g){out.push('<div class="tr-tip '+(g.th>=75?"good":"")+'"><b>'+esc(a.name)+' · '+esc(g.n)+':</b> แรงส่งในไทย '+g.th+'/100 · ในโลก '+g.gl+'/100 — '+esc(g.why)+'</div>')});
+ if(/eminem/i.test(a.idols+a.style))out.push('<div class="tr-tip"><b>กลิ่น Eminem กับชาร์ตตอนนี้:</b> แร็ปเร็ว สัมผัสหลายพยางค์ และเล่าเรื่องจริงยังเป็นจุดขายที่จำได้ แต่ชาร์ตตอนนี้ให้รางวัลกับฮุคที่ร้องเป็นเมโลดี้ ทางที่เข้ากับคุณคือเก็บเวิร์สแบบ Eminem แล้วทำฮุคร้อง (หรือชวนนักร้องมาร้องฮุค) แบบที่ Eminem เคยใช้ในเพลงดังหลายเพลงของเขา</div>');
+ return out.join("")}
+async function liveUpdate(){var b=$("tr-live");b.disabled=true;b.textContent="กำลังดึงชาร์ตล่าสุด…";
+ try{var r=await fetch("/api/trends?force=1",{cache:"no-store"});if(!r.ok)throw new Error(r.status==404?"เซิร์ฟเวอร์บนคอมยังเป็นรุ่นเก่า ดับเบิลคลิก start.bat ใหม่":"HTTP "+r.status);var j=await r.json();
+  if(!j.ok)throw new Error((j.err||[]).join(", ")||"ดึงไม่ได้");LIVE=j;JS("sns:trends:live",j);renderChart();toastT("อัปเดตชาร์ตแล้ว "+j.at)}
+ catch(e){b.disabled=false;b.textContent="อัปเดตชาร์ตสด (ต้องเปิดแอปผ่าน start.bat บนคอม)";toastT(/Failed to fetch|NetworkError|Unexpected token|JSON/.test(String(e))?"ต้องเปิดแอปผ่าน start.bat บนคอม (หรือมือถือที่ต่อคอม) ถึงจะดึงชาร์ตสดได้ ตอนนี้แสดงข้อมูลที่เก็บไว้":"อัปเดตไม่สำเร็จ: "+(e.message||e))}}
+
+/* ---------- วิเคราะห์เพลงของฉัน ---------- */
+var ME=J("sns:trend:me",{src:"proj",lyr:"",genre:"",bpm:"",hook:"",len:"",feat:""});
+function song(){try{if(window.SNS&&(SNS.pid||SNS.baked)&&typeof window.SNSSong=="function")return SNSSong()}catch(e){}return null}
+function renderMe(){var a=art(),el=$("tr-me");
+ if(!a){el.innerHTML='<div class="tr-card"><h4>เลือกศิลปินก่อน</h4><p class="mut">แตะชื่อศิลปินด้านบน (เช่น Bedupbiw) หรือ + เพิ่มศิลปิน แล้วเล่าสไตล์ให้แอปจำ แอปจะคำนวณโดยดูจากสไตล์ของคนนั้น</p></div>';return}
+ var sg=song(),hasProj=!!(sg&&sg.lines&&sg.lines.length>1);if(!hasProj)ME.src="paste";
+ var g0=ME.genre||(sg&&GENMAP[sg.genre])||a.genres[0]||"hiphop";
+ var h='<div class="tr-card"><h4>เพลงที่จะประเมิน · '+esc(a.name)+'</h4>'+
+ (hasProj?'<div class="tr-seg" style="margin:4px 0 6px"><button data-s="proj" class="'+(ME.src=="proj"?"on":"")+'">เพลงที่เปิดอยู่'+(sg.title?' ('+esc(sg.title)+')':'')+'</button><button data-s="paste" class="'+(ME.src=="paste"?"on":"")+'">วางเนื้อเอง</button></div>':'<p class="tr-note" style="margin:0">ยังไม่ได้เปิดโปรเจกต์เพลง วางเนื้อเพลงด้านล่าง (ใส่ § หน้าบรรทัดท่อนฮุค)</p>')+
+ '<div id="tr-paste" '+(ME.src=="proj"?"hidden":"")+'><label class="tr-f"><span>เนื้อเพลง (เว้นบรรทัดระหว่างท่อน · ใส่ § หน้าท่อนฮุค)</span><textarea id="tr-lyr" style="min-height:140px">'+esc(ME.lyr)+'</textarea></label>'+
+ '<div class="two" style="margin-top:0"><label class="tr-f" style="flex:1"><span>ฮุคเริ่มวินาทีที่</span><input id="tr-hook" inputmode="decimal" value="'+esc(ME.hook)+'" placeholder="เช่น 20"></label><label class="tr-f" style="flex:1"><span>ความยาวเพลง (วินาที)</span><input id="tr-len" inputmode="decimal" value="'+esc(ME.len)+'" placeholder="เช่น 180"></label></div></div>'+
+ '<div class="two" style="margin-top:0"><label class="tr-f" style="flex:1.4"><span>แนวของเพลงนี้</span><select id="tr-gen">'+GENRES.map(function(g){return'<option value="'+g.k+'"'+(g.k==g0?" selected":"")+'>'+esc(g.n)+'</option>'}).join("")+'</select></label>'+
+ '<label class="tr-f" style="flex:1"><span>BPM</span><input id="tr-bpm" inputmode="numeric" value="'+esc(ME.bpm)+'" placeholder="ไม่รู้ก็ได้"></label></div>'+
+ '<label class="tr-f"><span>ฟีเจอริ่ง (ถ้ามี)</span><input id="tr-feat" value="'+esc(ME.feat||(sg&&sg.feat)||"")+'" placeholder="เช่น Killmonker"></label>'+
+ (hasProj?'<button class="cta alt" id="tr-bpmgo" style="min-height:40px;font-size:13px;margin-top:8px">หา BPM จากไฟล์เพลงอัตโนมัติ</button>':'')+
+ '<button class="cta" id="tr-go" style="margin-top:10px">คำนวณโอกาสแมส</button></div><div id="tr-res"></div>';
+ el.innerHTML=h;
+ el.querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){ME.src=b.dataset.s;JS("sns:trend:me",ME);renderMe()}});
+ $("tr-go").onclick=run;if($("tr-bpmgo"))$("tr-bpmgo").onclick=autoBpm;
+ if(a.last&&a.last.res&&!$("tr-res").innerHTML)showRes(a.last.res,true)}
+function readMe(){["lyr","hook","len","bpm","feat"].forEach(function(k){var e=$("tr-"+k);if(e)ME[k]=e.value});ME.genre=$("tr-gen").value;JS("sns:trend:me",ME)}
+function parseLyr(t){var L=[];String(t||"").replace(/\r/g,"").split(/\n\s*\n/).forEach(function(b,gi){var h=/^\s*§/.test(b)||/^\s*\[?(hook|chorus|ฮุค|คอรัส)/i.test(b);b.split("\n").forEach(function(l){l=l.replace(/^\s*(§|@[1-4])\s*/g,"").trim();if(l&&!/^\[.*\]$/.test(l))L.push({t:l,h:h,g:gi})})});return L}
+async function autoBpm(){var b=$("tr-bpmgo");b.disabled=true;b.textContent="กำลังฟังจังหวะ…";
+ try{var src=document.getElementById("a").src;if(!src)throw 0;var buf=await (await fetch(src)).arrayBuffer();var AC=window.AudioContext||window.webkitAudioContext,ac=new AC(),au=await ac.decodeAudioData(buf);try{ac.close()}catch(e){}
+  var sr=au.sampleRate,ch=au.getChannelData(0),hop=Math.round(sr/100),n=Math.floor(Math.min(ch.length,sr*90)/hop),st=Math.floor(Math.min(ch.length/3,sr*30)/hop),env=new Float32Array(n),prev=0,i,j;
+  for(i=0;i<n;i++){var s=0,o=(i+st)*hop;if(o+hop>ch.length)break;for(j=0;j<hop;j+=4){var v=ch[o+j];s+=v*v}s=Math.sqrt(s);env[i]=Math.max(0,s-prev);prev=s}
+  var best=0,bl=0;for(var bpm=70;bpm<=175;bpm+=.5){var lag=6000/bpm,sc=0;for(i=0;i+lag*2<n;i++)sc+=env[i]*(env[Math.round(i+lag)]+.5*env[Math.round(i+lag*2)]);if(sc>best){best=sc;bl=bpm}}
+  if(!bl)throw 0;ME.bpm=String(Math.round(bl));$("tr-bpm").value=ME.bpm;JS("sns:trend:me",ME);toastT("ประมาณ "+ME.bpm+" BPM (อาจเป็นครึ่ง/สองเท่าของที่นับเอง)")}
+ catch(e){toastT("หา BPM ไม่ได้ ใส่เองได้เลย")}b.disabled=false;b.textContent="หา BPM จากไฟล์เพลงอัตโนมัติ"}
+function clamp(x){return Math.max(0,Math.min(100,Math.round(x)))}
+function run(){readMe();var a=art();if(!a){toastT("เลือกศิลปินก่อน");return}
+ var sg=ME.src=="proj"?song():null,L,hook=null,len=null,title="";
+ if(sg){L=sg.lines.map(function(l){return{t:l.t,h:l.h,g:l.g}});var hi=sg.lines.findIndex(function(l){return l.h});if(hi>=0&&sg.T&&sg.T[hi]!=null)hook=sg.T[hi];len=sg.dur||null;title=sg.title||""}
+ else{L=parseLyr(ME.lyr);hook=parseFloat(ME.hook);hook=isNaN(hook)?null:hook;len=parseFloat(ME.len);len=isNaN(len)?null:len}
+ if(L.length<4){toastT("ใส่เนื้อเพลงอย่างน้อย 4 บรรทัด");return}
+ var r=score(L,{hook:hook,len:len,genre:ME.genre,bpm:parseFloat(ME.bpm)||0,feat:(ME.feat||"").trim(),art:a,synced:!!(sg&&sg.synced)});r.title=title||(L[0].t.slice(0,30));
+ a.last={at:Date.now(),res:r};a.hist=(a.hist||[]).filter(function(x){return x.title!=r.title}).concat([{title:r.title,th:r.th,gl:r.gl,genre:ME.genre,at:Date.now()}]).slice(-20);saveArts();showRes(r)}
+function score(L,o){var all=L.map(function(l){return l.t}).join("\n"),low=all.toLowerCase(),F=[];
+ var G=GENRES.find(function(g){return g.k==o.genre})||GENRES[2];
+ F.push({k:"genre",n:"แนวเพลงตรงกระแส",th:G.th,gl:G.gl,good:"แนว "+G.n+" กำลังมีแรงส่ง: "+G.why,fix:G.th>=75?"แนว "+G.n+" มาแรงอยู่แล้ว เพิ่มความต่าง เช่น ฮุคร้องแบบ R&B หรือกลองแบบ UK garage ในบางท่อน จะเด่นกว่าเพลงแนวเดียวกัน":"แนว "+G.n+" ตอนนี้แรงส่งไม่สูง ลองใส่องค์ประกอบของแนวที่กำลังขึ้น เช่น ฮุคร้องแบบ R&B หรือกลองแบบ UK garage ในท่อนฮุค โดยเวิร์สยังเป็นตัวคุณ",tgt:85});
+ var hs=o.hook,hk=hs==null?45:hs<=20?100:hs<=30?85:hs<=45?62:hs<=60?42:25;
+ F.push({k:"hook",n:"ฮุคมาเร็ว",th:hk,gl:hk,good:"ฮุคเข้าที่ "+(hs!=null?Math.round(hs)+" วิ":"")+" คนฟังจับได้ก่อนเลื่อนผ่าน เหมาะกับ TikTok/Reels",fix:hs==null?"ยังไม่ได้บอกว่าฮุคอยู่ตรงไหน (ใส่ § หน้าท่อนฮุค) ถ้าฮุคมาหลัง 30 วิ ลองเปิดเพลงด้วยฮุคสั้นๆ 1 รอบก่อนเข้าเวิร์ส":"ฮุคแรกเข้าที่ "+Math.round(hs)+" วิ ช้าไปสำหรับยุคคลิปสั้น ลองตัดอินโทรให้สั้นลง หรือเปิดเพลงด้วยฮุค 1 รอบ (คนส่วนใหญ่ตัดสินใจใน 15–30 วิแรก)",tgt:90});
+ var ln=o.len,lnS=ln==null?70:ln<105?65:ln<=200?100:ln<=230?80:ln<=260?62:45;
+ F.push({k:"len",n:"ความยาวเพลง",th:lnS,gl:lnS,good:"ยาว "+(ln?fmt(ln):"")+" อยู่ในช่วงที่เพลงฮิตตอนนี้นิยม (ราว 2–3:20 นาที) คนเปิดซ้ำได้ง่าย",fix:ln==null?"ใส่ความยาวเพลงเพื่อคำนวณให้แม่น":"ยาว "+fmt(ln)+" ลองตัดให้อยู่ราว 2:30–3:20 เช่น ลดเวิร์สที่ 3 หรือฮุครอบท้าย",tgt:95});
+ var hl=L.filter(function(l){return l.h}),cnt={};L.forEach(function(l){var k=l.t.replace(/\s+/g," ").toLowerCase();cnt[k]=(cnt[k]||0)+1});
+ var rep=Object.keys(cnt).filter(function(k){return cnt[k]>=2}).length,hookAvg=hl.length?hl.reduce(function(s,l){return s+l.t.length},0)/hl.length:0;
+ var ph=catchphrase(L),cS=clamp((hl.length?35:10)+Math.min(30,rep*6)+(hookAvg&&hookAvg<=30?15:hookAvg<=40?8:0)+(ph?20:0));
+ F.push({k:"catch",n:"ฮุคติดหู",th:cS,gl:cS,good:"ฮุคมีคำซ้ำ"+(ph?' ("'+ph+'")':"")+" สั้น ร้องตามได้",fix:(hl.length?"":"ยังไม่มีท่อนที่ทำเครื่องหมายเป็นฮุค ")+"ทำฮุคให้มีวลีสั้นๆ 2–5 คำที่วนซ้ำ 3–4 ครั้ง บรรทัดฮุคไม่ควรยาวเกิน ~30 ตัวอักษร"+(ph?"":" ตอนนี้ยังไม่มีวลีที่ซ้ำพอให้คนจำ"),tgt:85});
+ var hits=TOPICS.map(function(t){var m=low.match(t.w)||[];return{t:t,c:m.length}}).filter(function(x){return x.c>=2}).sort(function(a,b){return b.c*b.t.heat-a.c*a.t.heat});
+ var love=hits.some(function(x){return x.t.k=="love"}),tp=hits.filter(function(x){return x.t.k!="love"&&x.t.heat>=70}).length;
+ var eTh=clamp(35+(love?32:0)+Math.min(20,tp*10)+(hits.length?8:0)),eGl=clamp(40+(love?20:0)+Math.min(20,tp*8)+(hits.some(function(x){return x.t.k=="nostalgia"||x.t.k=="self"})?12:0));
+ F.push({k:"topic",n:"เนื้อหาเข้ากับกระแส",th:eTh,gl:eGl,good:"เนื้อพูดถึง "+hits.slice(0,3).map(function(x){return x.t.n}).join(", ")+" ซึ่งตรงกับสิ่งที่คนฟังอยู่ตอนนี้",fix:hits.length?"มีประเด็น "+hits[0].t.n+" แล้ว ลองเล่าให้เจาะจงขึ้นด้วยภาพในชีวิตจริง":"เนื้อยังไม่ชัดว่าเล่าเรื่องอะไรที่คนอินตอนนี้ ดูหัวข้อ 'เนื้อหากับสถานการณ์ตอนนี้' ด้านล่าง",tgt:85,hits:hits});
+ var thC=(all.match(/[ก-๙]/g)||[]).length,enC=(all.match(/[a-z]/gi)||[]).length,enR=enC/Math.max(1,thC+enC);
+ var lTh=enR<.04?80:enR<=.35?100:enR<=.6?75:45,lGl=enR>=.6?90:enR>=.35?65:enR>=.1?42:30;
+ F.push({k:"lang",n:"ภาษา",th:lTh,gl:lGl,good:"ไทยเป็นหลัก ผสมคำอังกฤษพอดี ("+Math.round(enR*100)+"%)",fix:"ภาษาอังกฤษ "+Math.round(enR*100)+"% · ตลาดไทย: ไทยเป็นหลัก + วลีอังกฤษสั้นในฮุคได้ผลดี · ตลาดโลก: เพลงภาษาไทยไปได้ถ้ามีฮุคหรือวลีอังกฤษที่จำง่ายและภาพ MV แข็งแรง",tgt:90});
+ var bpm=o.bpm,bS=!bpm?65:(bpm>=68&&bpm<=105)||(bpm>=118&&bpm<=150)?92:75;
+ F.push({k:"bpm",n:"จังหวะ (BPM)",th:bS,gl:bS,good:bpm+" BPM อยู่ในช่วงที่ใช้บ่อยในเพลงติดชาร์ต",fix:bpm?bpm+" BPM ไม่ผิด แต่เพลงฮิตตอนนี้ส่วนใหญ่อยู่ช่วงบัลลาด/R&B 70–100 หรือแร็ปเร็ว 120–150":"ยังไม่รู้ BPM กดหา BPM อัตโนมัติ หรือใส่เอง",tgt:92});
+ var a=o.art,sig=0,wl=(a.words||"").split(/[,\n]/).map(function(w){return w.trim().toLowerCase()}).filter(Boolean);wl.forEach(function(w){if(w&&low.indexOf(w)>=0)sig++});
+ var rh=rhyme(L),em=/eminem/i.test(a.idols+" "+a.style);
+ var iS=clamp((a.ok?45:25)+Math.min(20,sig*10)+Math.round(rh*30)+(a.story?5:0));
+ F.push({k:"id",n:"ตัวตนชัด (จำได้ว่าเป็นคุณ)",th:iS,gl:iS,good:"มีลายเซ็นของ "+a.name+(sig?" (ใช้คำประจำตัว "+sig+" คำ)":"")+(rh>=.35?" สัมผัสท้ายบรรทัดแน่น":""),fix:(a.ok?"":"ยังไม่ได้เล่าสไตล์ของ "+a.name+" ให้แอปจำ (แตะชื่อศิลปินด้านบน) · ")+"ใส่ลายเซ็นที่ได้ยินแล้วรู้ว่าเป็นคุณ เช่น คำประจำตัว ad-lib สัมผัสหลายพยางค์"+(em?" หรือท่อนแร็ปเร็วแบบ Eminem สัก 4 บาร์":""),tgt:85,rh:rh,em:em});
+ var ftS=o.feat?88:58;
+ F.push({k:"feat",n:"ฟีเจอริ่ง",th:ftS,gl:ftS,good:"มีฟีเจอริ่ง ("+o.feat+") ได้ฐานแฟนสองฝั่ง ชาร์ตตอนนี้เต็มไปด้วยเพลงคู่",fix:"ยังไม่มีฟีเจอริ่ง ชาร์ตไทยและโลกตอนนี้มีเพลงคู่เยอะ (Mirrr ft. BLVCKHEART, ILLSLICK x YOUNGOHM) ลองชวนนักร้องเมโลดี้มาร้องฮุค",tgt:88});
+ var W={th:{genre:.18,hook:.14,len:.06,catch:.14,topic:.16,lang:.08,bpm:.04,id:.10,feat:.10},gl:{genre:.18,hook:.14,len:.06,catch:.14,topic:.12,lang:.14,bpm:.04,id:.09,feat:.09}};
+ function tot(m){var s=0;F.forEach(function(f){s+=f[m]*W[m][f.k]});return Math.round(Math.max(3,Math.min(93,s*.86-3)))}
+ F.forEach(function(f){f.gain={th:Math.max(0,(f.tgt-f.th))*W.th[f.k],gl:Math.max(0,(f.tgt-f.gl))*W.gl[f.k]}});
+ return{th:tot("th"),gl:tot("gl"),F:F,G:G,hits:hits,ph:ph,rh:rh,em:em,art:a.name,story:a.story,genre:o.genre,at:Date.now()}}
+function fmt(s){s=Math.round(s);return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+function catchphrase(L){var c={};L.forEach(function(l){var w=l.t.toLowerCase().replace(/[^\sa-zก-๙']/g," ").split(/\s+/).filter(Boolean);for(var n=2;n<=4;n++)for(var i=0;i+n<=w.length;i++){var k=w.slice(i,i+n).join(" ");if(k.length>=5)c[k]=(c[k]||0)+1}});
+ var best=null,bc=2;Object.keys(c).forEach(function(k){if(c[k]>bc||(c[k]==bc&&best&&k.length>best.length)){best=k;bc=c[k]}});return bc>=3?best:null}
+function tail(s){s=s.toLowerCase().replace(/[^a-zก-๙]/g,"");if(/[a-z]$/.test(s))return s.slice(-2);return s.replace(/[่้๊๋็์]/g,"").slice(-2)}
+function rhyme(L){var n=0,m=0;for(var i=1;i<L.length;i++){if(L[i].g!==L[i-1].g)continue;n++;var a=tail(L[i].t),b=tail(L[i-1].t);if(a&&a==b)m++;else if(i>1&&L[i-2].g===L[i].g&&a&&a==tail(L[i-2].t))m+=.6}return n?Math.min(1,m/n):0}
+function band(p){return p>=68?["สูง","#7ee2a0"]:p>=48?["ปานกลาง","#ffd24a"]:["ต่ำ","#ff8b97"]}
+function showRes(r,old){var el=$("tr-res");if(!el)return;var a=art(),bt=band(r.th),bg=band(r.gl);
+ var h='<div class="tr-card"><h4>ผลประเมิน'+(old?' ล่าสุด':'')+' · '+esc(r.title)+'</h4><div class="tr-gs"><div class="tr-g"><em>โอกาสแมสในไทย</em><b style="color:'+bt[1]+'">'+r.th+'%</b><small style="color:'+bt[1]+'">'+bt[0]+'</small></div><div class="tr-g"><em>โอกาสในตลาดโลก</em><b style="color:'+bg[1]+'">'+r.gl+'%</b><small style="color:'+bg[1]+'">'+bg[0]+'</small></div></div>'+
+ '<p class="tr-note">ประเมินจากโครงเพลงและเนื้อ เทียบกับลักษณะเพลงที่ติดชาร์ตตอนนี้ ไม่ใช่การทำนายยอดสตรีมจริง ยอดจริงขึ้นกับการโปรโมต ฐานแฟน และจังหวะการปล่อยด้วย</p>'+
+ r.F.map(function(f){var c=f.th>=70?"#7ee2a0":f.th>=50?"#ffd24a":"#ff6b7a";return'<div class="tr-bar"><div><b>'+f.n+'</b><span>ไทย '+f.th+' · โลก '+f.gl+'</span></div><i><u style="width:'+f.th+'%;background:'+c+'"></u></i></div>'}).join("")+'</div>';
+ var good=r.F.filter(function(f){return f.th>=70}),fix=r.F.filter(function(f){return f.gain.th>.8||f.gain.gl>1.2}).sort(function(x,y){return(y.gain.th+y.gain.gl)-(x.gain.th+x.gain.gl)});
+ if(good.length)h+='<div class="tr-card"><h4>'+(r.th>=55?"ทำไมเพลงนี้มีโอกาส":"จุดที่ดีอยู่แล้ว")+'</h4>'+good.map(function(f){return'<div class="tr-tip good"><b>'+f.n+':</b> '+esc(f.good)+'</div>'}).join("")+'</div>';
+ if(fix.length)h+='<div class="tr-card"><h4>'+(r.th>=60?"ทำแบบนี้จะดีขึ้นอีก":"ควรแก้ตรงไหน (เรียงจากได้ผลมากสุด)")+'</h4>'+fix.slice(0,5).map(function(f){return'<div class="tr-tip"><b>'+f.n+' (+'+Math.max(1,Math.round(f.gain.th))+'%):</b> '+esc(f.fix)+'</div>'}).join("")+'</div>';
+ h+='<div class="tr-card"><h4>แนะนำสำหรับ '+esc(r.art)+'</h4>'+advice(r,a).map(function(t){return'<div class="tr-tip"><b>'+t[0]+':</b> '+esc(t[1])+'</div>'}).join("")+'</div>';
+ h+='<div class="tr-card"><h4>เนื้อหากับสถานการณ์ตอนนี้</h4>'+topicFit(r)+'</div>';
+ if(a&&a.hist&&a.hist.length>1)h+='<div class="tr-card"><h4>เทียบเพลงก่อนหน้าของ '+esc(a.name)+'</h4>'+a.hist.slice().reverse().slice(0,6).map(function(x){return'<div class="tr-li"><div><strong>'+esc(x.title)+'</strong><span>'+new Date(x.at).toLocaleDateString("th-TH")+'</span></div><span class="tr-tag">ไทย '+x.th+'%</span><span class="tr-tag">โลก '+x.gl+'%</span></div>'}).join("")+'</div>';
+ var ai=aiAvail();h+='<div class="tr-card"><h4>ให้ AI อ่านเนื้อแล้ววิเคราะห์ลึก</h4>'+(ai?'<p class="tr-note" style="margin:0 0 8px">AI อ่านเนื้อทั้งเพลง + สไตล์ที่จำไว้ + ชาร์ตตอนนี้ แล้วแนะนำการเล่าเรื่อง คำ และไอเดียฮุคใหม่</p><button class="cta alt" id="tr-aigo" style="min-height:44px;font-size:14px">วิเคราะห์ลึกด้วย AI</button><div id="tr-ai" style="margin-top:10px"></div>':'<p class="tr-note" style="margin:0">ใช้ได้เมื่อเปิดแอปผ่าน claude.ai (ลิงก์แอปในบัญชี Claude) · ผลด้านบนคำนวณในเครื่อง ใช้ได้ทุกที่แม้ไม่มีเน็ต</p>')+'</div>';
+ el.innerHTML=h;if(ai)$("tr-aigo").onclick=function(){aiDeep(r)};if(!old)el.scrollIntoView({behavior:"smooth",block:"start"})}
+function advice(r,a){var o=[],G=r.G,f=function(k){return r.F.find(function(x){return x.k==k})};
+ if(r.em){o.push(["กลิ่น Eminem ที่ควรเก็บไว้","เวิร์สเล่าเรื่องจริงแบบสารภาพ สัมผัสหลายพยางค์ต่อกันยาว เปลี่ยนจังหวะการแร็ประหว่างเวิร์ส (ช้า→เร็ว) และการเล่นเสียงเป็นตัวละคร"]);
+  o.push(["ทำให้แมสขึ้นโดยไม่เสียตัวตน","เวิร์สแร็ปแน่นแบบ Eminem ได้เต็มที่ แต่ฮุคให้ร้องเป็นเมโลดี้ง่ายๆ (หรือชวนนักร้องมาร้องฮุค) คนทั่วไปร้องตามฮุค ส่วนแฟนแร็ปฟังเวิร์ส"]);
+  if(/rnb|pop|indie/.test(r.genre))o.push(["เพลงช้าแต่มีกลิ่น Eminem","บีตช้า 70–90 BPM เปิดด้วยเสียงพูดหรือกระซิบ เวิร์ส 1 เล่าเบาๆ แล้วไล่อารมณ์ขึ้นจนเวิร์สสุดท้ายแร็ปเร็วและระบายสุดทาง"])}
+ o.push(["เล่าเรื่องแบบไหน",(a&&a.story?"ตามสไตล์ที่คุณบอกไว้ ("+a.story.slice(0,80)+") · ":"")+(r.hits.length?"ใช้ประเด็น "+r.hits[0].t.n+" ที่มีอยู่แล้ว ":"")+"เล่าเป็นฉาก มีเวลา สถานที่ และของจริง 1–2 อย่าง (เช่น ตี 3, ใบแจ้งหนี้, ข้อความที่ไม่ได้ส่ง) จบด้วยการหักมุมหรือคำตอบที่ไม่คาดคิด"]);
+ var lg=f("lang");o.push(["ใช้คำแบบไหน","ภาษาพูดที่คนใช้จริง ใส่วลีอังกฤษสั้นๆ 1 วลีในฮุคให้จำง่าย (ชาร์ตไทยตอนนี้ใช้ชื่อเพลงไทย + อังกฤษในวงเล็บเยอะ) ลดสแลงที่รู้กันแค่ในวง"+(lg.th<70?" · ตอนนี้สัดส่วนภาษายังไม่พอดีกับตลาดไทย":"")]);
+ o.push(["ปล่อยเพลงให้เข้าทาง","ตัดคลิปฮุค 15 วิในแอป (ขั้น 3) ปล่อยก่อนเพลงเต็ม 3–7 วัน และทำเวอร์ชันคลิปที่ฮุคเข้าใน 3 วิแรก"]);
+ if(G.th<70){var up=GENRES.filter(function(g){return g.th>=80&&(a?a.genres.indexOf(g.k)<0:true)}).slice(0,2).map(function(g){return g.n});if(up.length)o.push(["ผสมแนวที่กำลังขึ้น","ลองใส่สีของ "+up.join(" หรือ ")+" ในท่อนฮุค โดยเวิร์สยังเป็นแนวของคุณ"])}
+ return o}
+function topicFit(r){var out=[];if(r.hits.length)out.push('<div class="tr-tip good"><b>เนื้อเพลงนี้แตะ:</b> '+r.hits.slice(0,4).map(function(x){return esc(x.t.n)+" ("+x.c+" คำ)"}).join(", ")+'</div>');
+ else out.push('<div class="tr-tip"><b>ยังจับประเด็นชัดๆ ไม่ได้</b> เนื้ออาจเป็นภาพนามธรรม ลองเลือกประเด็นด้านล่างมาเป็นแกนเรื่อง</div>');
+ var have={};r.hits.forEach(function(x){have[x.t.k]=1});
+ TOPICS.filter(function(t){return !have[t.k]&&t.heat>=70}).sort(function(a,b){return b.heat-a.heat}).slice(0,4).forEach(function(t){out.push('<div class="tr-tip"><b>'+esc(t.n)+' ('+t.where+' · ความร้อน '+t.heat+'):</b> '+esc(t.ang)+'</div>')});
+ out.push('<p class="tr-note">ประเด็นจากข่าวและชาร์ต ณ '+SNAP.at+' · เรื่องการเมืองให้เล่าผ่านชีวิตคน ไม่ระบุชื่อพรรคหรือบุคคล</p>');return out.join("")}
+function aiAvail(){try{var X=window.SNSX;return !!(X&&X.ST&&X.ST.sample)}catch(e){return false}}
+async function aiDeep(r){var X=window.SNSX,S=X.ST.sample,a=art(),b=$("tr-aigo"),w=$("tr-ai");b.disabled=true;w.textContent="กำลังวิเคราะห์…";
+ var sg=ME.src=="proj"?song():null,lyr=sg?sg.lines.map(function(l){return(l.h?"§ ":"")+l.t}).join("\n"):ME.lyr;
+ var ctx="คุณคือ A&R และโปรดิวเซอร์เพลงฮิปฮอปไทยที่ตามชาร์ตใกล้ชิด ตอบเป็นภาษาไทย กระชับ ใช้หัวข้อสั้นๆ\n\nศิลปิน: "+a.name+"\nสไตล์ที่ศิลปินเล่าไว้: "+(a.style||"-")+"\nไอดอล: "+(a.idols||"-")+"\nวิธีเล่าเรื่องที่ชอบ: "+(a.story||"-")+"\nคำประจำตัว: "+(a.words||"-")+"\nสิ่งที่ไม่อยากทำ: "+(a.avoid||"-")+
+ "\n\nชาร์ตไทยตอนนี้ (Top 10): "+SNAP.lists.th.items.map(function(x){return x[0]+" - "+x[1]}).join("; ")+"\nชาร์ตโลก (Top 10): "+SNAP.lists.global.items.map(function(x){return x[0]+" - "+x[1]}).join("; ")+
+ "\nประเด็นที่คนพูดถึงตอนนี้: "+TOPICS.map(function(t){return t.n+" ("+t.ang+")"}).join(" | ")+
+ "\n\nผลคำนวณเบื้องต้น: โอกาสแมสไทย "+r.th+"%, โลก "+r.gl+"% · คะแนนย่อย: "+r.F.map(function(f){return f.n+" "+f.th}).join(", ")+
+ "\n\nเนื้อเพลง (§ = ท่อนฮุค):\n"+String(lyr||"").slice(0,3000)+
+ "\n\nช่วยตอบ: 1) เห็นด้วยกับ % ไหม ปรับเป็นเท่าไหร่ เพราะอะไร 2) จุดแข็ง 3 ข้อ 3) สิ่งที่ควรแก้ 3 ข้อแบบลงมือได้ทันที 4) ไอเดียฮุคใหม่ 2 แบบ (แต่งใหม่เอง ห้ามใช้เนื้อเพลงคนอื่น) 5) ควรเล่าเรื่องต่อไปแบบไหนให้เข้ากับสถานการณ์ตอนนี้ แต่ยังเป็นสไตล์ของศิลปิน";
+ try{var res=await S.sample([{role:"user",content:ctx}],{modelTier:"quick",cache:false,onText:function(x){w.textContent=x.text}});w.textContent=(res&&res.text)||w.textContent;a.last.ai=w.textContent;saveArts()}
+ catch(e){w.textContent="AI ตอบไม่ได้ตอนนี้: "+(e&&e.message||e)}b.disabled=false}
+
+/* ---------- แนวที่กำลังมา ---------- */
+function renderNext(){var a=art(),mk=function(reg){var key=reg=="th"?"th":"gl",tk=reg=="th"?"trTh":"trGl";
+  return GENRES.slice().sort(function(x,y){return y[key]-x[key]}).map(function(g){var t=g[tk],lab=t=="hot"?'<span class="tr-tag hot">แรงอยู่</span>':t=="up"?'<span class="tr-tag up">กำลังขึ้น</span>':t=="dn"?'<span class="tr-tag dn">ชะลอ</span>':'';
+   return'<div class="tr-bar"><div><b>'+esc(g.n)+' '+lab+'</b><span>'+g[key]+'</span></div><i><u style="width:'+g[key]+'%;background:'+(g[key]>=80?"#ff3347":g[key]>=65?"#ffb300":"#666")+'"></u></i><p class="tr-note" style="margin-top:4px">'+esc(g.why)+'</p></div>'}).join("")};
+ var h='<div class="tr-card"><h4>คาดการณ์: แนวที่กำลังจะมา</h4><div class="tr-tip"><b>ไทย:</b> R&B และ melodic hip-hop ที่ร้องเป็นเมโลดี้กำลังไต่ขึ้นมาแทรกป๊อปบัลลาด (ขึ้นใจ อันดับ 1, YOUNGOHM ท็อป 2) · เพลงคู่ข้ามแนวยังแรง</div>'+
+ '<div class="tr-tip"><b>โลก:</b> R&B ทางเลือกกำลังขึ้น (ท็อป 3 ชาร์ตฮิปฮอป/R&B ออสเตรเลียเป็น R&B) · กระแสคิดถึงอดีตแรง (อัลบั้ม 20 ปีกลับขึ้นอันดับ 1) · ฝั่งโปรดิวเซอร์ส่งสัญญาณ UK/speed garage, hyperpop และ rage จะลามเข้าเพลงกระแสหลักปี 2027</div>'+
+ '<p class="tr-note">คาดการณ์จากชาร์ตและรายงานเทรนด์ ณ '+SNAP.at+' ไม่ใช่ข้อมูลแน่นอน</p></div>';
+ if(a){var best=GENRES.map(function(g){var fit=a.genres.indexOf(g.k)>=0?1:(/eminem/i.test(a.idols+a.style)&&(g.k=="hiphop"||g.k=="rnb"||g.k=="rock"))?.8:.4;return{g:g,s:(g.th*.6+g.gl*.4)*fit}}).sort(function(x,y){return y.s-x.s}).slice(0,3);
+  h+='<div class="tr-card"><h4>แนะนำแนวสำหรับ '+esc(a.name)+'</h4>'+best.map(function(x,i){return'<div class="tr-tip '+(i==0?"good":"")+'"><b>'+(i+1)+'. '+esc(x.g.n)+':</b> '+esc(x.g.why)+'</div>'}).join("")+
+  (/eminem/i.test(a.idols+a.style)?'<div class="tr-tip"><b>สูตรที่เข้ากับคุณ:</b> melodic hip-hop/R&B ช้า-กลาง เวิร์สแร็ปเล่าเรื่องแบบ Eminem + ฮุคร้อง · หรือทำเพลง emo-rap/ร็อกที่ได้อารมณ์คิดถึงอดีต ซึ่งเข้ากับกระแสโลกตอนนี้</div>':'')+
+  (a.ok?'':'<p class="tr-note">ยังไม่ได้เล่าสไตล์ของ '+esc(a.name)+' แตะชื่อด้านบนเพื่อเล่า คำแนะนำจะตรงตัวขึ้น</p>')+'</div>'}
+ else h+='<div class="tr-card"><p class="mut">เลือกศิลปินด้านบน แอปจะแนะนำว่าแนวไหนเหมาะกับสไตล์ของคนนั้น</p></div>';
+ h+='<div class="tr-card"><h4>แรงส่งตามแนว · ไทย</h4>'+mk("th")+'</div><div class="tr-card"><h4>แรงส่งตามแนว · โลก</h4>'+mk("gl")+'</div>';
+ $("tr-next").innerHTML=h}
+
+/* ---------- เปิด/ปิด ---------- */
+function setTab(t){TAB=t;document.querySelectorAll("#tr-tabs button").forEach(function(b){b.classList.toggle("on",b.dataset.t==t)});$("tr-chart").hidden=t!="chart";$("tr-me").hidden=t!="me";$("tr-next").hidden=t!="next";
+ if(t=="chart")renderChart();if(t=="me")renderMe();if(t=="next")renderNext()}
+document.querySelectorAll("#tr-tabs button").forEach(function(b){b.onclick=function(){setTab(b.dataset.t)}});
+$("tr-close").onclick=function(){$("trd").hidden=true};
+function open(tab){$("trd").hidden=false;$("trd").scrollTop=0;renderArts();setTab(tab||TAB);cloudLoad();
+ if(!LIVE||Date.now()-(LIVE._t||0)>6*3600e3)fetch("/api/trends",{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.ok){j._t=Date.now();LIVE=j;JS("sns:trends:live",j);if(TAB=="chart")renderChart()}}).catch(function(){})}
+window.SNSTrend={open:open,score:score,parse:parseLyr};
+/* ปุ่มเข้า: แท็บล่างในโปรเจกต์ + ปุ่มในขั้น 3 */
+(function(){var nav=$("tabs");if(nav&&!$("tab-trend")){var b=document.createElement("button");b.id="tab-trend";b.type="button";b.innerHTML='<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>เทรนด์';b.onclick=function(e){e.stopPropagation();open()};nav.appendChild(b)}
+ var cv=$("cv-open");if(cv&&!$("tr-open3")){var c=document.createElement("button");c.id="tr-open3";c.className="cta alt";c.style.cssText="min-height:44px;font-size:14px;margin-top:10px";c.textContent="เช็กโอกาสแมสของเพลงนี้ (เทียบชาร์ตไทย/โลก)";c.onclick=function(){open("me")};cv.parentNode.insertBefore(c,cv.nextSibling)}
+ var n1=$("next1");if(n1&&!$("tr-open1")){var d=document.createElement("button");d.id="tr-open1";d.className="cta alt";d.style.cssText="min-height:44px;font-size:14px;margin-top:10px";d.textContent="เช็กเทรนด์ & โอกาสแมสก่อนทำต่อ";d.onclick=function(){open()};n1.parentNode.insertBefore(d,n1.nextSibling)}})();
+})();
+</script>

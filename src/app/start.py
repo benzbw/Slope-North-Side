@@ -348,6 +348,71 @@ def scenes_job(jid, body):
     except Exception as e:
         traceback.print_exc(); J.update(status="error", err=str(e)[:300])
 
+
+# ---------- เทรนด์เพลง: ดึงชาร์ตล่าสุดจากอินเทอร์เน็ตของคอมนี้ (เก็บไว้ 6 ชม.) ----------
+_TR = {"t": 0, "d": None}
+def _get(url, timeout=15):
+    import urllib.request
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (SlopeNorthSide trends)"})
+    return urllib.request.urlopen(req, timeout=timeout).read().decode("utf-8", "replace")
+def _apple(cc, n=100):
+    d = json.loads(_get("https://rss.applemarketingtools.com/api/v2/%s/music/most-played/%d/songs.json" % (cc, n)))
+    out = []
+    for i, r in enumerate((d.get("feed") or {}).get("results") or []):
+        g = [x.get("name", "") for x in (r.get("genres") or []) if x.get("name") and x.get("name") != "Music"]
+        out.append({"p": i + 1, "t": r.get("name", ""), "a": r.get("artistName", ""), "g": g[:2]})
+    return out, (d.get("feed") or {}).get("updated", "")
+def _kworb(path):
+    import re, html as H
+    s = _get("https://kworb.net/spotify/country/%s" % path)
+    out = []
+    for row in re.findall(r"<tr[^>]*>(.*?)</tr>", s, re.S):
+        cells = [H.unescape(re.sub(r"<[^>]+>", "", c)).strip() for c in re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)]
+        if len(cells) < 3 or not cells[0].isdigit(): continue
+        at = next((c for c in cells if " - " in c), None)
+        if not at: continue
+        a, t = at.split(" - ", 1)
+        out.append({"p": int(cells[0]), "t": t.strip(), "a": a.strip(), "g": []})
+        if len(out) >= 200: break
+    return out
+def _hip(lst):
+    return [x for x in lst if any(("hip" in g.lower() or "rap" in g.lower()) for g in x["g"])]
+def trends(force=False):
+    if _TR["d"] and not force and time.time() - _TR["t"] < 6 * 3600: return _TR["d"]
+    fp = os.path.join(os.getcwd(), "cache", "trends.json")
+    if not force and not _TR["d"] and os.path.exists(fp) and time.time() - os.path.getmtime(fp) < 6 * 3600:
+        try:
+            _TR["d"] = json.load(open(fp, encoding="utf-8")); _TR["t"] = os.path.getmtime(fp); return _TR["d"]
+        except Exception: pass
+    res = {"ok": True, "at": time.strftime("%Y-%m-%d %H:%M"), "err": [], "lists": {}}
+    th = us = None
+    try:
+        th, up = _apple("th"); res["lists"]["th"] = {"src": "Apple Music · เพลงฮิตไทย (เล่นมากสุด)", "upd": up, "items": th[:10]}
+        h = _hip(th)
+        if h: res["lists"]["th_hip"] = {"src": "Apple Music ไทย · คัดเฉพาะ Hip-Hop/Rap", "upd": up, "items": [dict(x, p=i + 1, rank=x["p"]) for i, x in enumerate(h[:10])]}
+    except Exception as e: res["err"].append("apple th: " + str(e)[:80])
+    try:
+        g = _kworb("global_daily.html")
+        if g: res["lists"]["global"] = {"src": "Spotify Global รายวัน (kworb.net)", "upd": res["at"], "items": g[:10]}
+    except Exception as e: res["err"].append("spotify global: " + str(e)[:80])
+    try:
+        us, up = _apple("us")
+        h = _hip(us)
+        if h: res["lists"]["global_hip"] = {"src": "Apple Music US · คัดเฉพาะ Hip-Hop/Rap", "upd": up, "items": [dict(x, p=i + 1, rank=x["p"]) for i, x in enumerate(h[:10])]}
+        if "global" not in res["lists"]: res["lists"]["global"] = {"src": "Apple Music US (สำรอง)", "upd": up, "items": us[:10]}
+    except Exception as e: res["err"].append("apple us: " + str(e)[:80])
+    try:
+        t2 = _kworb("th_daily.html")
+        if t2: res["lists"]["th_spotify"] = {"src": "Spotify ไทย รายวัน (kworb.net)", "upd": res["at"], "items": t2[:10]}
+    except Exception as e: res["err"].append("spotify th: " + str(e)[:80])
+    res["ok"] = bool(res["lists"])
+    if res["ok"]:
+        _TR["d"] = res; _TR["t"] = time.time()
+        try:
+            os.makedirs(os.path.dirname(fp), exist_ok=True); json.dump(res, open(fp, "w", encoding="utf-8"), ensure_ascii=False)
+        except Exception: pass
+    return res
+
 def run_job(jid, body):
     J = JOBS[jid]
     J.update(msg="รอคิวสักครู่ (มีคนอื่นกำลังซิงค์)", pct=1)
@@ -515,7 +580,10 @@ class H(http.server.SimpleHTTPRequestHandler):
             pth = self.path.split("?")[0]
             if pth.endswith("/") and pth != "/": return self.send_error(403)
             if (pth.startswith("/api/mixhist") or pth.startswith("/api/oembed") or pth.startswith("/api/job")) and not self._auth(): return
-        if self.path.startswith("/api/ping"): return self._json({"ok": True, "auth": bool(KEY) or not self._local(), "lan": not self._local(), "model": DEFAULT_MODEL, "v": 22, "mv": True, "report": True, "oembed": True, "queue": len(_Q), "mix": True, "img": __import__("importlib.util").util.find_spec("diffusers") is not None, "sep": __import__("importlib.util").util.find_spec("demucs") is not None})
+        if self.path.startswith("/api/ping"): return self._json({"ok": True, "auth": bool(KEY) or not self._local(), "lan": not self._local(), "model": DEFAULT_MODEL, "v": 23, "trends": True, "mv": True, "report": True, "oembed": True, "queue": len(_Q), "mix": True, "img": __import__("importlib.util").util.find_spec("diffusers") is not None, "sep": __import__("importlib.util").util.find_spec("demucs") is not None})
+        if self.path.startswith("/api/trends"):
+            try: return self._json(trends("force=1" in self.path))
+            except Exception as e: return self._json({"ok": False, "err": [str(e)[:160]]}, 502)
         if self.path.startswith("/api/mixhist"):
             try: return self._json(json.load(open(os.path.join(os.getcwd(), "mixes", "history.json"), encoding="utf-8")))
             except Exception: return self._json([])
