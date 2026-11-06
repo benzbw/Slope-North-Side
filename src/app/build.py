@@ -11,6 +11,8 @@ s=rep(s,'</head>','<style>'+SCSS+'</style></head>')
 s=rep(s,'</script>\n</body>','</script>\n<script>'+SJS+'</script>\n</body>')
 TRD=open(os.environ.get('TREND','/tmp/w/trend.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าเทรนด์ & โอกาสแมส (src/trend.html)
 s=rep(s,'</script>\n</body>','</script>\n'+TRD+'\n</body>')
+MIXS=open(os.environ.get('MIXST','/tmp/w/mixstudio.html'),encoding='utf-8').read().rstrip('\n')  # สตูดิโอมิกซ์ + แนวเพลง + ฟังเทียบ (src/mixstudio.html)
+s=rep(s,'</script>\n</body>','</script>\n'+MIXS+'\n</body>')
 M='<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050305"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">\n'
 W='<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){})</script>\n'
 app=rep(s,'</style>\n','</style>\n'+M); app=rep(app,'</script>\n</body>','</script>\n'+W+'</body>')
