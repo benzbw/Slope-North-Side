@@ -88,3 +88,5 @@ if 'SNSFreeAI={' not in s:
 # อารมณ์เพิ่ม + พิมพ์อารมณ์เอง
 import subprocess as _sp, os as _os
 _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_moods.py'), p], check=True)
+# AI ทำบีต (Beat Lab)
+_sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_beatlab.py'), p], check=True)
