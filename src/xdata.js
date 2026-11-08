@@ -76,5 +76,5 @@ function slangThemes(o){o=o||{};var sc={},txt=[o.title,o.concept,o.lyrics].join(
 function slangFor(lang,era,n,themes,extra){var I=slIdx(),B=SLANG[lang],pool=(era=="now"?B.now:era=="old"?B.old:B.now.concat(B.old)).concat(extra||[]),T=(themes||[]).map(function(x){return x.t||x});
  var r=pool.map(function(x,i){var tg=I[x[0]]||[],m=0;T.forEach(function(t,k){if(tg.indexOf(t)>=0)m+=3-k});return{x:x,m:m,r:Math.random()}});
  r.sort(function(a,b){return b.m-a.m||a.r-b.r});return r.slice(0,n||10).map(function(o){var y=o.x.slice();y.fit=o.m>0;y.tags=(I[o.x[0]]||[]).filter(function(t){return T.indexOf(t)>=0}).map(function(t){return SLNAME[t]});return y})}
-window.SNSData={MOOD:MOOD,SLANG:SLANG,AUD:AUD,GENZ:GENZ,REL:REL,moodSongs:moodSongs,slangPick:slangPick,slangFor:slangFor,slangThemes:slangThemes,SLNAME:SLNAME,clash:clash,sp:sp,yt:yt};
+window.SNSData={MOOD:MOOD,SLANG:SLANG,AUD:AUD,GENZ:GENZ,REL:REL,moodSongs:moodSongs,slangPick:slangPick,slangFor:slangFor,slangTags:function(w){return slIdx()[w]||[]},slangThemes:slangThemes,SLNAME:SLNAME,clash:clash,sp:sp,yt:yt};
 })();
