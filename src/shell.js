@@ -101,7 +101,7 @@ async function findLocal(handle){var A=J("sns:accts",{});return A[String(handle)
 async function saveAcct(a){if(ST.mode=="cloud"){await ST.db.doc("data/users/"+ST.uid+"/account").set(a)}else{var A=J("sns:accts",{});A[a.handle.toLowerCase()]=a;JS("sns:accts",A)}}
 function sessOn(handle){S.raw.set("sns:sess",ST.mode=="cloud"?ST.uid:String(handle).toLowerCase())}
 function sessOk(acct){var s=S.raw.get("sns:sess");if(!s||!acct)return false;return ST.mode=="cloud"?s==ST.uid:s==acct.handle.toLowerCase()}
-function logout(){S.raw.rm("sns:sess");if(ST.mode=="cloud")S.raw.set("sns:out:"+ST.uid,"1");location.hash="";location.reload()}
+function logout(){S.raw.rm("sns:sess");S.raw.rm("sns:openp");if(ST.mode=="cloud")S.raw.set("sns:out:"+ST.uid,"1");location.hash="";location.reload()}
 
 /* ---------- โครงหน้า ---------- */
 var root;
@@ -282,8 +282,8 @@ function repairDialog(p){var m=modal('<h3>ซ่อมโปรเจกต์</
  $("sx-rpn").onclick=function(){m.remove()};$("sx-rpy").onclick=async function(){["bw3","bw3s57l"].forEach(function(k){S.raw.rm("p:"+p.id+":"+k)});S.raw.set("sns:boot:"+p.id,"0");try{await Store.push(p.id)}catch(e){}m.remove();toastS("ล้างการซิงค์แล้ว");Store.log("repair",{pid:p.id})}}
 
 async function openProject(id){busy("กำลังเปิดโปรเจกต์…");try{if(id!="demo"){var d=await Store.pull(id);if(d===false){busy();toastS("ไม่พบโปรเจกต์นี้");return}}}catch(e){Store.log("error",{msg:"pull: "+(e&&e.message||e)})}
- location.hash="p-"+id;location.reload()}
-function goHome(){var fin=function(){location.hash="";location.reload()};if(S.pid&&!S.demo&&ST.acct){busy("กำลังบันทึก…");Store.push(S.pid).then(fin,fin)}else fin()}
+ S.raw.set("sns:openp",JSON.stringify({pid:id,t:now()}));location.hash="p-"+id;location.reload()}
+function goHome(){var fin=function(){S.raw.rm("sns:openp");S.raw.rm("sns:place");location.hash="";location.reload()};if(S.pid&&!S.demo&&ST.acct){busy("กำลังบันทึก…");Store.push(S.pid).then(fin,fin)}else fin()}
 
 /* ---------- วิธีใช้ ---------- */
 function guide(){modal('<button class="sx-x" aria-label="ปิด">×</button><h3>วิธีใช้ Slope North Side</h3>'+

@@ -1,6 +1,9 @@
 /* Slope North Side · boot: เลือกโปรเจกต์จาก #p-<id> และแยกข้อมูลแต่ละโปรเจกต์ออกจากกัน */
 (function(){
 var h=(location.hash||"").replace(/^#/,""),m=/^p-([a-z0-9_-]{1,40})$/i.exec(h);
+/* มือถือโหลดหน้าใหม่หลังสลับแอป (ลิงก์ #p- หาย) → เปิดโปรเจกต์เดิมให้ */
+if(!m&&!h){try{var op=JSON.parse(localStorage.getItem("sns:openp")||"null");if(op&&op.pid&&Date.now()-op.t<864e5*2){m=[0,op.pid];try{history.replaceState(null,"","#p-"+op.pid)}catch(e){}}}catch(e){}}
+else if(m){try{localStorage.setItem("sns:openp",JSON.stringify({pid:m[1].toLowerCase(),t:Date.now()}))}catch(e){}}
 var S=window.SNS={pid:m?m[1].toLowerCase():null,mem:{}};
 S.demo=S.pid=="demo";S.baked=S.pid=="dangerous"||S.demo;
 var GL={bwalbums:1,bwkey:1,bwlite:1};S.GL=GL;
