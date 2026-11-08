@@ -18,7 +18,7 @@ R('''var ref=pick(G.ref,Math.min(4,G.ref.length),rnd).map(function(x){return{art
 R('2) แนะนำเพลงที่มีอยู่จริง 6 เพลงให้ฟังเป็นแรงบันดาลใจ: 2 เพลงของศิลปินที่อิน (ถ้ามี) และ 4 เพลงแนวใกล้กัน บอกว่าฟังเพื่อเรียนรู้อะไร (ฮุค ฟลว์ ทิศทางทำนอง โครงเพลง)',
   '2) แนะนำเพลงที่มีอยู่จริง 6 เพลงให้ฟังเป็นแรงบันดาลใจ: 2 เพลงของศิลปินที่อิน (ถ้ามี), 2 เพลงที่ดนตรี/แนวคล้ายเพลงที่อิน และ 2 เพลงที่สื่อสารเรื่องเดียวกันหรือเข้ากับอารมณ์ตอนนี้ แนวไหนก็ได้ ไม่จำเป็นต้องเป็นฮิปฮอป (ป๊อป ร็อก อินดี้ R&B เพลงไทยก็ได้) ใน why บอกว่าคล้ายตรงไหน (ดนตรี/แนว/สื่อสาร/อารมณ์) และฟังเพื่อเรียนรู้อะไร (ฮุค ฟลว์ ทิศทางทำนอง โครงเพลง)')
 # slang / hot words in the lyric notebook
-R('<div class="sw-side"><div class="sw-player" id="sw-pl"></div>','<div class="sw-side"><div class="sw-player" id="sw-pl"></div><div class="sw-box" id="sw-slang"></div>')
+R('<div class="sw-stat" id="sw-stt"></div></div>\'+','<div class="sw-stat" id="sw-stt"></div><div class="sw-box" id="sw-slang"></div></div>\'+')
 R('function padEditor(){var n=W.note;','function padEditor(){setTimeout(slangUI,0);var n=W.note;')
 SL0=r'''<script>/* คำฮิต & สแลง: ไทย 10 + อังกฤษ 10 สุ่มใหม่ได้ แตะเพื่อใส่ในเนื้อ */
 var SLERA="now";
