@@ -299,7 +299,16 @@ if(document.readyState=="loading")document.addEventListener("DOMContentLoaded",b
 .sx-modal select.sw-in option{background:#120d12;color:#f6eff1}
 </style><script>/* บีตจาก YouTube เล่นในแอป: ทำตัวให้เหมือน <audio> เพื่อให้ปุ่มเดิมทั้งหมดใช้ได้ */
 function snsYtId(u){var m=/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([\w-]{11})/.exec(u||"");return m?m[1]:null}
-function snsYT(id){var A={paused:true,_t:0,_r:1,duration:0,loop:true,src:"",el:null},fr=document.createElement("iframe");
+var SNS_WEB="https://benzbw.github.io/Slope-North-Side/write.html";
+function snsPack(o){try{return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}catch(e){return""}}
+function snsYT(id,n){var A={paused:true,_t:0,_r:1,duration:0,loop:true,src:"",el:null};
+ if(/claude\.ai|claudeusercontent/.test(location.hostname)){var d=document.createElement("div"),u="https://www.youtube.com/watch?v="+id,tx=document.getElementById("sw-tx"),ti=document.getElementById("sw-ti");
+  var pk=snsPack({t:(ti&&ti.value)||n&&n.title||"",b:(tx&&tx.value)||n&&n.body||"",l:(n&&n.link)||u,bpm:n&&n.bpm||0});
+  d.style.cssText="border:1px solid var(--sx-line2);border-radius:12px;padding:12px;margin:0 0 10px;background:rgba(255,51,71,.06)";
+  d.innerHTML='<b style="display:block;font-size:14px">claude.ai ไม่ให้เล่นคลิป YouTube ในหน้า</b><p class="sw-note" style="margin:4px 0 8px">เปิดเพลงนี้ในเว็บแอป (ลิงก์ GitHub) จะได้ชื่อเพลง เนื้อ และบีตเดิมไปด้วย แล้วกดเล่นบีตในสมุดได้เลย หรือฟังใน YouTube แล้วกลับมาเขียน</p><div class="sw-acts" style="margin-top:0"><a class="sx-btn" target="_blank" rel="noopener" href="'+SNS_WEB+'#import='+pk+'">เปิดเพลงนี้ในเว็บแอป ↗</a><a class="sw-ghost" target="_blank" rel="noopener" href="'+u+'">▶ ฟังใน YouTube</a></div>';
+  A.el=d;A.blocked=true;A.play=function(){window.open(SNS_WEB+"#import="+pk,"_blank");return Promise.resolve()};A.pause=function(){};A.kill=function(){};
+  Object.defineProperty(A,"currentTime",{get:function(){return 0},set:function(){}});return A}
+ var fr=document.createElement("iframe");
  fr.src="https://www.youtube-nocookie.com/embed/"+id+"?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&origin="+encodeURIComponent(location.origin);
  fr.allow="autoplay; encrypted-media";fr.setAttribute("allowfullscreen","");fr.title="บีตจาก YouTube";fr.style.cssText="width:100%;aspect-ratio:16/9;border:0;border-radius:10px;margin:0 0 10px;display:block;background:#000";A.el=fr;
  var send=function(o){try{fr.contentWindow.postMessage(JSON.stringify(o),"*")}catch(e){}},cmd=function(f,a){send({event:"command",func:f,args:a||[]})};
@@ -825,7 +834,7 @@ async function player(){var n=W.note,pl=$("sw-pl");if(!pl)return;
  if(W.url){try{URL.revokeObjectURL(W.url)}catch(e){}W.url=null}
  W.audio=new Audio();W.audio.preload="auto";W.loopA=W.loopB=null;var A=W.audio,src=null;
  if(n.beat){try{var r=await IDB.get("beat:"+n.id);if(r&&r.blob){src=W.url=URL.createObjectURL(r.blob)}}catch(e){}if(!src&&n.beat.url)src=n.beat.url}
- if(W.ytA){try{W.ytA.kill()}catch(e){}W.ytA=null}var YID=!src&&snsYtId(n.link||(n.beatPick&&n.beatPick.url)||"");if(YID){A=W.audio=W.ytA=snsYT(YID);src="yt"}
+ if(W.ytA){try{W.ytA.kill()}catch(e){}W.ytA=null}var YID=!src&&snsYtId(n.link||(n.beatPick&&n.beatPick.url)||"");if(YID){A=W.audio=W.ytA=snsYT(YID,n);src="yt"}
  pl.innerHTML='<div class="sw-pl1"><button class="sw-play" id="sw-pp" aria-label="เล่น" '+(src?"":"disabled")+'>▶</button><div class="b"><b id="sw-bn"></b><small id="sw-bt">0:00 / 0:00</small></div></div>'+
   '<input type="range" class="sw-seek" id="sw-sk2" min="0" max="1000" value="0" aria-label="ตำแหน่งบีต" '+(src?"":"disabled")+'>'+
   '<div class="sw-pl2"><button id="sw-lp" aria-pressed="true">⟳ วน</button><button id="sw-ab">A-B</button><button id="sw-bk5">−5 วิ</button><button id="sw-sp">1×</button><button id="sw-tap">แตะหา BPM</button>'+
@@ -834,7 +843,7 @@ async function player(){var n=W.note,pl=$("sw-pl");if(!pl)return;
   '<p class="sw-note" id="sw-bh" style="font-size:12px"></p>';
  if(YID)pl.insertBefore(A.el,pl.firstChild);
  $("sw-bn").textContent=n.beat?n.beat.name:YID?((n.beatPick&&n.beatPick.name)||"บีตจาก YouTube"):"ยังไม่มีบีต";
- $("sw-bh").textContent=YID?"เล่นบีตจาก YouTube ในแอป · ปุ่มวน/A-B/−5 วิใช้ได้ · ถ้าภาพไม่ขึ้นให้กดเปิด ↗ หรือใส่ไฟล์บีต":src?"":(n.beat&&n.beat.localOnly?"ไฟล์บีตอยู่ในอีกเครื่อง ใส่ไฟล์ในเครื่องนี้อีกครั้ง":"โหลดบีตจาก BeatStars/YouTube (ที่โปรดิวเซอร์ให้ดาวน์โหลด) แล้วกด ♪ ใส่ไฟล์บีต เพื่อเปิดวนไปพร้อมเขียน");
+ $("sw-bh").textContent=YID?(A.blocked?"หรือโหลดไฟล์บีตที่โปรดิวเซอร์แจก แล้วกด ♪ ใส่ไฟล์บีต เพื่อเปิดวนในหน้านี้":"เล่นบีตจาก YouTube ในแอป · ปุ่มวน/A-B/−5 วิใช้ได้ · ถ้าภาพไม่ขึ้นให้กดเปิด ↗ หรือใส่ไฟล์บีต"):src?"":(n.beat&&n.beat.localOnly?"ไฟล์บีตอยู่ในอีกเครื่อง ใส่ไฟล์ในเครื่องนี้อีกครั้ง":"โหลดบีตจาก BeatStars/YouTube (ที่โปรดิวเซอร์ให้ดาวน์โหลด) แล้วกด ♪ ใส่ไฟล์บีต เพื่อเปิดวนไปพร้อมเขียน");
  var bl=$("sw-bl"),blo=$("sw-blo");bl.value=n.link||"";var upd=function(){var v=bl.value.trim();blo.style.display=v?"":"none";if(v)blo.href=/^https?:/i.test(v)?v:"https://"+v};upd();
  bl.onchange=function(){var was=snsYtId(n.link||"");n.link=bl.value.trim();upd();W.dirty=true;wSaveNow();if(!n.beat&&snsYtId(n.link)!=was)player()};bl.oninput=upd;
  if(src&&!YID)A.src=src;A.loop=true;
@@ -908,6 +917,8 @@ async function boot(){mount();
   claude.use("assets").then(function(a){ST.assets=a}).catch(function(){});
   try{ST.sample=await claude.use("sample")}catch(e){}}
  if(!ST.sample&&window.SNSFreeAI)ST.sample=SNSFreeAI.sample;document.addEventListener("sns:freeai",function(){if(document.getElementById("sw-slang")&&window.slangUI)slangUI()});window.SNSWX={savedList:function(){try{savedList()}catch(e){}},W:W,IDB:IDB,save:wSaveNow,writer:writer,newNote:newNote,wGen:wGen,ST:ST,can:function(){return!!ST.sample&&(!window.SNSFreeAI||ST.sample!==SNSFreeAI.sample||SNSFreeAI.signedIn())},ai:function(q){return aiJSON(q)}};var t=(location.hash||"").replace("#","");(async function(){var Ss=null,rs=false;try{Ss=JSON.parse(localStorage.getItem("sns:wsess")||"null")}catch(e){}
+ var IM=/^#import=([\w-]+)/.exec(location.hash||"");if(IM){try{var o=JSON.parse(decodeURIComponent(escape(atob(IM[1].replace(/-/g,"+").replace(/_/g,"/")))));var L0=[];try{L0=await Notes.list()}catch(e){}
+  var nn=L0.filter(function(x){return o.t&&x.title==o.t})[0]||newNote({title:o.t||""});if(o.b)nn.body=o.b;if(o.l)nn.link=o.l;if(o.bpm)nn.bpm=o.bpm;W.note=nn;W.dirty=true;try{await wSaveNow()}catch(e){}t="pad";Ss=null;try{history.replaceState(null,"","#pad")}catch(e){}}catch(e){}}
  if(!(t=="beat"||t=="pad")&&Ss&&now()-(Ss.t||0)<864e5*2){rs=true;t=Ss.tab||"idea";if(Ss.lastIdeas&&!W.lastIdeas)W.lastIdeas=Ss.lastIdeas;if(Ss.mood&&Ss.mood.length)W.mood=Ss.mood;
   if(t=="pad"&&Ss.note){try{var L=await Notes.list();W.note=L.filter(function(x){return x.id==Ss.note})[0]||null}catch(e){}}}
  var _w=writer;writer=function(tab){_w(tab);setTimeout(snsSave,80)};

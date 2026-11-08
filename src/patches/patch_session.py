@@ -5,6 +5,8 @@ if 'sns:wsess' in s: print('session already'); sys.exit(0)
 a = 'writer(t=="beat"||t=="pad"?t:"idea")}'
 assert s.count(a) == 1, 'boot anchor'
 NEW = r'''(async function(){var Ss=null,rs=false;try{Ss=JSON.parse(localStorage.getItem("sns:wsess")||"null")}catch(e){}
+ var IM=/^#import=([\w-]+)/.exec(location.hash||"");if(IM){try{var o=JSON.parse(decodeURIComponent(escape(atob(IM[1].replace(/-/g,"+").replace(/_/g,"/")))));var L0=[];try{L0=await Notes.list()}catch(e){}
+  var nn=L0.filter(function(x){return o.t&&x.title==o.t})[0]||newNote({title:o.t||""});if(o.b)nn.body=o.b;if(o.l)nn.link=o.l;if(o.bpm)nn.bpm=o.bpm;W.note=nn;W.dirty=true;try{await wSaveNow()}catch(e){}t="pad";Ss=null;try{history.replaceState(null,"","#pad")}catch(e){}}catch(e){}}
  if(!(t=="beat"||t=="pad")&&Ss&&now()-(Ss.t||0)<864e5*2){rs=true;t=Ss.tab||"idea";if(Ss.lastIdeas&&!W.lastIdeas)W.lastIdeas=Ss.lastIdeas;if(Ss.mood&&Ss.mood.length)W.mood=Ss.mood;
   if(t=="pad"&&Ss.note){try{var L=await Notes.list();W.note=L.filter(function(x){return x.id==Ss.note})[0]||null}catch(e){}}}
  var _w=writer;writer=function(tab){_w(tab);setTimeout(snsSave,80)};
