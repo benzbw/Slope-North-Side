@@ -76,3 +76,6 @@ SL=SL0[:SL0.index('/* คำฮิต')]+SL0[SL0.index('/* คำฮิต'):].r
 i=s.rindex('</body>')
 s=s[:i]+'<script>'+X+'</script>\n'+SL+s[i:]
 open(p,'w',encoding='utf-8').write(s);print('ok')
+# อารมณ์เพิ่ม + พิมพ์อารมณ์เอง
+import subprocess as _sp, os as _os
+_sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_moods.py'), p], check=True)
