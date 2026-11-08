@@ -92,3 +92,5 @@ _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file_
 _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_beatlab.py'), p], check=True)
 # จำหน้าเดิมเมื่อสลับแอป
 _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_session.py'), p], check=True)
+# เล่นบีต YouTube ในเครื่องเล่น + แก้สีโมดัล
+_sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_ytplay.py'), p], check=True)
