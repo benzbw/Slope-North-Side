@@ -29,19 +29,13 @@ jobs:
           if python3 ci/gpt_packet.py task > .gpt/prompt.txt 2> .gpt/err.txt; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "ok=0" >> "$GITHUB_OUTPUT"; fi
       - name: Ask GPT for a patch
         if: steps.pk.outputs.ok == '1'
-        id: ai
-        uses: actions/ai-inference@v1
-        with:
-          model: openai/gpt-4.1
-          prompt-file: .gpt/prompt.txt
-          max-tokens: 3500
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 ci/gpt_call.py .gpt/prompt.txt .gpt/response.md openai/gpt-4.1 3500
       - name: Apply patch
         if: steps.pk.outputs.ok == '1'
         id: ap
-        env:
-          RESP: ${{ steps.ai.outputs.response }}
         run: |
-          printf '%s' "$RESP" > .gpt/response.md
           python3 - <<'PY'
           import re
           t=open('.gpt/response.md',encoding='utf-8').read()

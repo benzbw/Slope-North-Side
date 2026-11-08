@@ -10,6 +10,6 @@ mkdir -p "$W/app"
 cp "$ROOT/src/app/sw.js" "$ROOT/src/app/manifest.json" "$W/app/"
 cp "$ROOT/icon-192.png" "$ROOT/icon-512.png" "$W/app/"
 rm -rf "$OUT"; mkdir -p "$OUT"
-SNS_W="$W" SNS_APP="$W/app" SNS_FIX=off FUSED="$ROOT/src/data/fused_fa5.json" SWV=ci python3 "$ROOT/src/app/build.py" "$OUT/build" >/dev/null
+export SNS_W="$W" SNS_APP="$W/app"; SNS_W="$W" SNS_APP="$W/app" SNS_FIX=off FUSED="$ROOT/src/data/fused_fa5.json" SWV=ci python3 "$ROOT/src/app/build.py" "$OUT/build" >/dev/null
 python3 "$ROOT/src/app/build_web.py" "$OUT/build" "$OUT/web" ci
 echo "build ok -> $OUT/web"

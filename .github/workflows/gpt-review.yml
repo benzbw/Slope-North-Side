@@ -38,20 +38,17 @@ jobs:
           python3 ci/gpt_packet.py review > .gpt/prompt.txt
           echo "packet chars: $(wc -c < .gpt/prompt.txt)"
       - name: Ask GPT (GitHub Models, free tier)
-        id: ai
-        uses: actions/ai-inference@v1
-        with:
-          model: ${{ github.event.label.name == 'gpt:deep' && 'openai/gpt-4.1' || 'openai/gpt-4.1-mini' }}
-          prompt-file: .gpt/prompt.txt
-          max-tokens: 2000
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          MODEL: ${{ github.event.label.name == 'gpt:deep' && 'openai/gpt-4.1' || 'openai/gpt-4.1-mini' }}
+        run: python3 ci/gpt_call.py .gpt/prompt.txt .gpt/response.md "$MODEL" 2000
       - name: Post review comment
         uses: actions/github-script@v7
         env:
-          RESP: ${{ steps.ai.outputs.response }}
           MODEL: ${{ github.event.label.name == 'gpt:deep' && 'openai/gpt-4.1' || 'openai/gpt-4.1-mini' }}
         with:
           script: |
-            const body = '### 🤖 GPT · Co-Developer review\n\n' + (process.env.RESP || '(ไม่มีคำตอบ)') +
+            const body = '### 🤖 GPT · Co-Developer review\n\n' + (require('fs').readFileSync('.gpt/response.md','utf8') || '(ไม่มีคำตอบ)') +
               '\n\n---\n<sub>โมเดล ' + process.env.MODEL + ' ผ่าน GitHub Models (ฟรี) · Claude (Lead) จะตรวจและตัดสินใจขั้นสุดท้าย · ติดป้าย ask-gpt อีกครั้งเพื่อรีวิวใหม่</sub>';
             await github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body });
             try { await github.rest.issues.removeLabel({ ...context.repo, issue_number: context.payload.pull_request.number, name: context.payload.label.name }); } catch (e) {}
