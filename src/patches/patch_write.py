@@ -24,7 +24,7 @@ R('$("sw-bgo").onclick=beatSearch;','$("sw-bgo").onclick=function(){beatSearch()
 R('function beatSearch(extra){','function beatSearch(extra){extra=Array.isArray(extra)?extra:(typeof extra=="string"&&extra?[extra]:[]);')
 R('function padEditor(){var n=W.note;','function padEditor(){window.SNSW={W:W,can:function(){return!!ST.sample&&(!window.SNSFreeAI||ST.sample!==SNSFreeAI.sample||SNSFreeAI.signedIn())},ai:function(q){return aiJSON(q)}};setTimeout(slangUI,0);var n=W.note;')
 SL0=r'''<style>#sx u.slw{text-decoration:underline 2px var(--sx-hot,#ff3347);text-underline-offset:4px}#sx u.slw.no{text-decoration:none}</style><script>/* คำฮิต & สแลง: เลือกให้เข้ากับคอนเซปต์เพลงที่กำลังเขียนเองอัตโนมัติ (ชื่อเพลง คอนเซปต์ อารมณ์ เนื้อ) + AI คิดเฉพาะเพลงนี้ */
-var SLERA="now",SLSIG="",SLT0=0,SLAI={busy:0,last:0};
+var SLERA="now",SLSEEN={th:{},en:{}},SLSIG="",SLT0=0,SLAI={busy:0,last:0};
 function slangMine(){try{return JSON.parse(localStorage.getItem("sns:slang:mine")||"[]")}catch(e){return[]}}
 function slCtx(){var S=window.SNSW,n=S&&S.W&&S.W.note||{},ti=document.getElementById("sw-ti"),tx=document.getElementById("sw-tx");
  return{id:n.id||"x",title:(ti&&ti.value)||n.title||"",concept:(n.idea&&n.idea.concept)||"",moods:(S&&S.W&&S.W.mood)||[],lyrics:((tx&&tx.value)||n.body||"").replace(/\[[^\]]*\]/g," ").slice(-1500)}}
@@ -43,11 +43,11 @@ function slAI(ctx,th,force){var el=document.getElementById("sw-slai"),S=window.S
  var show=function(r){var L=function(a){return(a||[]).slice(0,8).map(function(x){var y=[x.w,x.m,x.p,x.ex];y.fit=1;return y})};
   el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px"><p class="sw-note" style="margin:0"><b style="color:var(--sx-fg)">AI คิดให้เพลงนี้</b>'+(r.why?' · '+esc(r.why):'')+'</p><button class="sw-ghost" id="sw-slaire" style="min-height:32px">↻ คิดใหม่</button></div><div class="sw-chips" style="margin-top:4px">'+slChips(L(r.th).concat(L(r.en)))+'</div>';
   slBind(el);document.getElementById("sw-slaire").onclick=function(){slAI(slCtx(),th,1)}};
- if(c&&!force){show(c);return}
+ if(c&&!force){show(c);return}var seenW=Object.keys(SLSEEN.th).concat(Object.keys(SLSEEN.en)).concat(c?(c.th||[]).concat(c.en||[]).map(function(x){return x.w}):[]);
  if(SLAI.busy)return;if(!force&&Date.now()-SLAI.last<45000){if(!el.innerHTML)el.innerHTML='<p class="sw-note" style="margin:6px 0 0">AI จะคิดสแลงให้เข้ากับเพลงนี้อีกสักครู่…</p>';clearTimeout(SLAI.t);SLAI.t=setTimeout(function(){slAI(slCtx(),SNSData.slangThemes(slCtx()))},45000-(Date.now()-SLAI.last));return}
  SLAI.busy=1;SLAI.last=Date.now();el.innerHTML='<p class="sw-note" style="margin:8px 0 0">AI กำลังคิดสแลงให้เข้ากับคอนเซปต์เพลงนี้…</p>';
  S.ai("คุณเป็นนักแต่งเพลงฮิปฮอป/R&B ไทยที่ตามภาษาวัยรุ่นทันสมัย ช่วยศิลปินเลือกคำแสลงให้เข้ากับเพลงที่เขากำลังเขียน\nชื่อเพลง: "+(ctx.title||"-")+"\nคอนเซปต์: "+(ctx.concept||"-")+"\nอารมณ์: "+(ctx.moods.join(", ")||"-")+"\nธีมที่แอปจับได้: "+(th.map(function(x){return x.n}).join(", ")||"-")+"\nเนื้อที่เขียนแล้ว (ท้ายสุด):\n"+(ctx.lyrics.slice(-900)||"-")+
-  "\n\nงาน: เสนอคำแสลง/คำฮิตที่คนใช้จริงตอนนี้ และเข้ากับเรื่องของเพลงนี้ ไทย 6 คำ อังกฤษ (สายแร็ปเปอร์ฝรั่ง) 6 คำ ห้ามคำหยาบรุนแรงหรือเหยียด แต่ละคำให้ความหมายสั้น คำอ่านภาษาไทย (สำหรับคำอังกฤษ) และประโยคตัวอย่าง 1 บรรทัดที่เข้ากับเรื่องเพลงนี้ (แต่งใหม่ ห้ามยกเนื้อเพลงคนอื่น)\nตอบเป็น JSON อย่างเดียว: {\"why\":\"สรุปคอนเซปต์ที่จับได้ ไม่เกิน 12 คำ\",\"th\":[{\"w\":\"\",\"m\":\"\",\"ex\":\"\"}],\"en\":[{\"w\":\"\",\"m\":\"\",\"p\":\"\",\"ex\":\"\"}]}")
+  "\n\nงาน: เสนอคำแสลง/คำฮิตที่คนใช้จริงตอนนี้ และเข้ากับเรื่องของเพลงนี้ ไทย 6 คำ อังกฤษ (สายแร็ปเปอร์ฝรั่ง) 6 คำ ห้ามคำหยาบรุนแรงหรือเหยียด"+(force&&seenW.length?" ห้ามซ้ำคำเหล่านี้ (ศิลปินเห็นแล้ว อยากได้คำใหม่): "+seenW.slice(-60).join(", "):"")+"  แต่ละคำให้ความหมายสั้น คำอ่านภาษาไทย (สำหรับคำอังกฤษ) และประโยคตัวอย่าง 1 บรรทัดที่เข้ากับเรื่องเพลงนี้ (แต่งใหม่ ห้ามยกเนื้อเพลงคนอื่น)\nตอบเป็น JSON อย่างเดียว: {\"why\":\"สรุปคอนเซปต์ที่จับได้ ไม่เกิน 12 คำ\",\"th\":[{\"w\":\"\",\"m\":\"\",\"ex\":\"\"}],\"en\":[{\"w\":\"\",\"m\":\"\",\"p\":\"\",\"ex\":\"\"}]}")
   .then(function(r){SLAI.busy=0;if(!r||!(r.th||r.en))throw{code:"parse"};try{localStorage.setItem(key,JSON.stringify(r))}catch(e){}show(r)})
   .catch(function(e){SLAI.busy=0;el.innerHTML='<p class="sw-note" style="margin:8px 0 0">'+esc(e&&e.code=="not_granted"?"ยังไม่ได้อนุญาตให้แอปถาม AI":e&&e.code=="rate_limited"?"ถาม AI ถี่ไป เดี๋ยวลองใหม่ให้เอง":"AI ไม่ตอบตอนนี้ ใช้คำที่แอปเลือกตามคอนเซปต์ด้านบนไปก่อน")+'</p>'})}
 function slMark(c){var D=window.SNSData;if(!D||!D.slangTags)return;var th=D.slangThemes(c||slCtx()),T=th.map(function(x){return x.t}),sig=T.join(",");
@@ -55,7 +55,7 @@ function slMark(c){var D=window.SNSData;if(!D||!D.slangTags)return;var th=D.slan
  var el=document.getElementById("sw-slsug");if(!el)return;
  if(sig&&sig!=SLSIG){el.innerHTML='<p class="sw-note" style="margin:6px 0 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">เรื่องในเพลงตอนนี้ดูเป็น '+th.map(function(x){return'<b style="color:var(--sx-fg)">'+esc(x.n)+'</b>'}).join(" · ")+' · คำที่ขีดเส้นใต้คือคำที่เข้ากัน <button class="sw-ghost" id="sw-slnew" style="min-height:32px">ดูคำแนะนำใหม่</button></p>';document.getElementById("sw-slnew").onclick=function(){slangUI()}}else el.innerHTML=""}
 function slangUI(force){var box=document.getElementById("sw-slang");if(!box||!window.SNSData)return;var D=SNSData,M=slangMine(),ctx=slCtx(),th=D.slangThemes?D.slangThemes(ctx):[],
-  pick=function(l,ex){return D.slangFor&&th.length?D.slangFor(l,SLERA,10,th,ex):D.slangPick(l,SLERA,10,ex)},
+  pick=function(l,ex){if(!D.slangFor)return D.slangPick(l,SLERA,10,ex);var B=D.SLANG[l],n=(SLERA=="now"?B.now.length:SLERA=="old"?B.old.length:B.now.length+B.old.length)+ex.length;if(Object.keys(SLSEEN[l]).length>n-10)SLSEEN[l]={};var L=D.slangFor(l,SLERA,10,th,ex,SLSEEN[l]);L.forEach(function(w){SLSEEN[l][w[0]]=1});return L},
   T=pick("th",M.filter(function(w){return/[฀-๿]/.test(w[0])})),E=pick("en",M.filter(function(w){return!/[฀-๿]/.test(w[0])}));
  SLSIG=th.map(function(x){return x.t}).join(",");
  box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 style="font-size:15px;margin:0">คำฮิต & สแลง</h3><button class="sw-ghost" id="sw-slre">↻ สุ่มใหม่</button></div>'+
@@ -65,10 +65,10 @@ function slangUI(force){var box=document.getElementById("sw-slang");if(!box||!wi
   '<div id="sw-slai"></div>'+
   '<div id="sw-slm" class="sw-note" style="min-height:18px;margin:8px 0 0">ขีดเส้นใต้ = เข้ากับเพลงนี้ · คำอ่านอยู่ใน [ ] ความหมายอยู่ใต้คำ · แตะคำเพื่อฟังเสียงอ่าน แล้วกด "ใส่ในเนื้อ"</div>'+
   '<div style="display:flex;gap:6px;margin-top:6px"><input class="sw-in" id="sw-slin" maxlength="40" placeholder="เพิ่มคำของคุณ เช่น คำที่ฮิตในกลุ่ม" style="flex:1;min-width:0"><button class="sw-ghost" id="sw-sladd">+ เก็บ</button></div>';
- box.querySelectorAll("[data-era]").forEach(function(b){b.onclick=function(){SLERA=b.dataset.era;slangUI()}});
- document.getElementById("sw-slre").onclick=function(){slangUI()};slBind(box);
+ box.querySelectorAll("[data-era]").forEach(function(b){b.onclick=function(){SLERA=b.dataset.era;slangUI(0)}});
+ document.getElementById("sw-slre").onclick=function(){slangUI(1)};slBind(box);
  document.getElementById("sw-sladd").onclick=function(){var v=document.getElementById("sw-slin").value.trim();if(!v)return;var L=slangMine();if(!L.some(function(w){return w[0]==v})){L.push([v,"คำของคุณ"]);try{localStorage.setItem("sns:slang:mine",JSON.stringify(L.slice(-60)))}catch(e){}}slangUI();document.getElementById("sw-slm").textContent="เก็บ “"+v+"” ไว้ในคลังคำแล้ว"};
- slAI(ctx,th,0);
+ slAI(ctx,th,force?2:0);
  ["sw-tx","sw-ti"].forEach(function(id){var e=document.getElementById(id);if(e&&!e.dataset.sl){e.dataset.sl=1;e.addEventListener("input",function(){clearTimeout(SLT0);SLT0=setTimeout(function(){var c=slCtx(),t=SNSData.slangThemes?SNSData.slangThemes(c).map(function(x){return x.t}).join(","):"";slMark(c)},1500)})}})}
 </script>
 '''
