@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/out}"
 W="$(mktemp -d)"
-cp "$ROOT"/src/{new.html,shell_boot.js,shell.css,shell.js,trend.html,mixstudio.html,xdata.js,explore.html} "$W"/
+cp "$ROOT"/src/*.html "$ROOT"/src/*.js "$ROOT"/src/*.css "$W"/  # ทุกไฟล์ต้นฉบับ (ไฟล์ใหม่ไม่ต้องมาแก้รายชื่อ)
 : > "$W/audio.b64"
 mkdir -p "$W/app"
 cp "$ROOT/src/app/sw.js" "$ROOT/src/app/manifest.json" "$W/app/"
