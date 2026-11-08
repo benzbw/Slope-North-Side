@@ -8,7 +8,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
-  concurrency:
+concurrency:
   group: gpt-task-${{ github.event.issue.number }}
   cancel-in-progress: false
 jobs:
@@ -75,10 +75,13 @@ jobs:
           git config user.name "gpt-co-developer[bot]"; git config user.email "gpt-co-developer@users.noreply.github.com"
           git checkout -b "$B"
           git add -A -- . ':!.gpt' ':!node_modules' ':!out'
-          git commit -m "GPT: issue #$N" -m "สร้างโดย GPT (GitHub Models) ผ่าน workflow gpt-task — รอ Claude ตรวจ"
+          git commit -m "GPT: issue #$N" -m "สร้างโดย GPT (gpt-oss-20b ฟรีบนเครื่อง GitHub) ผ่าน workflow gpt-task — รอ Claude ตรวจ"
           git push -f origin "$B"
           { echo "งานจาก Issue #$N โดย GPT (Co-Developer)"; echo; echo "ผลทดสอบในเครื่อง GitHub: $([ "$PASS" = 1 ] && echo 'ผ่าน' || echo 'ไม่ผ่าน — ต้องแก้')"; echo; echo '```'; tail -20 .gpt/test.txt; echo '```'; echo; echo "หมายเหตุ: PR ที่สร้างด้วย GITHUB_TOKEN จะไม่สั่ง CI ซ้ำเอง ผลทดสอบด้านบนรันใน workflow นี้แล้ว"; echo; echo "---"; sed -n '/```$/,$p' .gpt/response.md | tail -n +2; } > .gpt/pr.md
-          gh pr create --base main --head "$B" --title "GPT: $(gh issue view $N --json title -q .title)" --body-file .gpt/pr.md --label from-gpt || gh pr edit "$B" --body-file .gpt/pr.md
+          T="GPT: $(gh api repos/$GITHUB_REPOSITORY/issues/$N --jq .title)"
+          jq -n --arg t "$T" --arg h "$B" --rawfile b .gpt/pr.md '{title:$t,head:$h,base:"main",body:$b}' > .gpt/pr.json
+          P=$(gh api repos/$GITHUB_REPOSITORY/pulls --input .gpt/pr.json --jq .number 2>/dev/null || gh api "repos/$GITHUB_REPOSITORY/pulls?head=${GITHUB_REPOSITORY%%/*}:$B" --jq ".[0].number")
+          [ -n "$P" ] && gh api repos/$GITHUB_REPOSITORY/issues/$P/labels -f "labels[]=from-gpt" >/dev/null || true
       - name: Report back on the issue
         if: always()
         env:

@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
-  concurrency:
+concurrency:
   group: gpt-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 jobs:
@@ -57,6 +57,6 @@ jobs:
         with:
           script: |
             const body = '### 🤖 GPT · Co-Developer review\n\n' + (require('fs').readFileSync('.gpt/response.md','utf8') || '(ไม่มีคำตอบ)') +
-              '\n\n---\n<sub>โมเดล ' + process.env.MODEL + ' ผ่าน GitHub Models (ฟรี) · Claude (Lead) จะตรวจและตัดสินใจขั้นสุดท้าย · ติดป้าย ask-gpt อีกครั้งเพื่อรีวิวใหม่</sub>';
+              '\n\n---\n<sub>โมเดล ' + process.env.MODEL + ' (โมเดลเปิดของ OpenAI) รันฟรีบนเครื่อง GitHub Actions · Claude (Lead) จะตรวจและตัดสินใจขั้นสุดท้าย · ติดป้าย ask-gpt อีกครั้งเพื่อรีวิวใหม่</sub>';
             await github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body });
             try { await github.rest.issues.removeLabel({ ...context.repo, issue_number: context.payload.pull_request.number, name: context.payload.label.name }); } catch (e) {}
