@@ -17,8 +17,9 @@ s=rep(s,'</script>\n</body>','</script>\n'+MIXS+'\n</body>')
 XD=open(os.environ.get('XDATA',W0+'/xdata.js'),encoding='utf-8').read()  # ข้อมูลเพลงร่วม (src/xdata.js)
 EXP=open(os.environ.get('EXPLORE',W0+'/explore.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าค้นหาแนวเพลง (src/explore.html)
 REL=open(os.environ.get('RELEASE',W0+'/release.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # เตรียมส่งสตรีม + ปฏิทินปล่อยเพลง (src/release.html)
+KEEP=open(os.environ.get('KEEPPLACE',W0+'/keepplace.js'),encoding='utf-8').read()  # จำขั้น/แท็บ/ตำแหน่งเมื่อมือถือโหลดหน้าใหม่
 FREEAI=open(os.environ.get('FREEAI',W0+'/freeai.js'),encoding='utf-8').read()  # AI ฟรีบนเว็บ GitHub (Puter) · บน claude.ai ไม่ทำงาน
-s=rep(s,'</script>\n</body>','</script>\n<script>'+XD+'</script>\n'+EXP+'\n'+REL+'\n<script>'+FREEAI+'</script>\n</body>')
+s=rep(s,'</script>\n</body>','</script>\n<script>'+XD+'</script>\n'+EXP+'\n'+REL+'\n<script>'+FREEAI+'</script>\n<script>'+KEEP+'</script>\n</body>')
 M='<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050305"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">\n'
 W='<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){})</script>\n'
 app=rep(s,'</style>\n','</style>\n'+M); app=rep(app,'</script>\n</body>','</script>\n'+W+'</body>')
