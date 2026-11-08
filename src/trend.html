@@ -29,6 +29,7 @@
 .tr-bar i{display:block;height:6px;border-radius:6px;background:rgba(255,255,255,.1);margin-top:4px;overflow:hidden}.tr-bar i u{display:block;height:100%;border-radius:6px}
 .tr-tip{padding:9px 0;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6}.tr-tip:first-of-type{border-top:0}
 .tr-tip b{color:#ffd24a}.tr-tip.good b{color:#7ee2a0}
+.tr-pl{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:32px;padding:0 9px;border-radius:99px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:12px;margin-left:4px}
 .tr-note{font-size:11.5px;color:var(--mut);line-height:1.5;margin:6px 0 0}
 #tr-ai{white-space:pre-wrap;font-size:13.5px;line-height:1.65}
 </style>
@@ -53,12 +54,25 @@ function JS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 
 /* ---------- ข้อมูลชาร์ต ณ วันที่เก็บ (อัปเดตสดได้เมื่อเปิดผ่าน start.bat บนคอม) ---------- */
 var SNAP={at:"6 พ.ย. 2569",lists:{
- global:{src:"Spotify Global รายวัน · 4 พ.ย. 2026 (kworb.net)",items:[
+ global:{src:"Spotify Global รายสัปดาห์ · 5 พ.ย. 2026 (kworb.net)",items:[
   ["Housewife","Tate McRae","Pop"],["BbY WOW","KAROL G w/ Judeline, rusowsky","Latin"],["Nicole Kidman","ADÉLA","Pop"],["Stop The Wedding!","Ashe","Pop"],["Ain't In LA","ADÉLA","Pop"],
-  ["the cure","Olivia Rodrigo","Pop rock"],["back to friends","sombr","Alt pop"],["Earrings","Malcolm Todd","Alt R&B"],["Babydoll","Jamie Miller","Pop"],["The One That Got Away","Katy Perry","Pop (เพลงเก่ากลับมา)"]]},
- th:{src:"Spotify ไทย รายวัน · 3 พ.ย. 2569 (kworb.net)",items:[
-  ["อย่ามากกว่าฉันก็พอ (Jealous)","GAVIN:D w/ Violette Wautier","ป๊อป/R&B"],["ได้แค่เดินมาส่ง (The Last Walk)","GAVIN:D w/ BLVCKHEART","R&B"],["ขึ้นใจ (3am call)","Mirrr w/ BLVCKHEART","R&B"],["เมื่อไหร่จะมี (มีใจให้กัน)","BLVCKHEART","R&B"],["เขียว เหลือง แดง (Get high)","PUN w/ THE TOYS","ป๊อป"],
-  ["รอ SIS (TER)","DICEBLUE w/ DICE","ป๊อป"],["กลัวว่าฉันจะไม่เสียใจ (Fear)","PURPEECH","อินดี้ป๊อป"],["ไม่รักดีกว่า","Z9","ป๊อป"],["ไม่ได้เลวขนาดนั้น","PORZAX","Hip-hop"],["Living Death","PUN","ร็อก"]]},
+  ["the cure","Olivia Rodrigo","Pop rock"],["back to friends","sombr","Alt pop"],["Beauty And A Beat","Justin Bieber w/ Nicki Minaj","Pop"],["The One That Got Away","Katy Perry","Pop"],["Earrings","Malcolm Todd","Alt R&B"],
+  ["Die With A Smile","Lady Gaga w/ Bruno Mars","Pop"],["Iris","The Goo Goo Dolls","Rock"],["Babydoll","Jamie Miller","Pop"],["Just Give Me a Reason","P!nk w/ Nate Ruess","Pop"],["Sweater Weather","The Neighbourhood","Alt rock"],
+  ["Pós - Ao Vivo","Felipe e Rodrigo","Sertanejo"],["Thriller","Michael Jackson","Pop/funk"],["stupid song","Olivia Rodrigo","Pop"],["Love Me Not","Ravyn Lenae","R&B"],["Great Expectation","SIENNA SPIRO","Pop"]]},
+ th:{src:"Spotify ไทย รายสัปดาห์ · 5 พ.ย. 2569 (kworb.net)",items:[
+  ["อย่ามากกว่าฉันก็พอ (Jealous)","GAVIN:D w/ Violette Wautier","ป๊อป/R&B"],["ได้แค่เดินมาส่ง (The Last Walk)","GAVIN:D w/ BLVCKHEART","R&B"],["เขียว เหลือง แดง (Get high)","PUN w/ THE TOYS","ป๊อป"],["ขึ้นใจ (3am call)","Mirrr w/ BLVCKHEART","R&B"],["เมื่อไหร่จะมี (มีใจให้กัน)","BLVCKHEART","R&B"],
+  ["รอ SIS (TER)","DICEBLUE w/ DICE","ป๊อป"],["กลัวว่าฉันจะไม่เสียใจ (Fear)","PURPEECH","อินดี้ป๊อป"],["Living Death","PUN","ป๊อป"],["ไม่รักดีกว่า","Z9","ป๊อป"],["Airdrop","BLVCKHEART","R&B"],
+  ["เมื่อถูกค้นพบ (Finally She Found.)","FREEHAND","อินดี้"],["ไม่ได้เลวขนาดนั้น","PORZAX","Hip-hop"],["ยิ้มอันตราย","PORZAX","Hip-hop"],["สายไป","9tokyo w/ BLVCKHEART","R&B"],["รักให้เธอได้รู้ (Proof.)","PUN","ป๊อป"],
+  ["อยากจะกอดเธอนาน ๆ (HAVE A GOOD TIME)","BLVCKHEART","R&B"],["อย่ามากกว่าฉันก็พอ (Jealous)","GAVIN:D","R&B"],["Tarantino","LISA","Pop"],["ดีใจที่ตรงนั้นไม่ใช่เรา","Only Monday","ป๊อปร็อก"],["SaWaDiKa","LISA","Pop"]]},
+ th_new:{src:"มาแรงในไทย: เพลงใหม่ (NEW) + ขึ้นแรงสุด · Spotify ไทยรายสัปดาห์ 5 พ.ย. 2569",note:"ตัวเลข +N = อันดับที่ขึ้นจากสัปดาห์ก่อน · NEW = เข้าชาร์ตครั้งแรก",items:[
+  ["DND (โหมดพระจันทร์)","Saran w/ Sexski","NEW · Hip-hop"],["ถ้าเจอกันอีกครั้ง","K6Y w/ BLVCKHEART, 2T FLOW","+44 · R&B/Hip-hop"],["ที่ชอบที่ชอบ (Grief Eaters)","Jeff Satur","NEW · ป๊อป"],["สะสมคำบอกเลิก (COLLECTING)","Timethai w/ BLVCKHEART","NEW · R&B"],["เผื่อเราไม่ต้องลาจากกัน (Crossroads)","SERIOUS BACON w/ PURPEECH","NEW · อินดี้"],
+  ["ADDICTED","JISOO","NEW · K-pop"],["ฤดูที่ฉันเหงา","Flure","NEW · ป๊อป"],["ปลายความฝัน (This Far)","Slapkiss","NEW · ร็อก"],["กบ","หวิว","+87 · ป๊อป"],["ภาพจำ","ป๊อบ ปองกูล","+68 · ป๊อป"],
+  ["Summertime","YEW w/ LANDOKMAI","+63 · ป๊อป"],["ได้แต่นึกถึง","Only Monday","+60 · ป๊อปร็อก"],["เสียดายของ","Basher","+49 · ป๊อป"],["คิด(แต่ไม่)ถึง (Same Page?)","Tilly Birds","+48 · ร็อก"],["เก็บทรง","FULL","+47 · ป๊อป"],
+  ["ทางของฝุ่น (Dust)","atom chanakan","+43 · ป๊อป"],["ไม่บอกเธอ","Bedroom Audio","+38 · ป๊อปร็อก"],["มาเฟียบ้านนอก","บุ๊ค ศุภกาญจน์","+30 · ลูกทุ่ง"],["Reborn","atom chanakan","+26 · ป๊อป"],["ดีใจที่ตรงนั้นไม่ใช่เรา","Only Monday","+20 · ป๊อปร็อก"]]},
+ global_new:{src:"มาแรงทั่วโลก: ขึ้นแรงสุด + เพลงใหม่ · Spotify Global รายสัปดาห์ 5 พ.ย. 2026",note:"ช่วงนี้มีเพลงฮาโลวีน/คริสต์มาสกลับมาตามฤดูกาล (ตัดออกแล้ว) · เพลงเก่ากลับมาฮิตเพราะคลิปสั้น",items:[
+  ["Dracula","Tame Impala","+97 · Psych pop"],["Dracula - JENNIE Remix","Tame Impala w/ JENNIE","+91 · Pop"],["Thriller","Michael Jackson","+59 · Pop/funk"],["Counting Stars","OneRepublic","+54 · Pop"],["Hips Don't Lie","Shakira w/ Wyclef Jean","+50 · Latin pop"],
+  ["Movin' To The Sun","HUGEL w/ Imael Angel, Ultra Naté","+39 · Dance"],["Blinding Lights","The Weeknd","+36 · Dark R&B/Synth"],["Only Girl (In The World)","Rihanna","+36 · Pop/R&B"],["Give Me Everything","Pitbull w/ Ne-Yo","+27 · Dance/Rap"],["Coming Up Roses","Harry Styles","+21 · Pop"],
+  ["EoO","Bad Bunny","+21 · Reggaeton"],["Babydoll","Jamie Miller","+17 · Pop"],["You're Under Arrest","ILLIT","NEW · K-pop"],["Olimpo","Neton Vega w/ Fuerza Regida","NEW · Latin urban"],["ako ang bagyo","SHEAN","NEW · OPM"]]},
  global_hip:{src:"ARIA Hip Hop/R&B Singles (ออสเตรเลีย) · 2 พ.ย. 2026 + Billboard Hot Rap Songs",note:"อันดับ 1 Hot Rap Songs ของอเมริกาคือ Janice STFU (Drake) ครอง 23 สัปดาห์",items:[
   ["Earrings","Malcolm Todd","Alt R&B"],["Love Me Not","Ravyn Lenae","R&B"],["Where Is My Husband!","Raye","R&B/Soul"],["Raindance","Dave, Tems","UK rap"],["Cinderella","Mac Miller ft. Ty Dolla $ign","Hip-hop"],
   ["Noble","F3miii","Hip-hop"],["oh yeah?","Steve Lacy","Alt R&B"],["Janice STFU","Drake","Melodic rap"],["Dai Dai","Shakira, Burna Boy","Afro/Latin"],["Girls","The Kid Laroi","Pop rap"]]},
@@ -126,11 +140,15 @@ function profOpen(on){var p=$("tr-prof"),a=art();if(!a||!on){p.hidden=true;retur
 var TAB="chart",REG="th",KIND="all",LIVE=J("sns:trends:live",null);
 function lists(){var o={};Object.keys(SNAP.lists).forEach(function(k){var L=SNAP.lists[k];o[k]={src:L.src,upd:SNAP.at,note:L.note||"",items:L.items.map(function(x,i){return{p:i+1,t:x[0],a:x[1],g:[x[2]]}}),live:false}});
  if(LIVE&&LIVE.lists)Object.keys(LIVE.lists).forEach(function(k){var L=LIVE.lists[k],key=k=="th_spotify"?null:k;if(key&&L.items&&L.items.length)o[key]={src:L.src,upd:L.upd||LIVE.at,note:"",items:L.items,live:true}});return o}
-function renderChart(){var L=lists(),key=REG+(KIND=="hip"?"_hip":""),C=L[key];
+function lnk(q){return'<a class="tr-pl" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query='+encodeURIComponent(q)+'" aria-label="ฟังบน YouTube">▶</a><a class="tr-pl" target="_blank" rel="noopener" href="https://open.spotify.com/search/'+encodeURIComponent(q)+'">Spotify</a>'}
+function genzHtml(){var Z=(window.SNSData&&SNSData.GENZ)||[];return'<div class="tr-card"><h4>แนวที่ Gen Z ฟังตอนนี้ (สายฮิปฮอป)</h4><p class="tr-note" style="margin:0 0 6px">Chartmetric 2026: แนวย่อยที่คนอายุ 13–24 ฟังมากสุดบน Spotify คือ Russian Phonk, Trap Metal, Rage Rap, NYC Drill · SoundCloud Music Intelligence Report 2026: jerk, plugg/chugg, DMV rap กำลังโต</p>'+
+ Z.map(function(z,i){return'<div class="tr-li"><b>'+(i+1)+'</b><div><strong>'+esc(z.n)+'</strong><span>'+esc(z.d)+'<br>ศิลปิน: '+z.a.map(esc).join(", ")+'</span></div>'+lnk(z.q+" playlist")+'</div>'}).join("")+'</div>'}
+function renderChart(){var L=lists(),key=REG+(KIND=="hip"?"_hip":KIND=="new"?"_new":""),C=L[key]||L[REG];
  var h='<div class="tr-seg"><button data-r="th" class="'+(REG=="th"?"on":"")+'">ไทย</button><button data-r="global" class="'+(REG=="global"?"on":"")+'">ทั่วโลก</button></div>'+
- '<div class="tr-seg"><button data-k="all" class="'+(KIND=="all"?"on":"")+'">ทุกแนว</button><button data-k="hip" class="'+(KIND=="hip"?"on":"")+'">ฮิปฮอป</button></div>';
- h+='<div class="tr-card"><h4>'+(REG=="th"?"ไทย":"ทั่วโลก")+' Top 10 · '+(KIND=="hip"?"ฮิปฮอป/แร็ป":"ทุกแนว")+'</h4><p class="tr-note" style="margin:0 0 6px">'+esc(C.src)+' · '+(C.live?'<span style="color:#7ee2a0">อัปเดตสด '+esc(C.upd)+'</span>':'ข้อมูล ณ '+esc(C.upd))+'</p>'+
-  C.items.slice(0,10).map(function(x){return'<div class="tr-li"><b>'+x.p+'</b><div><strong>'+esc(x.t)+'</strong><span>'+esc(x.a)+'</span></div>'+((x.g&&x.g[0])?'<span class="tr-tag">'+esc(x.g[0])+'</span>':'')+'</div>'}).join("")+
+ '<div class="tr-seg"><button data-k="all" class="'+(KIND=="all"?"on":"")+'">ท็อป</button><button data-k="new" class="'+(KIND=="new"?"on":"")+'">มาแรง</button><button data-k="hip" class="'+(KIND=="hip"?"on":"")+'">ฮิปฮอป</button><button data-k="genz" class="'+(KIND=="genz"?"on":"")+'">Gen Z</button></div>';
+ if(KIND=="genz"){h+=genzHtml();$("tr-chart").innerHTML=h;$("tr-chart").querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){REG=b.dataset.r;renderChart()}});$("tr-chart").querySelectorAll("[data-k]").forEach(function(b){b.onclick=function(){KIND=b.dataset.k;renderChart()}});return}
+ h+='<div class="tr-card"><h4>'+(REG=="th"?"ไทย":"ทั่วโลก")+(KIND=="new"?" · เพลงใหม่มาแรง":KIND=="hip"?" · ฮิปฮอป/แร็ป":" · Top "+Math.min(20,C.items.length))+'</h4><p class="tr-note" style="margin:0 0 6px">'+esc(C.src)+' · '+(C.live?'<span style="color:#7ee2a0">อัปเดตสด '+esc(C.upd)+'</span>':'ข้อมูล ณ '+esc(C.upd))+'</p>'+
+  C.items.slice(0,20).map(function(x){return'<div class="tr-li"><b>'+x.p+'</b><div><strong>'+esc(x.t)+'</strong><span>'+esc(x.a)+((x.g&&x.g[0])?' · '+esc(x.g[0]):'')+'</span></div>'+lnk(x.a+" "+x.t)+'</div>'}).join("")+
   (C.note?'<p class="tr-note">'+esc(C.note)+'</p>':'')+'</div>';
  h+='<button class="cta alt" id="tr-live" style="min-height:44px;font-size:14px">อัปเดตชาร์ตสด (เปิดแอปผ่าน start.bat บนคอม)</button>';
  h+='<div class="tr-card"><h4>เทียบกับคุณ</h4>'+compare(L)+'</div>';

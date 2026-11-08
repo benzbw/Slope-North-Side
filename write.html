@@ -350,7 +350,8 @@ function offlineIdeas(inp,seed){var r=(seed>>>0)||1,rnd=function(){r=(Math.imul(
  var moods=inp.mood.length?inp.mood:[MOODS[Math.floor(rnd()*MOODS.length)]],gk=wGen(inp),G=GEN[gk],out=[];
  for(var i=0;i<3;i++){var m=moods[i%moods.length],pr=pick(SEED[m],1,rnd)[0],im=pick(IMG,3,rnd),hk=pick(HOOKS[m],1,rnd)[0];
   out.push({title:hk.split(" ").slice(0,3).join(" "),concept:pr+" — "+pick(POV,1,rnd)[0],hook:hk,images:im,flow:G.n+" · BPM "+G.bpm+(m=="โกรธ"||m=="มั่นใจ/โชว์ของ"?" · ฟลว์ถี่ สัมผัสท้ายคำแน่นๆ":" · ร้องเมโลดี้สลับแร็พช้า เว้นช่องหายใจ"),mood:m})}
- var ref=pick(G.ref,Math.min(4,G.ref.length),rnd).map(function(x){return{artist:x[0],title:x[1],why:"ฟัง"+(rnd()<.5?"วิธีวางฮุค":"การเล่าเรื่องและซาวด์")+"ของแนว "+G.n}});
+ var ref=pick(G.ref,Math.min(inp.mood.length?3:4,G.ref.length),rnd).map(function(x){return{artist:x[0],title:x[1],why:"ฟัง"+(rnd()<.5?"วิธีวางฮุค":"การเล่าเรื่องและซาวด์")+"ของแนว "+G.n}});
+ if(window.SNSData&&inp.mood.length){var ms=SNSData.moodSongs(inp.mood,3).map(function(x){return{artist:x.artist,title:x.title,why:"เข้ากับอารมณ์ "+x.mood+" · "+x.genre+" (คนละแนวก็ได้ เอาวิธีสื่ออารมณ์มาใช้)"}});ref=ms.concat(ref)}
  return{ideas:out,listen:ref,genre:gk,src:"offline"}}
 async function aiJSON(prompt){if(!ST.sample)throw{code:"none"};var r=await ST.sample([{role:"user",content:prompt}],{modelTier:"default",cache:false});
  var t=(r&&r.text||"").replace(/```json|```/g,""),a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw{code:"parse"};return JSON.parse(t.slice(a,b+1))}
@@ -415,10 +416,11 @@ function artKey(s){s=String(s||"").toLowerCase().replace(/[^a-z0-9ก-๙]/g,"")
 /* รวมเพลงที่แนะนำได้: ของศิลปินที่อินก่อน แล้วศิลปินแนวเดียวกัน */
 function songPool(inp){var gk=wGen(inp),ak=artKey(inp.artist),P=[];
  if(ak)ART[ak][1].forEach(function(t){P.push({artist:ak,title:t,own:1})});
+ if(window.SNSData&&inp.mood&&inp.mood.length)SNSData.moodSongs(inp.mood).forEach(function(x){if(!P.some(function(y){return y.title==x.title}))P.push({artist:x.artist,title:x.title,mood:x.mood,genre:x.genre})});
  Object.keys(ART).forEach(function(k){if(k!=ak&&ART[k][0]==gk)ART[k][1].forEach(function(t){P.push({artist:k,title:t})})});
  (GEN[gk].ref||[]).forEach(function(r){if(!P.some(function(x){return x.title==r[1]}))P.push({artist:r[0],title:r[1]})});
  var me=(inp.song||"").toLowerCase();return P.filter(function(x){return x.title.toLowerCase()!=me})}
-function whyFor(x,gk){var G=GEN[gk]||GEN.rnb,W2=["ฟังการวางฮุค: ท่อนฮุคเข้าตอนไหน ซ้ำกี่รอบ","ฟังฟลว์: จังหวะคำตกตรงกลองตรงไหน เว้นช่องหายใจตรงไหน","ฟังเมโลดี้: ขึ้น-ลงแบบไหน โน้ตยาวตรงคำไหน","ฟังโครงเพลง: อินโทรยาวเท่าไหร่ ท่อนไหนบีตหาย","ฟังการเล่าเรื่อง: ท่อนแรกปูอะไร ท่อนสองพลิกยังไง","ฟังเสียงร้องซ้อน/แอดลิบ: ใส่ตรงไหนให้เพลงเต็ม"];
+function whyFor(x,gk){if(x.mood)return"เข้ากับอารมณ์ "+x.mood+" · "+x.genre+" — ฟังว่าเขาสื่ออารมณ์นี้ด้วยเสียง/คำ/ดนตรียังไง";var G=GEN[gk]||GEN.rnb,W2=["ฟังการวางฮุค: ท่อนฮุคเข้าตอนไหน ซ้ำกี่รอบ","ฟังฟลว์: จังหวะคำตกตรงกลองตรงไหน เว้นช่องหายใจตรงไหน","ฟังเมโลดี้: ขึ้น-ลงแบบไหน โน้ตยาวตรงคำไหน","ฟังโครงเพลง: อินโทรยาวเท่าไหร่ ท่อนไหนบีตหาย","ฟังการเล่าเรื่อง: ท่อนแรกปูอะไร ท่อนสองพลิกยังไง","ฟังเสียงร้องซ้อน/แอดลิบ: ใส่ตรงไหนให้เพลงเต็ม"];
  return(x.own?"เพลงของศิลปินที่คุณอิน · ":"")+W2[hashN(x.artist+x.title)%W2.length]}
 var MELO=["เก็บจังหวะ (rhythm) ของท่อนที่ชอบไว้ แต่เปลี่ยนโน้ตใหม่ทั้งหมด",
  "เก็บทิศทางทำนอง (ขึ้น-ลง) ไว้ แต่เปลี่ยนจังหวะคำ เช่น จากคำยาวเป็นคำถี่",
@@ -553,7 +555,7 @@ async function genIdeas(again,only){var inp=wInp();inp.story=$("sw-story").value
   var ex=again&&prev?"\nห้ามซ้ำกับ: "+(only!="listen"?prev.ideas.map(function(x){return x.title}).join(", "):"")+" / "+prev.listen.map(function(x){return x.artist+" - "+x.title}).join(", "):"";
   var j=await aiJSON("คุณเป็นโปรดิวเซอร์/นักแต่งเพลงฮิปฮอป-R&B ระดับโลกที่ช่วยศิลปินอิสระชาวไทย (แบรนด์ Slope North Side จากภาคเหนือ)\n"+
    "ศิลปินที่อินตอนนี้: "+(inp.artist||"-")+"\nเพลงที่อินตอนนี้: "+(inp.song||"-")+"\nอารมณ์: "+(inp.mood.join(", ")||"ไม่ระบุ")+"\nแนว: "+(inp.genre=="auto"?"เลือกให้เหมาะกับศิลปิน/อารมณ์":GEN[inp.genre].n)+"\nภาษาเนื้อ: "+inp.lang+"\nเรื่องที่อยากเล่า: "+(inp.story||"-")+"\n"+
-   "1) เสนอไอเดียเพลงใหม่ 3 เรื่อง เฉพาะเจาะจง มีภาพชัด ไม่จืด\n2) แนะนำเพลงที่มีอยู่จริง 6 เพลงให้ฟังเป็นแรงบันดาลใจ: 2 เพลงของศิลปินที่อิน (ถ้ามี) และ 4 เพลงแนวใกล้กัน บอกว่าฟังเพื่อเรียนรู้อะไร (ฮุค ฟลว์ ทิศทางทำนอง โครงเพลง) ต้องมั่นใจว่าชื่อเพลงกับศิลปินถูกต้อง ถ้าไม่มั่นใจอย่าใส่\n3) บอกลักษณะบีตที่เข้ากับเพลงที่อิน (BPM ประมาณ คีย์/โทน เครื่องดนตรี) และคำค้น type beat ภาษาอังกฤษ 3 คำ"+ex+"\n"+
+   "1) เสนอไอเดียเพลงใหม่ 3 เรื่อง เฉพาะเจาะจง มีภาพชัด ไม่จืด\n2) แนะนำเพลงที่มีอยู่จริง 6 เพลงให้ฟังเป็นแรงบันดาลใจ: 2 เพลงของศิลปินที่อิน (ถ้ามี), 2 เพลงที่ดนตรี/แนวคล้ายเพลงที่อิน และ 2 เพลงที่สื่อสารเรื่องเดียวกันหรือเข้ากับอารมณ์ตอนนี้ แนวไหนก็ได้ ไม่จำเป็นต้องเป็นฮิปฮอป (ป๊อป ร็อก อินดี้ R&B เพลงไทยก็ได้) ใน why บอกว่าคล้ายตรงไหน (ดนตรี/แนว/สื่อสาร/อารมณ์) และฟังเพื่อเรียนรู้อะไร (ฮุค ฟลว์ ทิศทางทำนอง โครงเพลง) ต้องมั่นใจว่าชื่อเพลงกับศิลปินถูกต้อง ถ้าไม่มั่นใจอย่าใส่\n3) บอกลักษณะบีตที่เข้ากับเพลงที่อิน (BPM ประมาณ คีย์/โทน เครื่องดนตรี) และคำค้น type beat ภาษาอังกฤษ 3 คำ"+ex+"\n"+
    "ห้ามเขียนเนื้อหรือทำนองของเพลงคนอื่น ฮุคต้องแต่งใหม่ สั้นไม่เกิน 12 คำ\n"+
    'ตอบ JSON อย่างเดียว: {"genre":"rnb|drill|trap|lofi|rap|thai|emo|phonk|pop","ideas":[{"title":"","concept":"","hook":"","images":["","",""],"flow":"","mood":""}],"listen":[{"artist":"","title":"","about":"เพลงนี้เล่าเรื่องอะไร 1 ประโยค สรุปเอง ห้ามยกเนื้อ","why":""}],"beat":{"bpm":"","key":"","sound":"","queries":["","",""]}}');
   if(j&&j.ideas&&j.ideas.length){j.src="ai";if(!GEN[j.genre])j.genre=wGen(inp);res=j}}catch(e){st.textContent=aiErr(e)}}
@@ -709,13 +711,13 @@ async function padTab(){var b=$("sw-body");
 function wCount(t){t=t.replace(/\[[^\]]*\]|\([^)]*\)/g," ");var en=(t.match(/[a-z']+/gi)||[]).reduce(function(s,w){return s+Math.max(1,(w.toLowerCase().replace(/e\b/,"").match(/[aeiouy]+/g)||[]).length)},0);
  var th=t.replace(/[^฀-๿\s]/g," ").trim(),ts=0;if(th){try{if(window.Intl&&Intl.Segmenter){var sg=new Intl.Segmenter("th",{granularity:"word"});for(var s of sg.segment(th))if(s.isWordLike)ts++}else ts=th.split(/\s+/).length}catch(e){ts=th.split(/\s+/).length}}
  return{en:en,th:ts}}
-function padEditor(){var n=W.note;
+function padEditor(){setTimeout(slangUI,0);var n=W.note;
  $("sw-body").innerHTML='<div class="sw-ed"><div style="min-width:0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="sw-ghost" id="sw-nb">‹ ทุกเพลง</button><span class="sw-save" id="sw-sv"></span><span style="flex:1"></span><button class="sw-ghost" id="sw-more" aria-label="ตัวเลือก">⋯</button></div>'+
   '<input class="sw-ttl" id="sw-ti" maxlength="60" placeholder="ชื่อเพลง">'+
   '<div class="sw-ins">'+["Intro","Verse","Pre-Hook","Hook","Bridge","Outro"].map(function(s){return'<button data-s="'+s+'">['+s+']</button>'}).join("")+'<button id="sw-ts" title="ใส่เวลาของบีตตรงนี้">⏱ เวลาบีต</button><button data-s="(adlib)">( แอดลิบ )</button></div>'+
   '<textarea class="sw-pad" id="sw-tx" spellcheck="false" placeholder="[Verse 1]&#10;เริ่มเขียนตรงนี้…&#10;&#10;[Hook]&#10;ท่อนฮุคใส่ในหัวข้อ [Hook] ตอนส่งไปทำวิดีโอ แอปจะตั้งเป็นท่อนฮุคให้"></textarea>'+
   '<div class="sw-stat" id="sw-stt"></div></div>'+
-  '<div class="sw-side"><div class="sw-player" id="sw-pl"></div>'+
+  '<div class="sw-side"><div class="sw-player" id="sw-pl"></div><div class="sw-box" id="sw-slang"></div>'+
   ((n.ref&&n.ref.length)?'<div class="sw-box"><h3 style="font-size:15px">เพลงอ้างอิง</h3><p class="sw-note">ฟังเอาฟีล แล้วทำทำนองใหม่ทับบีตนี้</p><div class="sw-list" id="sw-refs"></div><details style="margin-top:8px"><summary class="sw-note" style="cursor:pointer">♫ วิธีเปลี่ยนทำนองให้เป็นของเรา</summary><ol class="sw-note" style="padding-left:18px">'+MELO.map(function(m){return"<li>"+esc(m)+"</li>"}).join("")+'</ol></details></div>':'')+
   '<div class="sw-box"><h3 style="font-size:15px">อัดเสียงไอเดีย</h3>'+(ST.mode=="cloud"?'<p class="sw-note">ลิงก์ claude.ai ไม่อนุญาตให้ใช้ไมค์ อัดไอเดียได้ในแอปบนคอม (localhost:8790) หรือลิงก์ GitHub ส่วนในมือถือ ใช้แอปอัดเสียงของเครื่องไปก่อน แล้วเขียนเวลาบีตกำกับไว้ด้วยปุ่ม ⏱</p>':'<p class="sw-note">ฮัมเมโลดี้หรือลองฟลว์ทับบีต (ใช้หูฟังจะไม่มีเสียงบีตติดเข้าไป) เก็บในเครื่องนี้</p><div class="sw-acts" style="margin-top:8px"><button class="sw-ghost" id="sw-rec">● อัด</button></div>')+'<div id="sw-tk"></div></div>'+
   (ST.sample?'<div class="sw-box"><h3 style="font-size:15px">AI ช่วยเขียน</h3><div class="sw-chips" style="margin-top:8px"><button class="sw-chip" data-a="rhyme">หาคำสัมผัส</button><button class="sw-chip" data-a="next">ช่วยคิดบรรทัดต่อ</button><button class="sw-chip" data-a="hook">ฮุคแบบอื่น</button><button class="sw-chip" data-a="check">ตรวจเนื้อ/ฟลว์</button></div>'+
@@ -837,4 +839,88 @@ if(document.readyState=="loading")document.addEventListener("DOMContentLoaded",b
 </script>
 <script>(function(){var D=null;try{if(window.claude&&claude.use)claude.use("downloads").then(function(d){D=d}).catch(function(){})}catch(e){}
 var oc=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){var a=this;if(D&&a.download&&/^(blob:|data:)/.test(a.href)){var fn=a.download;if(/\.wav$/i.test(fn)){try{toast("ไฟล์ WAV ดาวน์โหลดได้ในแอปบนคอม (localhost) เท่านั้น")}catch(e){}return}fetch(a.href).then(function(r){return r.blob()}).then(function(b){return D.save({filename:fn,data:b})}).catch(function(e){if(e&&e.code&&e.code!="declined")try{toast("บันทึกไฟล์ไม่ได้: "+(e.message||e.code))}catch(x){}});return}return oc.call(this)}})()</script>
+<script>/* ===== Slope North Side · ข้อมูลเพลงร่วม (อารมณ์ → เพลงทุกแนว, คำฮิต/สแลง, สัดส่วนคนฟัง, Gen Z, วันปล่อยเพลงดัง) — อัปเดต 8 พ.ย. 2569 ===== */
+(function(){
+if(window.SNSData)return;
+/* เพลงที่มีอยู่จริง แยกตามอารมณ์ ทุกแนว (ไม่ใช่ฮิปฮอปอย่างเดียว) · เพลงไทยคัดจากชาร์ต Spotify ไทยรายสัปดาห์ 5 พ.ย. 2569 */
+var MOOD={
+"เศร้า":[["Billie Eilish","when the party's over","Alt pop"],["Lewis Capaldi","Someone You Loved","Pop ballad"],["Juice WRLD","Lucid Dreams","Emo rap"],["Mac Miller","Good News","Alt hip-hop"],["Joji","Glimpse of Us","Ballad"],["XXXTENTACION","Jocelyn Flores","Emo rap"],["Three Man Down","ฝนตกไหม","ป๊อปร็อกไทย"],["PURPEECH","กลัวว่าฉันจะไม่เสียใจ (Fear)","อินดี้ไทย"]],
+"อกหัก":[["Olivia Rodrigo","drivers license","Pop"],["The Weeknd","Call Out My Name","R&B"],["SZA","Kill Bill","R&B"],["Drake","Marvins Room","R&B rap"],["Adele","Someone Like You","Ballad"],["GAVIN:D","ได้แค่เดินมาส่ง (The Last Walk)","R&B ไทย"],["Only Monday","ดีใจที่ตรงนั้นไม่ใช่เรา","ป๊อปไทย"],["Timethai","สะสมคำบอกเลิก (COLLECTING)","ป๊อปไทย"]],
+"โกรธ":[["Kendrick Lamar","Not Like Us","West coast rap"],["Linkin Park","In the End","Nu-metal"],["Rage Against the Machine","Killing in the Name","Rap rock"],["Eminem","The Way I Am","Rap"],["Travis Scott","FE!N","Rage"],["Pop Smoke","Welcome to the Party","NY drill"],["Ghostemane","Mercury: Retrograde","Trap metal"]],
+"มืด/หม่น":[["The Weeknd","The Hills","Dark R&B"],["Travis Scott","goosebumps","Trap"],["Billie Eilish","bury a friend","Dark pop"],["6LACK","PRBLMS","Alt R&B"],["Lana Del Rey","Summertime Sadness","Dream pop"],["Kanye West","Runaway","Hip-hop"],["PORZAX","ยิ้มอันตราย","ฮิปฮอปไทย"]],
+"เหงา":[["Frank Ocean","Self Control","Alt R&B"],["Joji","SLOW DANCING IN THE DARK","Lo-fi R&B"],["The Neighbourhood","Sweater Weather","Alt rock"],["Kid Cudi","Day 'n' Nite","Alt hip-hop"],["Mirrr","ขึ้นใจ (3am call)","R&B ไทย"],["Flure","ฤดูที่ฉันเหงา","ป๊อปไทย"]],
+"คิดถึง":[["Ed Sheeran","Photograph","Pop"],["The Kid LAROI","WITHOUT YOU","Pop rap"],["PURPEECH","ไม่มีวันไหนที่ไม่คิดถึง (starlost.)","อินดี้ไทย"],["Only Monday","ได้แต่นึกถึง","ป๊อปไทย"],["guncharlie","ไม่ได้ลืมแค่ไม่ได้เจอ - Flashback","ป๊อปไทย"],["The Goo Goo Dolls","Iris","Rock ballad"]],
+"รัก/หวาน":[["Lady Gaga, Bruno Mars","Die With A Smile","Pop"],["Daniel Caesar","Best Part","R&B"],["Ed Sheeran","Perfect","Pop"],["Ravyn Lenae","Love Me Not","R&B"],["BLVCKHEART","อยากจะกอดเธอนาน ๆ (HAVE A GOOD TIME)","R&B ไทย"],["PUN","รักให้เธอได้รู้ (Proof.)","ป๊อปไทย"],["Violette Wautier","wanna be yours (อยากให้เธอรัก)","ป๊อปไทย"]],
+"ปาร์ตี้":[["Travis Scott","SICKO MODE","Trap"],["Doja Cat","Say So","Disco pop"],["Pitbull","Give Me Everything","Dance"],["Bad Bunny","Tití Me Preguntó","Reggaeton"],["LISA","ROCKSTAR","Pop rap"],["Black Eyed Peas","I Gotta Feeling","Dance pop"]],
+"มั่นใจ/โชว์ของ":[["Kendrick Lamar","HUMBLE.","Rap"],["Megan Thee Stallion","Savage","Rap"],["Central Cee, Dave","Sprinter","UK rap"],["Doechii","DENIAL IS A RIVER","Rap"],["The Weeknd","Starboy","R&B pop"],["YOUNGOHM","กรุงเทพมหานคร","ฮิปฮอปไทย"]],
+"สู้/ฮึกเหิม":[["Eminem","Lose Yourself","Rap"],["Kanye West","Stronger","Hip-hop"],["Imagine Dragons","Believer","Pop rock"],["J. Cole","Middle Child","Rap"],["Kendrick Lamar","Alright","Rap"],["Bodyslam","ความเชื่อ","ร็อกไทย"]],
+"ชิล":[["Steve Lacy","Bad Habit","Alt R&B"],["Rex Orange County","Loving Is Easy","Indie pop"],["Malcolm Todd","Earrings","Alt R&B"],["Tyler, The Creator","See You Again","Alt hip-hop"],["Mac Miller","Small Worlds","Hip-hop"],["Phum Viphurit","Lover Boy","อินดี้ไทย"],["YEW, LANDOKMAI","Summertime","ป๊อปไทย"]],
+"หลอน":[["Michael Jackson","Thriller","Pop/funk"],["Tame Impala","Dracula","Psych pop"],["Billie Eilish","bury a friend","Dark pop"],["Eminem","Stan","Rap"],["Travis Scott","goosebumps","Trap"]]
+};
+/* คำฮิต & สแลง: [คำ, ความหมายสั้นๆ] · now = ตอนนี้, old = ยุคก่อน (90s–2010s) */
+var SLANG={
+th:{now:[["ตัวตึง","ตัวท็อปของวงการนั้น"],["ต๊าช","ปังมาก เกินคาด"],["แบบตะโกน","มากๆ (ต่อท้ายคำ)"],["แบบใหม่แบบสับ","ใหม่และเท่ ไม่เคยมีใคร"],["เฟื่อน","เพื่อนก็ไม่ใช่ แฟนก็ไม่เชิง"],["ช็อตฟีล","อารมณ์ดีอยู่แล้วโดนตัดจบ"],["อรุ่มเจ๊าะ","ยิ้มเขินกลั้นไม่อยู่"],["เต็มคาราเบล","เต็มที่ / เมาเต็มที่"],["ตัวแม่","ตัวจริง ตัวนำ"],["เอาปากกามาวง","ชี้ให้เห็นชัดๆ ว่าผิดตรงไหน"],["แน่นะวิ","คิดว่าง่าย แต่จริงๆ ยาก"],["ปัง","ดีมาก ฮิต"],["ฉ่ำ","เยอะ จัดเต็ม"],["จึ้ง","สวย/เท่จนตะลึง"],["มูฟออน","ก้าวผ่าน ไม่จมอดีต"],["นอยด์","คิดมาก เครียด"],["ทรงอย่างแบด","ลุคดุ เท่"],["โป๊ะ","ความลับแตก"],["หัวร้อน","โมโหง่าย"],["สายเปย์","ทุ่มเงินให้คนอื่น"],["ตึง","เก่ง/แรง/เอาจริง"],["เดือด","ดุ ร้อนแรง"],["ห้าว","กล้า ซ่า"],["แก๊ง","กลุ่มเพื่อน/ทีม"],["ฟีล","อารมณ์ ความรู้สึก"],["ไฟลุก","ฮึก ร้อนแรง"],["ซัด","จัดหนัก ลุย"],["เบียว","อินเกินจริง"],["กาว","มโน พูดเกินจริง"],["เท","ทิ้ง เบี้ยวนัด"]],
+ old:[["จ๊าบ","เท่ ทันสมัย (ยุค 90)"],["เฟี้ยว","เท่ ซ่า"],["แอ๊บแบ๊ว","แกล้งทำน่ารัก"],["ชิมิ","ใช่มั้ย (ยุคแชท)"],["จุงเบย","จังเลย"],["ตะมุตะมิ","น่ารักน่าหยิก"],["เด็กแนว","สายอินดี้ แต่งตัวแหวก"],["กิ๊ก","คนคุยเล่นๆ ไม่ใช่แฟน"],["เด็กแว้น","ซิ่งรถเสียงดัง"],["เกรียน","ป่วน กวน"],["เนียน","แนบเนียน ดูไม่ออก"],["แจ่ม","ดี เยี่ยม"],["สะเหล่อ","เชย ทำเกินงาม"],["ซิ่ง","ขับเร็ว / แรง"],["ปิ๊ง","ปิ๊งรัก ชอบทันที"],["วีน","อาละวาด"],["เซ็ง","เบื่อ หงุดหงิด"],["ชิลๆ","สบายๆ"],["เด็ด","เจ๋ง โดน"],["มันส์","สนุกสุดๆ"]]},
+en:{now:[["rizz","เสน่ห์ จีบเก่ง"],["aura","ออร่า ความเท่จากข้างใน"],["no cap","ไม่โม้ พูดจริง"],["delulu","มโนหนัก"],["locked in","โฟกัสเต็มที่"],["cooked","จบเห่ แย่แล้ว"],["it's giving","ให้ฟีลแบบ…"],["ate","ทำได้สุดยอด"],["mid","ธรรมดา กลางๆ"],["opps","ศัตรู คู่กรณี"],["drip","ลุค/แฟชั่นแพง"],["fr","for real จริงๆ"],["lowkey","แบบเงียบๆ นิดๆ"],["situationship","ความสัมพันธ์ไม่ชัดเจน"],["the ick","อยู่ๆ ก็เลิกชอบ"],["main character","ใช้ชีวิตเหมือนพระเอก"],["slay","ทำออกมาเริ่ด"],["glazing","อวยเกินจริง"],["motion","ชีวิตกำลังเดิน มีงาน มีของ"],["pressure","ของแรง กดดันคู่แข่ง"],["bussin","เจ๋งมาก (มักใช้กับอาหาร)"],["sus","น่าสงสัย"],["bet","ได้ ตกลง"],["goated","เทพ ระดับตำนาน"],["real one","คนจริง ไม่ทิ้งกัน"],["ice","เพชร เครื่องประดับ"],["racks","เงินปึก (พันดอลลาร์)"],["finesse","หลอกเนียน / ทำเก๋ๆ"],["tweakin","ทำตัวแปลก ไม่อยู่กับร่องกับรอย"],["vibe check","เช็กฟีล"]],
+ old:[["dope","เจ๋ง"],["fly","เท่ ดูดี"],["fresh","ใหม่ เท่"],["homie","เพื่อนสนิท"],["crib","บ้าน"],["bling","เครื่องประดับวิบวับ"],["shorty","สาว / คนที่คุยอยู่"],["dawg","เพื่อน"],["word","จริง เห็นด้วย"],["grill","ครอบฟันทอง/เพชร"],["whip","รถ"],["hustle","ดิ้นรนหาเงิน"],["baller","คนรวย ใช้เงินเก่ง"],["props","ยกย่อง ให้เครดิต"],["wack","ห่วย"],["peace out","ไปละ"],["holla","ทัก เรียก"],["swag","สไตล์มั่นใจ"],["hater","คนชอบเกลียด"],["G.O.A.T.","ดีที่สุดตลอดกาล"]]}
+};
+/* สัดส่วนคนฟัง/ชอบแนวนี้ (ประมาณการ %) — th ไทย, gl ทั่วโลก, z = Gen Z ชอบมากกว่าค่าเฉลี่ยไหม */
+var AUD={
+ thai_pop:{th:[55,65],gl:[55,65],z:0,b:"ป๊อป/บัลลาดครองชาร์ต Spotify ไทยเกือบทั้งท็อป 25 (5 พ.ย. 2569) · ป๊อปเป็นแนวอันดับ 1 ของโลกตาม IFPI"},
+ pop_rnb:{th:[30,40],gl:[30,40],z:1,b:"R&B/ป๊อป R&B ไทยมาแรง (GAVIN:D, BLVCKHEART อยู่ท็อป 5) · ทั่วโลก R&B/ป๊อปเป็นกลุ่มใหญ่"},
+ dark_rnb:{th:[15,25],gl:[20,30],z:1,b:"แนวเดียวกับ The Weeknd / Brent Faiyaz · Blinding Lights กลับขึ้นชาร์ตโลก +36 อันดับ (สัปดาห์ 5 พ.ย.)"},
+ melodic_trap:{th:[20,30],gl:[30,40],z:1,b:"R&B/ฮิปฮอปเป็นแนวสตรีมเยอะสุดในอเมริกา 349.9 พันล้านครั้งปี 2025 (Luminate) · ไทย: PORZAX 2 เพลงในท็อป 13"},
+ drill:{th:[5,10],gl:[10,15],z:1,b:"NYC drill ติด 4 แนวย่อยฮิปฮอปที่ Gen Z อายุ 13–24 ฟังมากสุดบน Spotify (Chartmetric 2026) · ไทยยังเฉพาะกลุ่ม"},
+ boom_bap:{th:[5,10],gl:[10,15],z:0,b:"ฐานแฟนผู้ใหญ่ 25+ แน่น แต่ไม่ใช่แนวที่ดันชาร์ตตอนนี้"},
+ lofi:{th:[10,15],gl:[15,20],z:1,b:"ฟังประกอบเรียน/ทำงานเยอะ แต่คนจำชื่อศิลปินน้อย"},
+ phonk:{th:[5,10],gl:[10,20],z:1,b:"Russian/Brazilian phonk ติดท็อปแนวย่อยของคนอายุ 18–24 และโตเร็วสุดบน SoundCloud (Chartmetric 2026)"},
+ emo:{th:[8,12],gl:[15,20],z:1,b:"ร็อกเป็นแนวที่โตเร็วสุดในสตรีมมิงปี 2025 (Luminate) · trap metal อยู่ท็อปแนวย่อยของ Gen Z"},
+ afro:{th:[3,6],gl:[10,15],z:1,b:"โตต่อเนื่องทั่วโลก (Afrobeats/Amapiano) · ในไทยยังน้อย"}
+};
+/* แนวย่อยฮิปฮอปที่ Gen Z ฟัง (Chartmetric 2026, SoundCloud Music Intelligence Report 2026) */
+var GENZ=[
+ {n:"Rage rap",d:"ซินธ์แตก เบสบี้ ร้องตะโกนเมโลดี้ · โตเร็วสุดบน SoundCloud และติดท็อปของคนอายุ 13–24",a:["EsDeeKid","Playboi Carti","Ken Carson","Destroy Lonely","Yeat"],q:"rage rap"},
+ {n:"Phonk (Russian / Brazilian)",d:"คาวเบลล์ เบสแตก สายดริฟต์ · อันดับ 1 แนวย่อยของคนอายุ 18–24 บน Spotify",a:["Kordhell","INTERWORLD","DVRST"],q:"brazilian phonk"},
+ {n:"Trap metal",d:"แทรป + เมทัล เสียงแหบ ดุ",a:["Ghostemane","Scarlxrd"],q:"trap metal"},
+ {n:"NYC / UK drill",d:"808 สไลด์ กลองเหวี่ยง แร็พเล่าเรื่องถนน",a:["Pop Smoke","Central Cee","Fivio Foreign"],q:"drill"},
+ {n:"Jerk",d:"กลองเร็วแบบคลับ เสียงร้องเบาๆ ลอยๆ · เริ่มผสมกับอินดี้/ป๊อปพังก์ (89% ของแฟนเป็น Gen Z ตาม SoundCloud)",a:["Xaviersobased","Nettspend"],q:"jerk rap"},
+ {n:"Plugg / Chugg",d:"ซินธ์หวาน ฮัมเบาๆ · ฉากเม็กซิโกโต 81% ต่อปี",a:["Doony Graff","Ezya"],q:"pluggnb"},
+ {n:"DMV rap",d:"แทรป + ดริล + go-go ฟลว์เร็ว",a:["HavinMotion","JaeyChino","kuru"],q:"DMV rap"},
+ {n:"Melodic rap / R&B rap",d:"แร็ป + ฮุคร้อง แนวที่อยู่ชาร์ตนานสุด (ไทย: PORZAX, YOUNGOHM)",a:["Drake","Lil Tecca","PORZAX","YOUNGOHM"],q:"melodic rap"}
+];
+/* ใครปล่อย/เล่นช่วงไหน (ตรวจวันชน) · t: intl=อัลบั้มต่างประเทศ, th=ไทย, ev=อีเวนต์ใหญ่ในไทย · big=คนสนใจมาก */
+var REL={at:"8 พ.ย. 2569",items:[
+ ["2026-11-06","intl","Lil Baby","อัลบั้ม Fresh",1],["2026-11-06","intl","Skepta","อัลบั้ม The Fork & Knife",0],
+ ["2026-11-07","ev","BIGBANG / BABYMONSTER","คอนเสิร์ตกรุงเทพฯ 7–8 พ.ย.",1],
+ ["2026-11-13","intl","Wiz Khalifa","อัลบั้ม Cool",0],["2026-11-13","intl","Offset","อัลบั้ม GMFU (วันอาจเลื่อน)",1],["2026-11-13","intl","Sleepy Hallow","อัลบั้ม Still Sleep",0],["2026-11-13","intl","Westside Gunn","อัลบั้ม HEELMATIC",0],
+ ["2026-11-13","ev","BIG ASS","คอนเสิร์ตใหญ่ 13–17 พ.ย.",1],["2026-11-14","ev","BE PEERAPAT","BE & BEYOND Concert",0],
+ ["2026-11-19","intl","GTA VI","เพลงประกอบเกม GTA VI (เกมออกวันเดียวกัน)",1],
+ ["2026-11-24","ev","Joji","คอนเสิร์ต SOLARIS กรุงเทพฯ",1],["2026-11-27","intl","OsamaSon","อัลบั้ม Nocturnal",0],["2026-11-27","intl","JID","Live From NPR's Tiny Desk",0],
+ ["2026-11-29","ev","Khalid","คอนเสิร์ตกรุงเทพฯ",0],
+ ["","th","Jeff Satur","ซิงเกิล ที่ชอบที่ชอบ (Grief Eaters) — เข้าชาร์ตใหม่สัปดาห์นี้",1],["","th","Timethai × BLVCKHEART","สะสมคำบอกเลิก (COLLECTING) — เพิ่งปล่อย",1],["","th","SERIOUS BACON × PURPEECH","เผื่อเราไม่ต้องลาจากกัน — เพิ่งปล่อย",0],["","th","Saran","DND (โหมดพระจันทร์) — เพิ่งปล่อย",0],["","th","JISOO","ADDICTED — เพิ่งปล่อย",1]
+],src:["HotNewHipHop: Hip-Hop Albums Dropping In November 2026","PPTV: คอนเสิร์ตเดือนพฤศจิกายน 2569","kworb: Spotify Weekly Chart Thailand 2026/11/05 (เพลงใหม่)"]};
+var sp=function(q){return "https://open.spotify.com/search/"+encodeURIComponent(q)},yt=function(q){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)};
+function moodSongs(moods,n){var out=[],seen={};(moods&&moods.length?moods:Object.keys(MOOD)).forEach(function(m){(MOOD[m]||[]).forEach(function(s){var k=(s[0]+"|"+s[1]).toLowerCase();if(!seen[k]){seen[k]=1;out.push({artist:s[0],title:s[1],genre:s[2],mood:m})}})});
+ for(var i=out.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=out[i];out[i]=out[j];out[j]=t}return n?out.slice(0,n):out}
+function slangPick(lang,era,n,extra){var B=SLANG[lang],pool=era=="now"?B.now:era=="old"?B.old:B.now.concat(B.old);pool=pool.concat(extra||[]);var a=pool.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a.slice(0,n||10)}
+function clash(dateStr){if(!dateStr)return[];var d=new Date(dateStr+"T12:00:00").getTime();return REL.items.filter(function(x){return x[0]}).map(function(x){return{d:x[0],t:x[1],a:x[2],w:x[3],big:!!x[4],gap:Math.round((new Date(x[0]+"T12:00:00").getTime()-d)/864e5)}}).filter(function(x){return Math.abs(x.gap)<=7}).sort(function(a,b){return Math.abs(a.gap)-Math.abs(b.gap)})}
+window.SNSData={MOOD:MOOD,SLANG:SLANG,AUD:AUD,GENZ:GENZ,REL:REL,moodSongs:moodSongs,slangPick:slangPick,clash:clash,sp:sp,yt:yt};
+})();
+</script>
+<script>/* คำฮิต & สแลง: ไทย 10 + อังกฤษ 10 สุ่มใหม่ได้ แตะเพื่อใส่ในเนื้อ */
+var SLERA="now";function slEsc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function slangMine(){try{return JSON.parse(localStorage.getItem("sns:slang:mine")||"[]")}catch(e){return[]}}
+function slangUI(){var box=document.getElementById("sw-slang");if(!box||!window.SNSData)return;var M=slangMine(),th=SNSData.slangPick("th",SLERA,10,M.filter(function(w){return/[฀-๿]/.test(w[0])})),en=SNSData.slangPick("en",SLERA,10,M.filter(function(w){return!/[฀-๿]/.test(w[0])}));
+ var col=function(L){return L.map(function(w){return'<button class="sw-chip" data-w="'+slEsc(w[0])+'" title="'+slEsc(w[1]||"")+'">'+slEsc(w[0])+'</button>'}).join("")};
+ box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 style="font-size:15px;margin:0">คำฮิต & สแลง</h3><button class="sw-ghost" id="sw-slre">↻ สุ่มใหม่</button></div>'+
+  '<div class="sw-chips" style="margin:8px 0 4px">'+[["now","ตอนนี้"],["old","ยุคก่อน"],["mix","ผสม"]].map(function(e){return'<button class="sw-chip" data-era="'+e[0]+'" aria-pressed="'+(SLERA==e[0])+'">'+e[1]+'</button>'}).join("")+'</div>'+
+  '<p class="sw-note" style="margin:6px 0 2px">ไทย</p><div class="sw-chips">'+col(th)+'</div><p class="sw-note" style="margin:8px 0 2px">อังกฤษ / แร็ปเปอร์ฝรั่ง</p><div class="sw-chips">'+col(en)+'</div>'+
+  '<p class="sw-note" id="sw-slm" style="min-height:18px;margin:8px 0 0">แตะคำเพื่อดูความหมายและใส่ในเนื้อตรงเคอร์เซอร์</p>'+
+  '<div style="display:flex;gap:6px;margin-top:6px"><input class="sw-in" id="sw-slin" maxlength="40" placeholder="เพิ่มคำของคุณ เช่น คำที่ฮิตในกลุ่ม" style="flex:1;min-width:0"><button class="sw-ghost" id="sw-sladd">+ เก็บ</button></div>';
+ box.querySelectorAll("[data-era]").forEach(function(b){b.onclick=function(){SLERA=b.dataset.era;slangUI()}});
+ document.getElementById("sw-slre").onclick=slangUI;
+ box.querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){var w=b.dataset.w,tx=document.getElementById("sw-tx");document.getElementById("sw-slm").textContent=w+(b.title?" — "+b.title:"")+" · ใส่ในเนื้อแล้ว";
+  if(tx){var a=tx.selectionStart||tx.value.length,e=tx.selectionEnd||a,pre=tx.value.slice(0,a),sp=pre&&!/\s$/.test(pre)?" ":"";tx.value=pre+sp+w+" "+tx.value.slice(e);tx.focus();var c=a+sp.length+w.length+1;try{tx.setSelectionRange(c,c)}catch(x){}tx.dispatchEvent(new Event("input"))}}});
+ document.getElementById("sw-sladd").onclick=function(){var v=document.getElementById("sw-slin").value.trim();if(!v)return;var L=slangMine();if(!L.some(function(w){return w[0]==v})){L.push([v,"คำของคุณ"]);try{localStorage.setItem("sns:slang:mine",JSON.stringify(L.slice(-60)))}catch(e){}}slangUI();document.getElementById("sw-slm").textContent="เก็บ “"+v+"” ไว้ในคลังคำแล้ว"}}
+</script>
 </body></html>

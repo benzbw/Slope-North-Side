@@ -13,6 +13,9 @@ TRD=open(os.environ.get('TREND','/tmp/w/trend.html'),encoding='utf-8').read().rs
 s=rep(s,'</script>\n</body>','</script>\n'+TRD+'\n</body>')
 MIXS=open(os.environ.get('MIXST','/tmp/w/mixstudio.html'),encoding='utf-8').read().rstrip('\n')  # สตูดิโอมิกซ์ + แนวเพลง + ฟังเทียบ (src/mixstudio.html)
 s=rep(s,'</script>\n</body>','</script>\n'+MIXS+'\n</body>')
+XD=open(os.environ.get('XDATA','/tmp/w/xdata.js'),encoding='utf-8').read()  # ข้อมูลเพลงร่วม (src/xdata.js)
+EXP=open(os.environ.get('EXPLORE','/tmp/w/explore.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าค้นหาแนวเพลง (src/explore.html)
+s=rep(s,'</script>\n</body>','</script>\n<script>'+XD+'</script>\n'+EXP+'\n</body>')
 M='<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050305"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">\n'
 W='<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){})</script>\n'
 app=rep(s,'</style>\n','</style>\n'+M); app=rep(app,'</script>\n</body>','</script>\n'+W+'</body>')

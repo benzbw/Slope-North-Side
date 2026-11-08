@@ -1,0 +1,142 @@
+<style>
+#xpl{position:fixed;inset:0;z-index:67;overflow:auto;background:#050305;-webkit-overflow-scrolling:touch}
+#xpl .pgw{padding-bottom:90px}
+.ex-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0}
+.ex-card h4{margin:0 0 6px;font-size:15px}
+.ex-in{display:flex;gap:8px;margin:8px 0}.ex-in input{flex:1;min-width:0;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);padding:12px;font:15px/1.4 inherit;font-family:inherit}
+.ex-chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.ex-chips button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 13px;font-size:13.5px;cursor:pointer;font-family:inherit}
+.ex-chips button.on{border-color:var(--red);background:rgba(255,51,71,.16)}
+.ex-li{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}.ex-li:first-child{border-top:0}
+.ex-li div{min-width:0;flex:1}.ex-li strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ex-li span{font-size:12px;color:var(--mut)}
+.ex-li a{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:34px;padding:0 10px;border-radius:99px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:12.5px}
+.ex-big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.ex-big b{font:800 22px/1.2 'Noto Sans Thai',system-ui}.ex-big span{color:#7be3a0;font-weight:700}
+.ex-bar{margin:9px 0}.ex-bar>div{display:flex;justify-content:space-between;font-size:13px}.ex-bar>div span{color:var(--mut)}
+.ex-bar i{display:block;height:8px;border-radius:6px;background:rgba(255,255,255,.1);margin-top:5px;overflow:hidden}.ex-bar i u{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#ff3347,#ff8a96)}
+.ex-note{font-size:11.5px;color:var(--mut);line-height:1.55;margin:6px 0 0}
+.ex-p{font-size:13.5px;line-height:1.65;margin:4px 0}
+.ex-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid rgba(126,226,160,.5);color:#7ee2a0;margin-left:6px;vertical-align:2px}
+.ex-st{font-size:12.5px;color:var(--mut);margin:6px 0}
+</style>
+<div id="xpl" hidden><div class="pgw">
+ <div class="pgh"><div class="h" style="margin:0">ค้นหาแนวเพลง</div><button class="cta alt" id="ex-close" style="width:auto;min-height:38px;padding:0 16px;font-size:13px">ปิด</button></div>
+ <p class="mut" style="font-size:12.5px">เพลงที่กำลังฟัง หรือศิลปินที่อินอยู่ เป็นแนวอะไร เล่าเรื่องอะไร มีเพลงไหนคล้ายๆ และแนวอื่นที่น่าลอง เอาไปหาคอนเซปต์ทำเพลงต่อ</p>
+ <div class="ex-card">
+  <h4>พิมพ์ชื่อเพลง หรือ ศิลปิน</h4>
+  <div class="ex-in"><input id="ex-q" maxlength="100" placeholder="เช่น The Weeknd - The Hills หรือ PORZAX"><button class="cta" id="ex-go" style="width:auto;min-height:46px;padding:0 18px">ค้นหา</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"><label class="cta alt" style="flex:1;min-width:150px;min-height:44px;font-size:13.5px">ใส่ไฟล์เพลง (ฟังจากเสียงจริง)<input type="file" id="ex-f" accept="audio/*,video/*" hidden></label><button class="cta alt" id="ex-proj" style="flex:1;min-width:150px;min-height:44px;font-size:13.5px" hidden>เพลงในโปรเจกต์นี้</button></div>
+  <p class="ex-st" id="ex-st"></p>
+ </div>
+ <div class="ex-card">
+  <h4>หรือบอกอารมณ์ตอนนี้</h4>
+  <p class="ex-note" style="margin:0 0 4px">แอปส่งเพลงที่เข้ากับอารมณ์มาให้ทุกแนว ไม่ใช่แค่ฮิปฮอป กดซ้ำเพื่อสุ่มใหม่</p>
+  <div class="ex-chips" id="ex-moods"></div>
+  <div id="ex-ms"></div>
+ </div>
+ <div id="ex-out"></div>
+</div></div>
+<script>/* ===== Slope North Side · ค้นหาแนวเพลง (แนว ความหมาย เพลงคล้าย แนวใกล้เคียง คอนเซปต์ % คนฟัง) ===== */
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)},D=window.SNSData;if(!D)return;
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+var KEYS=["dark_rnb","melodic_trap","drill","boom_bap","lofi","thai_pop","pop_rnb","phonk","emo","afro"];
+function G(){return(window.SNSGenre&&SNSGenre.G)||[]}
+function gOf(k){return G().filter(function(g){return g.k==k})[0]}
+/* ศิลปิน → แนว (ค้นจากชื่อ ไม่ต้องใช้เน็ต) */
+var ART={"the weeknd":"dark_rnb","partynextdoor":"dark_rnb","brent faiyaz":"dark_rnb","6lack":"dark_rnb","bryson tiller":"dark_rnb","frank ocean":"dark_rnb","billie eilish":"dark_rnb","lana del rey":"dark_rnb","bedupbiw":"dark_rnb","gavin:d":"pop_rnb","gavin.d":"pop_rnb","urboytj":"dark_rnb",
+ "travis scott":"melodic_trap","juice wrld":"emo","lil uzi vert":"melodic_trap","don toliver":"melodic_trap","future":"melodic_trap","drake":"melodic_trap","playboi carti":"melodic_trap","ken carson":"melodic_trap","yeat":"melodic_trap","esdeekid":"melodic_trap","lil tecca":"melodic_trap","porzax":"melodic_trap","youngohm":"melodic_trap","twopee southside":"melodic_trap","1mill":"melodic_trap","maiyarap":"melodic_trap","killmonker":"melodic_trap","sprite":"boom_bap",
+ "central cee":"drill","pop smoke":"drill","headie one":"drill","fivio foreign":"drill","kay flock":"drill",
+ "nas":"boom_bap","j. cole":"boom_bap","j cole":"boom_bap","joey bada$$":"boom_bap","kendrick lamar":"boom_bap","eminem":"boom_bap","thaitanium":"boom_bap","f.hero":"boom_bap","kanye west":"boom_bap","jay-z":"boom_bap",
+ "mac miller":"lofi","joji":"lofi","nujabes":"lofi","rex orange county":"lofi","steve lacy":"lofi","tyler, the creator":"lofi","phum viphurit":"lofi","malcolm todd":"lofi",
+ "billkin":"thai_pop","jeff satur":"thai_pop","three man down":"thai_pop","purpeech":"thai_pop","pun":"thai_pop","only monday":"thai_pop","violette wautier":"thai_pop","freehand":"thai_pop","guncharlie":"thai_pop","flure":"thai_pop","ed sheeran":"thai_pop","lauv":"thai_pop","keshi":"thai_pop","lewis capaldi":"thai_pop","adele":"thai_pop","olivia rodrigo":"thai_pop",
+ "doja cat":"pop_rnb","sza":"pop_rnb","bruno mars":"pop_rnb","dua lipa":"pop_rnb","pp krit":"pop_rnb","milli":"pop_rnb","blvckheart":"pop_rnb","mirrr":"pop_rnb","lisa":"pop_rnb","daniel caesar":"pop_rnb","ravyn lenae":"pop_rnb","tate mcrae":"pop_rnb",
+ "kordhell":"phonk","dvrst":"phonk","interworld":"phonk",
+ "lil peep":"emo","xxxtentacion":"emo","machine gun kelly":"emo","iann dior":"emo","tilly birds":"emo","ghostemane":"emo","scarlxrd":"emo","linkin park":"emo",
+ "burna boy":"afro","rema":"afro","tyla":"afro","wizkid":"afro"};
+var CONC={
+ dark_rnb:["ขับรถกลางคืนตามหาคนที่ทิ้งไป เมืองเป็นตัวละคร ไฟแดงเป็นภาพหลัก","ความสัมพันธ์ลับที่รู้ว่าพัง แต่ยังกลับไปหา เล่าจากมุมคนผิด","ชื่อเสียงมาพร้อมความเหงา ห้องหรูแต่ว่างเปล่า"],
+ melodic_trap:["คืนที่ชีวิตเปลี่ยน จากไม่มีอะไรจนมีทุกอย่าง แต่เพื่อนหายไป","ฮุคร้องสั้นซ้ำ 4 ครั้ง เล่าเรื่องปาร์ตี้ที่จบด้วยความว่าง","จดหมายถึงตัวเองตอนอายุ 15"],
+ drill:["เล่าวันธรรมดาในซอยบ้านแบบละเอียด ไม่ต้องรุนแรงก็ดุได้","ทีมที่โตมาด้วยกัน ใครยังอยู่ ใครไปแล้ว","ตอบโต้คำดูถูกด้วยผลงาน ไม่ใช่คำขู่"],
+ boom_bap:["เล่าเรื่องจริงทีละฉากเหมือนหนังสั้น จบด้วยบทเรียน","จดหมายถึงบ้านเกิด (ภาคเหนือ) ภาพชัด กลิ่น เสียง","แร็พคุยกับตัวเองในกระจก 2 มุมมอง"],
+ lofi:["เช้าวันหยุดที่ไม่ต้องรีบ รายละเอียดเล็กๆ ในห้อง","ฝนตกกับความทรงจำที่ไม่เจ็บแล้ว","คุยกับเพื่อนสนิทตอนตี 2 เรื่องอนาคต"],
+ thai_pop:["คำพูดที่ไม่ได้พูดในวันสุดท้าย","รักที่ดีแต่จังหวะไม่ใช่","ขอบคุณคนที่อยู่ข้างกันตอนแย่ที่สุด"],
+ pop_rnb:["เต้นกับคนที่เพิ่งเจอ ฮุคติดหูร้องตามง่าย","มั่นใจหลังเลิกรา แต่งตัวออกไปใช้ชีวิต","จีบแบบกวนๆ ด้วยภาษาโซเชียล"],
+ phonk:["ขับรถกลางคืนกับแก๊ง สปีดและแสงไฟ ไม่ต้องมีเนื้อเยอะ","เพลงประกอบคลิปแข่ง/ออกกำลัง ฮุคเป็นคำเดียว","ตัวตนอีกด้านตอนเที่ยงคืน"],
+ emo:["ด้านมืดในหัวที่ไม่เคยบอกใคร เล่าตรงๆ","วันที่อยากหายไป แล้วมีคนดึงกลับมา (จบมีหวัง)","กีตาร์+808 คิดถึงยุควัยรุ่น"],
+ afro:["ทะเล ไฟร้อน เต้นช้าๆ กับคนที่ชอบ","ฉลองความสำเร็จเล็กๆ กับเพื่อน","จีบแบบเพลงร้อนๆ ภาษาผสม"]};
+var MOODS=Object.keys(D.MOOD),MSEL=[];
+function songRow(x,sub){var q=(x.artist?x.artist+" ":"")+x.title;return'<div class="ex-li"><div><strong>'+esc(x.artist?x.artist+" – "+x.title:x.title)+'</strong><span>'+esc(sub||x.genre||"")+'</span></div><a target="_blank" rel="noopener" href="'+D.yt(q)+'">▶ YT</a><a target="_blank" rel="noopener" href="'+D.sp(q)+'">Spotify</a></div>'}
+function moodsUI(){$("ex-moods").innerHTML=MOODS.map(function(m){return'<button class="'+(MSEL.indexOf(m)>=0?"on":"")+'">'+esc(m)+'</button>'}).join("");
+ $("ex-moods").querySelectorAll("button").forEach(function(b){b.onclick=function(){var m=b.textContent,i=MSEL.indexOf(m);if(i>=0&&b.classList.contains("on")&&MSEL.length==1){renderMood();return}if(i>=0)MSEL.splice(i,1);else MSEL.push(m);moodsUI();renderMood()}})}
+function renderMood(){var el=$("ex-ms");if(!MSEL.length){el.innerHTML="";return}var L=D.moodSongs(MSEL,8);
+ el.innerHTML=L.map(function(x){return songRow(x,x.genre+" · "+x.mood)}).join("")+'<button class="cta alt" id="ex-mre" style="margin-top:8px;min-height:40px;font-size:13px">↻ สุ่มชุดใหม่</button>';$("ex-mre").onclick=renderMood}
+function audBlock(weights){var th=0,gl=0,z=0,tw=0;weights.forEach(function(w){var A=D.AUD[w.k];if(!A)return;th+=w.w*(A.th[0]+A.th[1])/2;gl+=w.w*(A.gl[0]+A.gl[1])/2;z+=w.w*A.z;tw+=w.w});if(!tw)return"";th/=tw;gl/=tw;
+ var top=D.AUD[weights[0].k];
+ return'<div class="ex-card"><h4>คนฟัง/ชอบแนวนี้ประมาณกี่ %'+(z/tw>=.5?'<span class="ex-tag">Gen Z ชอบ</span>':'')+'</h4>'+
+  '<div class="ex-bar"><div><b>ในไทย</b><span>~'+Math.round(th)+'%</span></div><i><u style="width:'+Math.min(100,th)+'%"></u></i></div>'+
+  '<div class="ex-bar"><div><b>ทั่วโลก</b><span>~'+Math.round(gl)+'%</span></div><i><u style="width:'+Math.min(100,gl)+'%"></u></i></div>'+
+  '<p class="ex-p" style="font-size:12.5px">'+esc(top.b)+'</p>'+
+  '<p class="ex-note">หมายถึง: ในคนฟังเพลงสตรีมมิง 100 คน ราวกี่คนฟัง/ชอบแนวนี้ (คนหนึ่งชอบหลายแนวได้ รวมกันจึงเกิน 100) · เป็นค่าประมาณจากชาร์ต Spotify ไทย/โลก (5 พ.ย. 2569), รายงาน Luminate 2025, IFPI และ Chartmetric 2026 ไม่ใช่ผลสำรวจโดยตรง</p></div>'}
+function genreCard(top,list,src){var g=gOf(top.k)||{n:top.k,th:"",intl:[],thai:[],pl:top.k},near=(list||[]).slice(1,3).map(function(x){return gOf(x.k)}).filter(Boolean);
+ var gz=D.GENZ.filter(function(z){return new RegExp(top.k=="drill"?"drill":top.k=="phonk"?"phonk":top.k=="emo"?"metal|jerk":top.k=="melodic_trap"?"rage|melodic|plugg":top.k=="dark_rnb"?"melodic|plugg":"melodic","i").test(z.n)}).slice(0,2);
+ return'<div class="ex-card"><h4>แนวเพลง</h4><div class="ex-big"><b>'+esc(g.n)+'</b>'+(top.pct?'<span>ตรง '+top.pct+'%</span>':'')+'</div><p class="ex-p">'+esc(g.th||"")+'</p>'+(src?'<p class="ex-note">'+esc(src)+'</p>':'')+
+  (list&&list.length>1?'<p class="ex-p" style="margin-top:8px"><b>ส่วนผสม:</b> '+list.slice(0,4).map(function(x){var gg=gOf(x.k);return esc(gg?gg.n:x.k)+" "+(x.pct||"")+(x.pct?"%":"")}).join(" · ")+'</p>':'')+'</div>'+
+ '<div class="ex-card"><h4>หาฟังแนวนี้ได้ที่ไหน</h4>'+songRow({title:g.pl+" playlist"},"เพลย์ลิสต์ทั้งแนว")+(g.k!="thai_pop"?songRow({title:"thai "+(g.q||g.pl)},"แนวนี้ในไทย"):"")+
+  (g.intl||[]).concat(g.thai||[]).slice(0,7).map(function(a){return songRow({title:a},"ศิลปินแนวใกล้กัน")}).join("")+'</div>'+
+ (near.length||gz.length?'<div class="ex-card"><h4>แนวใกล้เคียง / แนวอื่นที่น่าลอง</h4>'+near.map(function(n){return songRow({title:n.pl+" playlist"},n.n+" — "+n.th)}).join("")+gz.map(function(z){return songRow({title:z.q},"Gen Z · "+z.n+" — "+z.d)}).join("")+'</div>':"")+
+ '<div class="ex-card"><h4>ไอเดียคอนเซปต์ทำเพลงแนวนี้</h4>'+(CONC[g.k]||[]).map(function(c,i){return'<p class="ex-p">'+(i+1)+". "+esc(c)+'</p>'}).join("")+'<p class="ex-note">เอาไปต่อในหน้าแต่งเพลงได้เลย</p></div>'}
+function aiFn(){try{return window.SNSX&&SNSX.ST&&SNSX.ST.sample}catch(e){return null}}
+async function aiAsk(q,genreHint){var smp=aiFn();if(!smp)return null;
+ var p="ผู้ใช้เป็นศิลปินฮิปฮอป/R&B ไทย อยากรู้เกี่ยวกับ: \""+q+"\""+(genreHint?" (ระบบวัดเสียงได้: "+genreHint+")":"")+"\nตอบเป็น JSON อย่างเดียว ภาษาไทย ห้ามยกเนื้อเพลงจริง ให้สรุปด้วยคำของตัวเอง ห้ามแต่งชื่อเพลงที่ไม่มีจริง ถ้าไม่แน่ใจให้ใส่ชื่อศิลปินแทน:\n"+
+  '{"what":"เพลง/ศิลปินนี้คือใคร 1 บรรทัด","genre":"แนวหลัก","sub":"แนวย่อย","key":"หนึ่งใน '+KEYS.join("|")+'","meaning":"เพลงนี้เล่าเรื่อง/สื่ออะไร 2-3 ประโยค (ถ้าเป็นศิลปิน = ธีมที่มักเล่า)","mood":"อารมณ์","same_meaning":[{"artist":"","title":"","why":""}],"same_sound":[{"artist":"","title":"","why":""}],"other_genres":[{"n":"","why":""}],"concepts":[{"title":"","idea":""}]}\n'+
+  "same_meaning 5 เพลง (สื่อสารเรื่องคล้ายกัน แนวไหนก็ได้ มีเพลงไทยด้วยถ้ามี) · same_sound 5 เพลง (ดนตรี/แนวคล้าย) · other_genres 3 · concepts 3 (ไอเดียทำเพลงใหม่ของตัวเองจากแรงบันดาลใจนี้)";
+ var r=await smp([{role:"user",content:p}],{modelTier:"default",cache:false}),t=(r&&r.text||"").replace(/```json|```/g,""),a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0)return null;return JSON.parse(t.slice(a,b+1))}
+function aiCards(j){if(!j)return"";var L=function(arr){return(arr||[]).map(function(x){return songRow(x,x.why)}).join("")};
+ return'<div class="ex-card"><h4>'+esc(j.what||"")+'</h4><p class="ex-p"><b>แนว:</b> '+esc(j.genre||"")+(j.sub?" · "+esc(j.sub):"")+(j.mood?" · อารมณ์ "+esc(j.mood):"")+'</p><p class="ex-p"><b>เล่าเรื่อง/ความหมาย:</b> '+esc(j.meaning||"")+'</p><p class="ex-note">สรุปโดย AI อาจคลาดเคลื่อนได้</p></div>'+
+  (j.same_meaning&&j.same_meaning.length?'<div class="ex-card"><h4>เพลงที่สื่อสารคล้ายกัน</h4>'+L(j.same_meaning)+'</div>':"")+
+  (j.same_sound&&j.same_sound.length?'<div class="ex-card"><h4>เพลงแนว/ดนตรีคล้ายกัน</h4>'+L(j.same_sound)+'</div>':"")+
+  (j.other_genres&&j.other_genres.length?'<div class="ex-card"><h4>แนวอื่นที่น่าลองผสม</h4>'+j.other_genres.map(function(x){return songRow({title:x.n+" playlist"},x.why)}).join("")+'</div>':"")+
+  (j.concepts&&j.concepts.length?'<div class="ex-card"><h4>ไอเดียคอนเซปต์เพลงใหม่</h4>'+j.concepts.map(function(c,i){return'<p class="ex-p">'+(i+1)+'. <b>'+esc(c.title)+'</b> — '+esc(c.idea)+'</p>'}).join("")+'</div>':"")}
+function findArtist(q){var s=q.toLowerCase(),best=null;Object.keys(ART).forEach(function(a){if(s.indexOf(a)>=0&&(!best||a.length>best.length))best=a});
+ if(!best)Object.keys(D.MOOD).forEach(function(m){D.MOOD[m].forEach(function(x){if(!best&&s.indexOf(x[1].toLowerCase())>=0){var a=x[0].split(",")[0].toLowerCase();if(ART[a])best=a}})});return best}
+var BUSY=false;
+async function search(){var q=$("ex-q").value.trim(),st=$("ex-st"),out=$("ex-out");if(!q||BUSY)return;BUSY=true;$("ex-go").disabled=true;
+ var a=findArtist(q),k=a?ART[a]:null,html="",AUDW=null;
+ if(k){html+=genreCard({k:k},null,"รู้จาก: "+a);AUDW=[{k:k,w:1}]}
+ out.innerHTML=html+(aiFn()?'<div class="ex-card"><p class="ex-st">AI กำลังหาความหมายและเพลงคล้าย…</p></div>':(k?"":'<div class="ex-card"><h4>ยังไม่รู้จักชื่อนี้ในเครื่อง</h4><p class="ex-p">ใส่ไฟล์เพลงให้ฟังจากเสียงจริงได้เลย หรือค้นต่อ:</p>'+songRow({title:q},"ค้นเพลงนี้")+'<p class="ex-note">ความหมายและเพลงคล้ายแบบละเอียดใช้ AI ได้ในลิงก์ claude.ai</p></div>'))+(AUDW?audBlock(AUDW):"");
+ if(aiFn()){try{var j=await aiAsk(q);var kk=j&&KEYS.indexOf(j.key)>=0?j.key:k;out.innerHTML=aiCards(j)+(kk?genreCard({k:kk},null,k?"รู้จาก: "+a:"AI จัดแนว")+audBlock([{k:kk,w:1}]):"")}
+  catch(e){out.insertAdjacentHTML("afterbegin",'<div class="ex-card"><p class="ex-st">AI ตอบไม่ได้ตอนนี้: '+esc(e&&(e.message||e.code)||e)+'</p></div>')}}
+ BUSY=false;$("ex-go").disabled=false;try{localStorage.setItem("sns:exq",q)}catch(e){}}
+async function analyseChs(chs,dur,label){var A=SNSGenre.analyse(chs),C=SNSGenre.classify(A,(label||"").toLowerCase()),top=C.list[0];
+ var W=C.list.slice(0,4).map(function(x){return{k:x.g.k,w:x.share||x.s,pct:Math.max(1,Math.round((x.share||0)*100))}});
+ $("ex-st").textContent="ฟังจากเสียงจริง "+Math.round(dur)+" วิ · BPM "+A.bpm+" · คีย์ "+A.key.name+" · ความดัง "+Math.round(A.lufs*10)/10+" LUFS";
+ var html=genreCard({k:top.g.k,pct:top.pct},W,"วัดจาก BPM คีย์ เบส ความสว่าง"+(label?" + ชื่อไฟล์/เนื้อ":""))+audBlock(W);$("ex-out").innerHTML=html+(aiFn()?'<div class="ex-card"><p class="ex-st">AI กำลังหาเพลงคล้าย…</p></div>':"");
+ if(aiFn()){try{var j=await aiAsk(label||"เพลงนี้",top.g.n+" · BPM "+A.bpm+" · คีย์ "+A.key.name);$("ex-out").innerHTML=aiCards(j)+html}catch(e){}}}
+async function fromFile(){var f=this.files[0];this.value="";if(!f||!window.SNSGenre)return;var st=$("ex-st");st.textContent="กำลังฟังเพลง… (มือถือราว 10–30 วิ)";$("ex-out").innerHTML="";
+ try{var d=await SNSGenre.decode(await f.arrayBuffer(),200);await new Promise(function(r){setTimeout(r,30)});await analyseChs(d.chs,d.dur,f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," "))}catch(e){st.textContent="อ่านไฟล์นี้ไม่ได้: "+(e&&e.message||e)}}
+async function fromProject(){var st=$("ex-st");st.textContent="กำลังฟังเพลงในโปรเจกต์…";$("ex-out").innerHTML="";
+ try{var d=await SNSGenre.song();await new Promise(function(r){setTimeout(r,30)});var S={};try{S=SNSSong()}catch(e){}await analyseChs(d.chs,d.dur,(S.title||"")+" "+SNSGenre.text())}catch(e){st.textContent=/nosong/.test(e&&e.message)?"โปรเจกต์นี้ยังไม่มีไฟล์เพลง":"วิเคราะห์ไม่สำเร็จ: "+(e&&e.message||e)}}
+
+/* ---------- ปล่อยเพลง: ใครปล่อย/เล่นช่วงเดียวกัน ---------- */
+function radar(){var el=$("rl-radar");if(!el)return;var inp=$("rl-date"),v=inp&&inp.value,TL={intl:"อัลบั้มต่างประเทศ",th:"ไทย",ev:"อีเวนต์ในไทย"};
+ var row=function(x,extra){return'<div class="ex-li"><div><strong>'+esc(x.a)+'</strong><span>'+esc((x.d?x.d.slice(8,10)+"/"+x.d.slice(5,7)+" · ":"")+TL[x.t]+" · "+x.w)+(extra||"")+'</span></div><a target="_blank" rel="noopener" href="'+D.yt(x.a+" "+x.w.replace(/^อัลบั้ม |^ซิงเกิล /,"").split(" — ")[0])+'">▶</a></div>'};
+ var all=D.REL.items.map(function(x){return{d:x[0],t:x[1],a:x[2],w:x[3],big:!!x[4]}}),recentTh=all.filter(function(x){return x.t=="th"});
+ var h='<div class="ex-card" style="margin-top:10px"><h4>ใครปล่อย/เล่นช่วงเดียวกัน</h4>';
+ if(v){var C=D.clash(v),day=new Date(v+"T12:00:00").getDay(),big=C.filter(function(x){return x.big&&Math.abs(x.gap)<=2});
+  h+=big.length?'<p class="ex-p" style="color:#ff8b97"><b>ชนกับงานใหญ่:</b> '+big.map(function(x){return esc(x.a)+" ("+(x.gap==0?"วันเดียวกัน":x.gap>0?"หลังคุณ "+x.gap+" วัน":"ก่อนคุณ "+(-x.gap)+" วัน")+")"}).join(", ")+' — คนฟัง/สื่อจะสนใจงานนั้นก่อน แนะนำเลื่อนไปอีก 1 สัปดาห์</p>':(C.length?'<p class="ex-p" style="color:#7ee2a0">ไม่ชนงานใหญ่ในช่วง ±2 วัน</p>':'<p class="ex-p" style="color:#7ee2a0">ยังไม่พบใครปล่อย/เล่นงานใหญ่ในช่วง ±7 วันจากข้อมูลที่มี</p>');
+  h+=C.map(function(x){return row(x,x.gap==0?" · วันเดียวกัน":x.gap>0?" · หลังวันของคุณ "+x.gap+" วัน":" · ก่อนวันของคุณ "+(-x.gap)+" วัน")}).join("");
+  if(day!=5)h+='<p class="ex-note">ทิป: เพลงทั่วโลกปล่อยวันศุกร์ (ชาร์ตนับรายสัปดาห์ศุกร์–พฤหัสฯ) วันที่เลือกเป็นวัน'+["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสฯ","ศุกร์","เสาร์"][day]+'</p>'}
+ else{var now=Date.now(),soon=all.filter(function(x){if(!x.d)return false;var t=new Date(x.d+"T12:00:00").getTime();return t>now-2*864e5&&t<now+45*864e5}).sort(function(a,b){return a.d<b.d?-1:1});
+  h+='<p class="ex-note" style="margin:0 0 4px">ใส่วันปล่อยด้านบน แอปจะเช็กว่าชนกับใคร</p>'+soon.map(function(x){return row(x)}).join("")}
+ h+=(recentTh.length?'<p class="ex-p" style="margin-top:10px"><b>เพิ่งปล่อยในไทย (เข้าชาร์ตใหม่สัปดาห์นี้)</b></p>'+recentTh.map(function(x){return row(x)}).join(""):"")+
+  '<p class="ex-note">ข้อมูล ณ '+esc(D.REL.at)+' จาก '+D.REL.src.map(esc).join(" · ")+' · ศิลปินไทยมักประกาศวันปล่อยล่วงหน้าไม่กี่วัน เช็กโซเชียลของศิลปินดังก่อนกดปล่อยอีกครั้ง</p></div>';
+ el.innerHTML=h}
+function radarWire(){var d=$("rl-date");if(d&&!d._rad){d._rad=1;d.addEventListener("change",radar);d.addEventListener("input",radar)}radar()}
+function open(){var el=$("xpl");el.hidden=false;document.documentElement.style.overflow="hidden";var inProj=false;try{inProj=!!(window.SNS&&SNS.pid&&$("a")&&$("a").src)}catch(e){}$("ex-proj").hidden=!inProj||!window.SNSGenre;
+ try{var q=localStorage.getItem("sns:exq");if(q&&!$("ex-q").value)$("ex-q").value=q}catch(e){}moodsUI()}
+function close(){$("xpl").hidden=true;document.documentElement.style.overflow=""}
+function wire(){radarWire();setTimeout(radarWire,1500);$("ex-close").onclick=close;$("ex-go").onclick=search;$("ex-q").onkeydown=function(e){if(e.key=="Enter")search()};$("ex-f").onchange=fromFile;$("ex-proj").onclick=fromProject}
+if(document.readyState=="loading")document.addEventListener("DOMContentLoaded",wire);else wire();
+window.SNSExplore={open:open,close:close,find:findArtist,run:fromProject,radar:radar};
+})();
+</script>

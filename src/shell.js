@@ -196,7 +196,7 @@ function artFor(cv,p){var TH=(window.THEMES||[])[p.info&&p.info.theme||0]||{hot:
  c.fillStyle=TH.hot;c.fillRect(30,30,26,4);c.font="700 10px Montserrat, sans-serif";c.fillStyle="rgba(255,255,255,.6)";c.fillText("SLOPE NORTH SIDE",64,35)}
 
 /* ---------- หน้าแรก ---------- */
-var STEPS=[["เช็กเทรนด์ & วางแนว","ดูชาร์ตไทย/โลก Top 10 ทั้งทุกแนวและฮิปฮอป แนวที่กำลังมา และประเมินโอกาสแมสตามสไตล์ศิลปิน","ทุกเครื่อง"],["สร้างโปรเจกต์","ตั้งชื่อเพลง ใส่ไฟล์เพลงและเนื้อเพลง แยกท่อนร้อง/ฮุค และคนร้อง","ทุกเครื่อง"],["มิกซ์ & ดูแนวเพลง","ใส่เสียงร้อง+บีต ให้มิกซ์ จูนนิดๆ หาคีย์ เทียบกับเพลงที่ชอบ แล้วบอกว่าเพลงแนวอะไร ฟังแนวเดียวกันที่ไหน","ทุกเครื่อง"],
+var STEPS=[["เช็กเทรนด์ & วางแนว","ดูชาร์ตไทย/โลก Top 10 ทั้งทุกแนวและฮิปฮอป แนวที่กำลังมา และประเมินโอกาสแมสตามสไตล์ศิลปิน","ทุกเครื่อง"],["สร้างโปรเจกต์","ตั้งชื่อเพลง ใส่ไฟล์เพลงและเนื้อเพลง แยกท่อนร้อง/ฮุค และคนร้อง","ทุกเครื่อง"],["มิกซ์เสียงก่อน","ขั้น 1 › เสียง: ใส่เสียงร้อง+บีตแยกไฟล์ ให้มิกซ์ จูนนิดๆ หาคีย์ เทียบกับเพลงที่ชอบ แล้วใช้เป็นเพลงของโปรเจกต์","ทุกเครื่อง"],
  ["ซิงค์เนื้อกับเสียง","AI จับจังหวะคำร้องทีละคำ แล้วปรับเองได้ทีละบรรทัด","แม่นสุดบนคอม"],
  ["สไตล์ · ปก · MV","เลือกสไตล์ 60 แบบ ธีมสี เอฟเฟกต์ ภาพวาดอินโทร ปกเพลง และฉาก MV","ปก/MV ด้วย AI บนคอม"],
  ["ส่งออกวิดีโอ","YouTube 16:9, Reels/TikTok 9:16 ทั้งเพลงหรือท่อนฮุค 15–30 วิ","ทุกเครื่อง"],
@@ -212,15 +212,21 @@ async function home(){if(S.crashed){toastS("เปิดโปรเจกต์
  '<div class="sx-hello"><div style="min-width:0"><div class="sx-eyebrow">'+(BRANDED?"บัญชีหลักของแบรนด์":"สตูดิโอของคุณ")+'</div>'+
   '<h1 class="sx-h1">โปรเจกต์เพลง</h1><p class="sx-sub">แต่ละเพลงเก็บเป็นโปรเจกต์ของตัวเอง กดเข้าไปถึงจะแก้ไขได้ '+(ST.mode=="cloud"?"บันทึกในบัญชีอัตโนมัติ เปิดจากมือถือหรือคอมก็เห็นงานเดียวกัน":"บันทึกในเครื่องนี้อัตโนมัติ")+'</p>'+
   '<div class="sx-stats" id="sx-stats"></div></div>'+
-  '<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="sx-btn ghost" id="sx-wtop" target="_blank" rel="noopener" style="text-decoration:none">✎ แต่งเพลง & หาบีต</a><button class="sx-btn" id="sx-new">+ เพลงใหม่</button></div></div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="sx-btn" id="sx-new">+ เพลงใหม่</button></div></div>'+
+ '<section class="sx-sec"><div class="sx-sech"><h2>เครื่องมือ</h2><span>ใช้ได้ทันที ไม่ต้องเข้าโปรเจกต์</span></div><div class="sx-tools">'+
+  '<a class="sx-tool" id="sx-wtop" target="_blank" rel="noopener"><i>✎</i><b>แต่งเพลง & หาบีต</b><small>แรงบันดาลใจตามอารมณ์ · บีต · สมุดเนื้อ · คำฮิต/สแลง</small></a>'+
+  '<button class="sx-tool" type="button" onclick="window.SNSExplore&&SNSExplore.open()"><i>◎</i><b>ค้นหาแนวเพลง</b><small>เพลง/ศิลปินนี้แนวอะไร เล่าอะไร เพลงคล้าย · % คนฟัง</small></button>'+
+  '<button class="sx-tool" type="button" onclick="window.SNSTrend&&SNSTrend.open()"><i>↗</i><b>เทรนด์ & เพลงมาแรง</b><small>ท็อป 20 ไทย/โลก · มาแรง · ฮิปฮอป · Gen Z · กดฟังได้</small></button>'+
+  '<button class="sx-tool" type="button" id="sx-new2"><i>+</i><b>เริ่มเพลงใหม่</b><small>มิกซ์เสียง → เนื้อ → ซิงค์ → MV/ปก → ปล่อยเพลง</small></button>'+
+ '</div></section>'+
  '<section class="sx-sec"><div class="sx-sech"><h2>เพลงทั้งหมด</h2><span id="sx-cnt"></span></div><div class="sx-grid" id="sx-grid"></div></section>'+
  (BRANDED?'':'<section class="sx-sec"><div class="sx-sech"><h2>ตัวอย่างผลงานจากแอป</h2><span>เปิดดูได้ แก้ได้ แต่ไม่บันทึก</span></div><div class="sx-grid" id="sx-demo"></div></section>')+
- '<section class="sx-sec"><div class="sx-sech"><h2>เทรนด์ & โอกาสแมส</h2><span>ชาร์ตไทย/โลก · ฮิปฮอป · แนวที่กำลังมา</span></div><p class="sx-sub" style="margin:0 0 12px">เลือกศิลปิน แอปจำสไตล์ไว้ แล้วบอกว่าเพลงมีโอกาสแมสกี่ % เพราะอะไร และควรปรับตรงไหน</p><button class="sx-btn" type="button" onclick="window.SNSTrend&&SNSTrend.open()">เปิดหน้าเทรนด์</button></section>'+
- '<section class="sx-sec" id="sx-write"></section>'+'<section class="sx-sec" id="sx-lan"></section>'+
+ (0?'<section class="sx-sec"><div class="sx-sech"><h2>เทรนด์ & โอกาสแมส</h2><span>ชาร์ตไทย/โลก · ฮิปฮอป · แนวที่กำลังมา</span></div><p class="sx-sub" style="margin:0 0 12px">เลือกศิลปิน แอปจำสไตล์ไว้ แล้วบอกว่าเพลงมีโอกาสแมสกี่ % เพราะอะไร และควรปรับตรงไหน</p><button class="sx-btn" type="button" onclick="window.SNSTrend&&SNSTrend.open()">เปิดหน้าเทรนด์</button></section>':'')+
+ '<section class="sx-sec" id="sx-lan"></section>'+
  '<section class="sx-sec"><div class="sx-sech"><h2>ขั้นตอนทำเพลง 1 เพลง</h2><span>เรียงตามลำดับในแอป</span></div><div class="sx-steps">'+
   STEPS.map(function(s){return'<div class="sx-step"><b>'+s[0]+'</b><p>'+s[1]+'</p><em>'+s[2]+'</em></div>'}).join("")+'</div></section>'+
  '<div class="sx-foot"><span>© Slope North Side</span><span>'+(ST.mode=="cloud"?"ซิงค์กับบัญชี claude.ai":"โหมดเครื่องนี้ · ฟีเจอร์ AI ใช้ได้เมื่อเปิดเซิร์ฟเวอร์บนคอม")+'</span></div>');
- $("sx-new").onclick=newDialog;$("sx-guide").onclick=guide;$("sx-help").onclick=function(){bot.open()};
+ $("sx-new").onclick=newDialog;if($("sx-new2"))$("sx-new2").onclick=newDialog;$("sx-guide").onclick=guide;$("sx-help").onclick=function(){bot.open()};
  $("sx-me").onclick=function(ev){menuAt(ev.currentTarget,[["ออกจากระบบ",logout]].concat(BRANDED?[["ดูปัญหาที่แจ้งเข้ามา",function(){bot.open();bot.say("ai","รายการแจ้งปัญหาและข้อผิดพลาดทั้งหมดถูกเก็บไว้ในระบบ Claude จะเข้ามาตรวจและแก้ให้ตามรอบตรวจอัตโนมัติ หรือสั่งในแชทว่า \"ตรวจปัญหาที่แจ้งเข้ามา\" ได้เลย")}]]:[]),true)};
  if(!BRANDED){var dg=$("sx-demo");var dp={id:"demo",name:"Dangerous",artist:"Bedupbiw",feat:"Killmonker",info:{theme:0,synced:true}};dg.appendChild(card(dp,true))}
  renderGrid();lanCard();writeCard();
@@ -295,8 +301,8 @@ var FAQ=[
  [/ช้า|กระตุก|ค้าง|หน่วง|lag/i,"ลองเปิด \"โหมดประหยัดเครื่อง\" (ลดเอฟเฟกต์) แล้วโหลดแอปใหม่ ถ้ายังค้างที่โปรเจกต์เดิม ใช้ ⋯ › ซ่อมโปรเจกต์ ที่หน้าแรก",["lite","reload"]],
  [/รหัส|ลืม|password|ล็อกอิน|login/i,"รหัสผ่านถูกเก็บแบบเข้ารหัส ระบบดูรหัสเดิมไม่ได้ ถ้าลืม ให้แจ้งทีมเพื่อรีเซ็ตบัญชี (ห้ามพิมพ์รหัสในแชทนี้)",["ticket"]],
  [/มือถือ|คอม|ติดตั้ง|แอป|install/i,"ติดตั้งเป็นแอป: เปิดลิงก์ใน Chrome › ⋮ › เพิ่มลงในหน้าจอหลัก\nมือถือ: แก้โปรเจกต์ สไตล์ ส่งออกวิดีโอ\nคอม: ซิงค์ AI, มิกซ์, AI วาดปก/MV (ต้องเปิด start.bat)",[]],
- [/มิกซ์|mix|มาสเตอร์|master|ออโต้จูน|autotune|จูน|คีย์|key|เทียบ|อ้างอิง/i,"มิกซ์อยู่ขั้น 1 › แท็บ \"เสียง & แนว\" (ทำก่อนอย่างอื่น เพราะ AI ต้องใช้เพลงตัวจริงไปซิงค์):\n1) เพิ่มไฟล์เสียงร้อง (หลายแทร็กได้) + บีต\n2) จูนเสียงตั้งไว้ \"นิดเดียว\" 35% แก้เฉพาะโน้ตที่หลุด ไม่ให้เสียงเพี้ยนเป็นหุ่นยนต์\n3) คีย์หาให้เองจากบีต+เสียงร้อง (บอก % ความมั่นใจ) เลือกเองได้\n4) ใส่เพลงเปรียบเทียบ แล้วกดมิกซ์ ฟังสลับ A/B\n5) กด \"ใช้เสียงนี้เป็นเพลงของโปรเจกต์\"\nขั้น 3 › เสียง ใส่เพลงเทียบเพื่อฟังสลับกับเพลงเราได้อีกที่"],
- [/แนว|genre|คล้าย|ฟังที่ไหน/i,"ขั้น 1 › เสียง & แนว › กด \"เพลงนี้แนวอะไร\" ระบบฟังเพลงจริง (BPM คีย์ เบส ความสว่าง คำในเนื้อ) บอกแนวหลัก/แนวรองเป็น % ศิลปินใกล้กัน และลิงก์ Spotify/YouTube/Apple Music"],
+ [/มิกซ์|mix|มาสเตอร์|master|ออโต้จูน|autotune|จูน|คีย์|key|เทียบ|อ้างอิง/i,"มิกซ์อยู่ขั้น 1 › แท็บ \"เสียง (มิกซ์)\" (ทำก่อนอย่างอื่น เพราะ AI ต้องใช้เพลงตัวจริงไปซิงค์):\n1) เพิ่มไฟล์เสียงร้อง (หลายแทร็กได้) + บีต\n2) จูนเสียงตั้งไว้ \"นิดเดียว\" 35% แก้เฉพาะโน้ตที่หลุด ไม่ให้เสียงเพี้ยนเป็นหุ่นยนต์\n3) คีย์หาให้เองจากบีต+เสียงร้อง (บอก % ความมั่นใจ) เลือกเองได้\n4) ใส่เพลงเปรียบเทียบ แล้วกดมิกซ์ ฟังสลับ A/B\n5) กด \"ใช้เสียงนี้เป็นเพลงของโปรเจกต์\"\nขั้น 3 › เสียง ใส่เพลงเทียบเพื่อฟังสลับกับเพลงเราได้อีกที่"],
+ [/แนว|genre|คล้าย|ฟังที่ไหน/i,"หน้าแรก › เครื่องมือ › ค้นหาแนวเพลง: พิมพ์ชื่อเพลง/ศิลปิน หรือใส่ไฟล์เพลง ระบบฟังเพลงจริง (BPM คีย์ เบส ความสว่าง คำในเนื้อ) บอกแนวหลัก/แนวรองเป็น % ศิลปินใกล้กัน ลิงก์ Spotify/YouTube ไอเดียคอนเซปต์ และ % คนฟังแนวนี้ในไทย/ทั่วโลก"],
  [/บีต|beat|ลิขสิทธิ์|หารายได้|monet/i,"ดูตารางราคาบีตและสิทธิ์ได้ที่ขั้น 3 › ปล่อยเพลง & โปรโมท เลือกประเภทบีตที่ใช้ แอปจะบอกว่าลงสตรีม/หารายได้ได้ไหม",[]],
  [/ปก|cover|mv|ภาพ/i,"ปกแบบลายทำได้ทุกเครื่องในหัวข้อปกเพลง ส่วน AI วาดปกและฉาก MV ต้องเปิดเซิร์ฟเวอร์บนคอม (start.bat) แล้วใช้แอปที่ localhost:8790",[]]];
 var bot={el:null,hist:[],open:function(){if(this.el){this.el.hidden=false;return}var b=this.el=h('<div class="sx-bot" role="dialog" aria-label="ผู้ช่วย Slope"><div class="sx-both"><div><b>ผู้ช่วย Slope</b><small>'+(ST.sample?"ตอบด้วย AI · แก้ปัญหาเบื้องต้นให้ได้":"ตอบจากคู่มือ · แจ้งทีมได้")+'</small></div><button aria-label="ปิด">×</button></div>'+
@@ -355,7 +361,7 @@ async function lanPin(){if(!LANORIGIN)return;try{var j=await (await fetch("/api/
 var WRITE_URL="https://claude.ai/artifact/5howytgf8NkaPtrVWWxH6n",WRITE_PUB="https://benzbw.github.io/Slope-North-Side/write.html";
 /* หน้าแต่งเพลงบน claude.ai เป็นของเจ้าของแบรนด์ (คนอื่นเปิดแล้วขึ้น "ไม่พบหน้านี้") — บัญชีอื่นใช้หน้าแต่งเพลงสาธารณะบนเว็บแทน */
 function writeUrl(){if(ST.mode!="cloud"&&(LOCALHOST||location.protocol=="http:"))return "write.html";var own=ST.mode=="cloud"?!!ST.owner:!!(ST.acct&&(ST.acct.brand||String(ST.acct.handle||"").toLowerCase()==BRAND.toLowerCase()));if(own)return WRITE_URL;return /github\.io$/.test(location.hostname)?"write.html":WRITE_PUB}
-function writeCard(){var host=$("sx-write");if(!host)return;var url=writeUrl();
+function writeCard(){var host=$("sx-write"),url=writeUrl(),wt0=$("sx-wtop");if(wt0){wt0.href=url;if(url=="write.html"){wt0.removeAttribute("target");wt0.removeAttribute("rel")}}if(!host)return;
  host.innerHTML='<div class="sx-sech"><h2>แต่งเพลง & หาบีต</h2><span>เริ่มเพลงใหม่ก่อนเข้าโปรเจกต์</span></div><a class="sx-lanc" id="sx-wl" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><div style="font:400 34px/1 var(--sx-disp);color:var(--sx-hot)">✎</div><div style="min-width:0;flex:1"><b style="font-size:16px">เปิดหน้าแต่งเพลง</b><p class="sx-note" style="margin:4px 0 0">หาแรงบันดาลใจ · หาบีตฟรี/เสียเงินพร้อมราคา · สมุดเนื้อเพลงพร้อมเล่นบีต แล้วส่งเนื้อเข้าแอปนี้</p></div><span class="sx-pill">เปิด ↗</span></a>';$("sx-wl").href=url;var wt=$("sx-wtop");if(wt)wt.href=url;if(url=="write.html"){[$("sx-wl"),wt].forEach(function(e){if(e){e.removeAttribute("target");e.removeAttribute("rel")}})}}
 async function lanCard(){if(!LOCALHOST||location.protocol=="file:")return;try{var j=await (await fetch("/api/lan")).json();if(!j||!j.url)return;var host=$("sx-lan");if(!host)return;
  host.innerHTML='<div class="sx-sech"><h2>ใช้ในมือถือที่บ้าน (AI เต็มรูปแบบ)</h2><span>มือถือต่อ Wi-Fi เดียวกับคอมนี้</span></div><div class="sx-lanc"><div id="sx-qr" aria-hidden="true"></div><div style="min-width:0"><div class="sx-note">เปิดในมือถือ</div><div class="sx-big" id="sx-lu"></div><div class="sx-note" style="margin-top:8px">PIN</div><div class="sx-big" id="sx-lp"></div><p class="sx-note" style="margin-top:8px">มือถือจะใช้พลังคอมนี้วาด MV/ปก ซิงค์ และมิกซ์ได้ เปิด start.bat ค้างไว้ ถ้า Windows ถามเรื่อง Firewall ให้กด Allow</p></div></div>';
@@ -368,7 +374,7 @@ function needAudio(){if($("sx-na"))return;var bn=h('<div class="sx-demo" id="sx-
 /* ---------- แบ่งหน้าเป็นแท็บย่อย ให้ใช้ง่าย ---------- */
 var SUBT={
  pg1:{host:function(){return document.querySelector("#pg1 .pgw")},tabs:[
-  {k:"mix",n:"เสียง & แนว",d:"ทำก่อน: มิกซ์เสียงร้อง+บีต จูนเสียงนิดๆ หาคีย์ เทียบกับเพลงที่ชอบ แล้วดูว่าเพลงเป็นแนวอะไร",m:/^(สตูดิโอมิกซ์|แนวเพลง)/},
+  {k:"mix",n:"เสียง (มิกซ์)",d:"ทำก่อน: ใส่เสียงร้อง+บีตแยกไฟล์ มิกซ์ จูนเสียงนิดๆ หาคีย์ เทียบกับเพลงที่อยากให้เสียงออกมาแบบนั้น",m:/^สตูดิโอมิกซ์/},
   {k:"song",n:"เพลง & เนื้อ",d:"ใส่ไฟล์เพลง เนื้อเพลง แยกท่อน และคนร้อง",m:/^(เพลง|เนื้อเพลง)/},
   {k:"look",n:"สไตล์ & ธีม",d:"สไตล์ศิลปิน อัลบั้ม ธีมสี ตัวหนังสือ และภาพช่วงดนตรี",m:/^(สตูดิโอสไตล์|อัลบั้ม|ธีมสี|การขึ้นของตัวหนังสือ|ช่วงก่อนเพลงขึ้น)/}]},
  over:{host:function(){return document.getElementById("p-over")},tabs:[

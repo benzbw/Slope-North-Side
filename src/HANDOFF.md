@@ -46,6 +46,14 @@
 - แนวเพลง `SNSGenre` (10 แนว: BPM/คีย์/สเปกตรัมเทียบ CURVES/คำในเนื้อ) + ลิงก์ Spotify/YouTube/Apple Music + ศิลปินใกล้กัน + ปุ่มถาม AI (sample)
 - ฟังเทียบขั้น 3 › เสียง (`#cmp`): ไฟล์เพลงเทียบ สลับฟังที่จุดเดียวกัน ปรับความดังให้เท่ากัน รายงานต่าง BPM/คีย์/LUFS/โทน
 
+## หน้าค้นหาแนวเพลง, เทรนด์มาแรง/Gen Z, คำฮิต, วันปล่อยชน, Shorts, ปกจากรูป (เซสชัน "SNS Studio · แอปหลัก", 8 พ.ย.)
+- `src/xdata.js` (`window.SNSData`: MOOD เพลงตามอารมณ์ทุกแนว, SLANG ไทย/อังกฤษ now/old, AUD % คนฟังต่อแนว, GENZ, REL วันปล่อย/อีเวนต์) — build.py แทรกด้วย `XDATA=` และใส่ใน write.html ด้วย (patches/patch_write.py)
+- `src/explore.html` (`#xpl`, `window.SNSExplore`) หน้า "ค้นหาแนวเพลง" เปิดจากหน้าแรก (การ์ดเครื่องมือ `.sx-tools`) · ห้ามใช้ id `exp` (ชนกับปุ่มใน new.html) · มี radar วันปล่อยใน `#rl-radar`
+- แนวเพลงถูกย้ายออกจากแท็บมิกซ์ (แท็บขั้น 1 = "เสียง (มิกซ์)")
+- trend.html: ชาร์ตไทย/โลก Top 20 รายสัปดาห์ 5 พ.ย., แท็บ มาแรง (`th_new`/`global_new`) และ Gen Z, ทุกแถวกดฟัง YouTube/Spotify
+- new.html: Shorts (`#vshorts`, `bestSec()`/`VBEST` เลือกท่อนจากความดัง+ฮุค+ประโยคซ้ำ), ปกจากรูปผู้ใช้ `drawCoverPhoto` (ph_cine/ph_frame/ph_poster/ph_mag ไม่วาดคนใหม่)
+- แพตช์สำหรับไฟล์บนคอม: `src/patches/*.py` (รันกับ index.html / write.html บนคอมแล้วแทรก xdata+explore ก่อน </body>, แทนบล็อก trend เดิม)
+
 ## ข้อมูลผู้ใช้
 - ผู้ใช้: ศิลปินไทย Bedupbiw (แบรนด์ Slope North Side, ID แบรนด์ Slopenorthside44) — พูดไทย, เป็นงานอดิเรก, อยากได้งานระดับโลก
 - เพลงตัวอย่าง: "Dangerous" Bedupbiw ft. Killmonker (ธีมแดงมืดแบบ The Weeknd)

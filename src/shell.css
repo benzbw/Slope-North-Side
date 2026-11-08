@@ -136,3 +136,9 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
 .sx-sub button{flex:none;min-height:40px;padding:0 16px;border-radius:99px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);color:#f6eff1;font:600 14px 'Noto Sans Thai',sans-serif;cursor:pointer;white-space:nowrap}
 .sx-sub button.on{background:#ff3347;border-color:#ff3347;color:#fff}
 .sx-subd{margin:0 0 12px;color:#a9989e;font:400 13px 'Noto Sans Thai',sans-serif}
+.sx-tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.sx-tool{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:118px;padding:16px;border-radius:18px;border:1px solid var(--sx-line2);background:linear-gradient(160deg,rgba(255,51,71,.10),rgba(255,255,255,.03));color:var(--sx-fg);text-decoration:none;cursor:pointer;font:inherit}
+.sx-tool:hover{border-color:rgba(255,51,71,.55)}
+.sx-tool i{font-style:normal;font-size:24px;line-height:1;color:var(--sx-hot);margin-bottom:4px}
+.sx-tool b{font-size:16px}.sx-tool small{font-size:12.5px;color:var(--sx-mut,#9a98a6);line-height:1.5}
+@media (max-width:520px){.sx-tools{grid-template-columns:1fr 1fr}.sx-tool{min-height:132px;padding:13px}.sx-tool b{font-size:14.5px}}

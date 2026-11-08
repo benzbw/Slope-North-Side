@@ -1,0 +1,67 @@
+/* ===== Slope North Side · ข้อมูลเพลงร่วม (อารมณ์ → เพลงทุกแนว, คำฮิต/สแลง, สัดส่วนคนฟัง, Gen Z, วันปล่อยเพลงดัง) — อัปเดต 8 พ.ย. 2569 ===== */
+(function(){
+if(window.SNSData)return;
+/* เพลงที่มีอยู่จริง แยกตามอารมณ์ ทุกแนว (ไม่ใช่ฮิปฮอปอย่างเดียว) · เพลงไทยคัดจากชาร์ต Spotify ไทยรายสัปดาห์ 5 พ.ย. 2569 */
+var MOOD={
+"เศร้า":[["Billie Eilish","when the party's over","Alt pop"],["Lewis Capaldi","Someone You Loved","Pop ballad"],["Juice WRLD","Lucid Dreams","Emo rap"],["Mac Miller","Good News","Alt hip-hop"],["Joji","Glimpse of Us","Ballad"],["XXXTENTACION","Jocelyn Flores","Emo rap"],["Three Man Down","ฝนตกไหม","ป๊อปร็อกไทย"],["PURPEECH","กลัวว่าฉันจะไม่เสียใจ (Fear)","อินดี้ไทย"]],
+"อกหัก":[["Olivia Rodrigo","drivers license","Pop"],["The Weeknd","Call Out My Name","R&B"],["SZA","Kill Bill","R&B"],["Drake","Marvins Room","R&B rap"],["Adele","Someone Like You","Ballad"],["GAVIN:D","ได้แค่เดินมาส่ง (The Last Walk)","R&B ไทย"],["Only Monday","ดีใจที่ตรงนั้นไม่ใช่เรา","ป๊อปไทย"],["Timethai","สะสมคำบอกเลิก (COLLECTING)","ป๊อปไทย"]],
+"โกรธ":[["Kendrick Lamar","Not Like Us","West coast rap"],["Linkin Park","In the End","Nu-metal"],["Rage Against the Machine","Killing in the Name","Rap rock"],["Eminem","The Way I Am","Rap"],["Travis Scott","FE!N","Rage"],["Pop Smoke","Welcome to the Party","NY drill"],["Ghostemane","Mercury: Retrograde","Trap metal"]],
+"มืด/หม่น":[["The Weeknd","The Hills","Dark R&B"],["Travis Scott","goosebumps","Trap"],["Billie Eilish","bury a friend","Dark pop"],["6LACK","PRBLMS","Alt R&B"],["Lana Del Rey","Summertime Sadness","Dream pop"],["Kanye West","Runaway","Hip-hop"],["PORZAX","ยิ้มอันตราย","ฮิปฮอปไทย"]],
+"เหงา":[["Frank Ocean","Self Control","Alt R&B"],["Joji","SLOW DANCING IN THE DARK","Lo-fi R&B"],["The Neighbourhood","Sweater Weather","Alt rock"],["Kid Cudi","Day 'n' Nite","Alt hip-hop"],["Mirrr","ขึ้นใจ (3am call)","R&B ไทย"],["Flure","ฤดูที่ฉันเหงา","ป๊อปไทย"]],
+"คิดถึง":[["Ed Sheeran","Photograph","Pop"],["The Kid LAROI","WITHOUT YOU","Pop rap"],["PURPEECH","ไม่มีวันไหนที่ไม่คิดถึง (starlost.)","อินดี้ไทย"],["Only Monday","ได้แต่นึกถึง","ป๊อปไทย"],["guncharlie","ไม่ได้ลืมแค่ไม่ได้เจอ - Flashback","ป๊อปไทย"],["The Goo Goo Dolls","Iris","Rock ballad"]],
+"รัก/หวาน":[["Lady Gaga, Bruno Mars","Die With A Smile","Pop"],["Daniel Caesar","Best Part","R&B"],["Ed Sheeran","Perfect","Pop"],["Ravyn Lenae","Love Me Not","R&B"],["BLVCKHEART","อยากจะกอดเธอนาน ๆ (HAVE A GOOD TIME)","R&B ไทย"],["PUN","รักให้เธอได้รู้ (Proof.)","ป๊อปไทย"],["Violette Wautier","wanna be yours (อยากให้เธอรัก)","ป๊อปไทย"]],
+"ปาร์ตี้":[["Travis Scott","SICKO MODE","Trap"],["Doja Cat","Say So","Disco pop"],["Pitbull","Give Me Everything","Dance"],["Bad Bunny","Tití Me Preguntó","Reggaeton"],["LISA","ROCKSTAR","Pop rap"],["Black Eyed Peas","I Gotta Feeling","Dance pop"]],
+"มั่นใจ/โชว์ของ":[["Kendrick Lamar","HUMBLE.","Rap"],["Megan Thee Stallion","Savage","Rap"],["Central Cee, Dave","Sprinter","UK rap"],["Doechii","DENIAL IS A RIVER","Rap"],["The Weeknd","Starboy","R&B pop"],["YOUNGOHM","กรุงเทพมหานคร","ฮิปฮอปไทย"]],
+"สู้/ฮึกเหิม":[["Eminem","Lose Yourself","Rap"],["Kanye West","Stronger","Hip-hop"],["Imagine Dragons","Believer","Pop rock"],["J. Cole","Middle Child","Rap"],["Kendrick Lamar","Alright","Rap"],["Bodyslam","ความเชื่อ","ร็อกไทย"]],
+"ชิล":[["Steve Lacy","Bad Habit","Alt R&B"],["Rex Orange County","Loving Is Easy","Indie pop"],["Malcolm Todd","Earrings","Alt R&B"],["Tyler, The Creator","See You Again","Alt hip-hop"],["Mac Miller","Small Worlds","Hip-hop"],["Phum Viphurit","Lover Boy","อินดี้ไทย"],["YEW, LANDOKMAI","Summertime","ป๊อปไทย"]],
+"หลอน":[["Michael Jackson","Thriller","Pop/funk"],["Tame Impala","Dracula","Psych pop"],["Billie Eilish","bury a friend","Dark pop"],["Eminem","Stan","Rap"],["Travis Scott","goosebumps","Trap"]]
+};
+/* คำฮิต & สแลง: [คำ, ความหมายสั้นๆ] · now = ตอนนี้, old = ยุคก่อน (90s–2010s) */
+var SLANG={
+th:{now:[["ตัวตึง","ตัวท็อปของวงการนั้น"],["ต๊าช","ปังมาก เกินคาด"],["แบบตะโกน","มากๆ (ต่อท้ายคำ)"],["แบบใหม่แบบสับ","ใหม่และเท่ ไม่เคยมีใคร"],["เฟื่อน","เพื่อนก็ไม่ใช่ แฟนก็ไม่เชิง"],["ช็อตฟีล","อารมณ์ดีอยู่แล้วโดนตัดจบ"],["อรุ่มเจ๊าะ","ยิ้มเขินกลั้นไม่อยู่"],["เต็มคาราเบล","เต็มที่ / เมาเต็มที่"],["ตัวแม่","ตัวจริง ตัวนำ"],["เอาปากกามาวง","ชี้ให้เห็นชัดๆ ว่าผิดตรงไหน"],["แน่นะวิ","คิดว่าง่าย แต่จริงๆ ยาก"],["ปัง","ดีมาก ฮิต"],["ฉ่ำ","เยอะ จัดเต็ม"],["จึ้ง","สวย/เท่จนตะลึง"],["มูฟออน","ก้าวผ่าน ไม่จมอดีต"],["นอยด์","คิดมาก เครียด"],["ทรงอย่างแบด","ลุคดุ เท่"],["โป๊ะ","ความลับแตก"],["หัวร้อน","โมโหง่าย"],["สายเปย์","ทุ่มเงินให้คนอื่น"],["ตึง","เก่ง/แรง/เอาจริง"],["เดือด","ดุ ร้อนแรง"],["ห้าว","กล้า ซ่า"],["แก๊ง","กลุ่มเพื่อน/ทีม"],["ฟีล","อารมณ์ ความรู้สึก"],["ไฟลุก","ฮึก ร้อนแรง"],["ซัด","จัดหนัก ลุย"],["เบียว","อินเกินจริง"],["กาว","มโน พูดเกินจริง"],["เท","ทิ้ง เบี้ยวนัด"]],
+ old:[["จ๊าบ","เท่ ทันสมัย (ยุค 90)"],["เฟี้ยว","เท่ ซ่า"],["แอ๊บแบ๊ว","แกล้งทำน่ารัก"],["ชิมิ","ใช่มั้ย (ยุคแชท)"],["จุงเบย","จังเลย"],["ตะมุตะมิ","น่ารักน่าหยิก"],["เด็กแนว","สายอินดี้ แต่งตัวแหวก"],["กิ๊ก","คนคุยเล่นๆ ไม่ใช่แฟน"],["เด็กแว้น","ซิ่งรถเสียงดัง"],["เกรียน","ป่วน กวน"],["เนียน","แนบเนียน ดูไม่ออก"],["แจ่ม","ดี เยี่ยม"],["สะเหล่อ","เชย ทำเกินงาม"],["ซิ่ง","ขับเร็ว / แรง"],["ปิ๊ง","ปิ๊งรัก ชอบทันที"],["วีน","อาละวาด"],["เซ็ง","เบื่อ หงุดหงิด"],["ชิลๆ","สบายๆ"],["เด็ด","เจ๋ง โดน"],["มันส์","สนุกสุดๆ"]]},
+en:{now:[["rizz","เสน่ห์ จีบเก่ง"],["aura","ออร่า ความเท่จากข้างใน"],["no cap","ไม่โม้ พูดจริง"],["delulu","มโนหนัก"],["locked in","โฟกัสเต็มที่"],["cooked","จบเห่ แย่แล้ว"],["it's giving","ให้ฟีลแบบ…"],["ate","ทำได้สุดยอด"],["mid","ธรรมดา กลางๆ"],["opps","ศัตรู คู่กรณี"],["drip","ลุค/แฟชั่นแพง"],["fr","for real จริงๆ"],["lowkey","แบบเงียบๆ นิดๆ"],["situationship","ความสัมพันธ์ไม่ชัดเจน"],["the ick","อยู่ๆ ก็เลิกชอบ"],["main character","ใช้ชีวิตเหมือนพระเอก"],["slay","ทำออกมาเริ่ด"],["glazing","อวยเกินจริง"],["motion","ชีวิตกำลังเดิน มีงาน มีของ"],["pressure","ของแรง กดดันคู่แข่ง"],["bussin","เจ๋งมาก (มักใช้กับอาหาร)"],["sus","น่าสงสัย"],["bet","ได้ ตกลง"],["goated","เทพ ระดับตำนาน"],["real one","คนจริง ไม่ทิ้งกัน"],["ice","เพชร เครื่องประดับ"],["racks","เงินปึก (พันดอลลาร์)"],["finesse","หลอกเนียน / ทำเก๋ๆ"],["tweakin","ทำตัวแปลก ไม่อยู่กับร่องกับรอย"],["vibe check","เช็กฟีล"]],
+ old:[["dope","เจ๋ง"],["fly","เท่ ดูดี"],["fresh","ใหม่ เท่"],["homie","เพื่อนสนิท"],["crib","บ้าน"],["bling","เครื่องประดับวิบวับ"],["shorty","สาว / คนที่คุยอยู่"],["dawg","เพื่อน"],["word","จริง เห็นด้วย"],["grill","ครอบฟันทอง/เพชร"],["whip","รถ"],["hustle","ดิ้นรนหาเงิน"],["baller","คนรวย ใช้เงินเก่ง"],["props","ยกย่อง ให้เครดิต"],["wack","ห่วย"],["peace out","ไปละ"],["holla","ทัก เรียก"],["swag","สไตล์มั่นใจ"],["hater","คนชอบเกลียด"],["G.O.A.T.","ดีที่สุดตลอดกาล"]]}
+};
+/* สัดส่วนคนฟัง/ชอบแนวนี้ (ประมาณการ %) — th ไทย, gl ทั่วโลก, z = Gen Z ชอบมากกว่าค่าเฉลี่ยไหม */
+var AUD={
+ thai_pop:{th:[55,65],gl:[55,65],z:0,b:"ป๊อป/บัลลาดครองชาร์ต Spotify ไทยเกือบทั้งท็อป 25 (5 พ.ย. 2569) · ป๊อปเป็นแนวอันดับ 1 ของโลกตาม IFPI"},
+ pop_rnb:{th:[30,40],gl:[30,40],z:1,b:"R&B/ป๊อป R&B ไทยมาแรง (GAVIN:D, BLVCKHEART อยู่ท็อป 5) · ทั่วโลก R&B/ป๊อปเป็นกลุ่มใหญ่"},
+ dark_rnb:{th:[15,25],gl:[20,30],z:1,b:"แนวเดียวกับ The Weeknd / Brent Faiyaz · Blinding Lights กลับขึ้นชาร์ตโลก +36 อันดับ (สัปดาห์ 5 พ.ย.)"},
+ melodic_trap:{th:[20,30],gl:[30,40],z:1,b:"R&B/ฮิปฮอปเป็นแนวสตรีมเยอะสุดในอเมริกา 349.9 พันล้านครั้งปี 2025 (Luminate) · ไทย: PORZAX 2 เพลงในท็อป 13"},
+ drill:{th:[5,10],gl:[10,15],z:1,b:"NYC drill ติด 4 แนวย่อยฮิปฮอปที่ Gen Z อายุ 13–24 ฟังมากสุดบน Spotify (Chartmetric 2026) · ไทยยังเฉพาะกลุ่ม"},
+ boom_bap:{th:[5,10],gl:[10,15],z:0,b:"ฐานแฟนผู้ใหญ่ 25+ แน่น แต่ไม่ใช่แนวที่ดันชาร์ตตอนนี้"},
+ lofi:{th:[10,15],gl:[15,20],z:1,b:"ฟังประกอบเรียน/ทำงานเยอะ แต่คนจำชื่อศิลปินน้อย"},
+ phonk:{th:[5,10],gl:[10,20],z:1,b:"Russian/Brazilian phonk ติดท็อปแนวย่อยของคนอายุ 18–24 และโตเร็วสุดบน SoundCloud (Chartmetric 2026)"},
+ emo:{th:[8,12],gl:[15,20],z:1,b:"ร็อกเป็นแนวที่โตเร็วสุดในสตรีมมิงปี 2025 (Luminate) · trap metal อยู่ท็อปแนวย่อยของ Gen Z"},
+ afro:{th:[3,6],gl:[10,15],z:1,b:"โตต่อเนื่องทั่วโลก (Afrobeats/Amapiano) · ในไทยยังน้อย"}
+};
+/* แนวย่อยฮิปฮอปที่ Gen Z ฟัง (Chartmetric 2026, SoundCloud Music Intelligence Report 2026) */
+var GENZ=[
+ {n:"Rage rap",d:"ซินธ์แตก เบสบี้ ร้องตะโกนเมโลดี้ · โตเร็วสุดบน SoundCloud และติดท็อปของคนอายุ 13–24",a:["EsDeeKid","Playboi Carti","Ken Carson","Destroy Lonely","Yeat"],q:"rage rap"},
+ {n:"Phonk (Russian / Brazilian)",d:"คาวเบลล์ เบสแตก สายดริฟต์ · อันดับ 1 แนวย่อยของคนอายุ 18–24 บน Spotify",a:["Kordhell","INTERWORLD","DVRST"],q:"brazilian phonk"},
+ {n:"Trap metal",d:"แทรป + เมทัล เสียงแหบ ดุ",a:["Ghostemane","Scarlxrd"],q:"trap metal"},
+ {n:"NYC / UK drill",d:"808 สไลด์ กลองเหวี่ยง แร็พเล่าเรื่องถนน",a:["Pop Smoke","Central Cee","Fivio Foreign"],q:"drill"},
+ {n:"Jerk",d:"กลองเร็วแบบคลับ เสียงร้องเบาๆ ลอยๆ · เริ่มผสมกับอินดี้/ป๊อปพังก์ (89% ของแฟนเป็น Gen Z ตาม SoundCloud)",a:["Xaviersobased","Nettspend"],q:"jerk rap"},
+ {n:"Plugg / Chugg",d:"ซินธ์หวาน ฮัมเบาๆ · ฉากเม็กซิโกโต 81% ต่อปี",a:["Doony Graff","Ezya"],q:"pluggnb"},
+ {n:"DMV rap",d:"แทรป + ดริล + go-go ฟลว์เร็ว",a:["HavinMotion","JaeyChino","kuru"],q:"DMV rap"},
+ {n:"Melodic rap / R&B rap",d:"แร็ป + ฮุคร้อง แนวที่อยู่ชาร์ตนานสุด (ไทย: PORZAX, YOUNGOHM)",a:["Drake","Lil Tecca","PORZAX","YOUNGOHM"],q:"melodic rap"}
+];
+/* ใครปล่อย/เล่นช่วงไหน (ตรวจวันชน) · t: intl=อัลบั้มต่างประเทศ, th=ไทย, ev=อีเวนต์ใหญ่ในไทย · big=คนสนใจมาก */
+var REL={at:"8 พ.ย. 2569",items:[
+ ["2026-11-06","intl","Lil Baby","อัลบั้ม Fresh",1],["2026-11-06","intl","Skepta","อัลบั้ม The Fork & Knife",0],
+ ["2026-11-07","ev","BIGBANG / BABYMONSTER","คอนเสิร์ตกรุงเทพฯ 7–8 พ.ย.",1],
+ ["2026-11-13","intl","Wiz Khalifa","อัลบั้ม Cool",0],["2026-11-13","intl","Offset","อัลบั้ม GMFU (วันอาจเลื่อน)",1],["2026-11-13","intl","Sleepy Hallow","อัลบั้ม Still Sleep",0],["2026-11-13","intl","Westside Gunn","อัลบั้ม HEELMATIC",0],
+ ["2026-11-13","ev","BIG ASS","คอนเสิร์ตใหญ่ 13–17 พ.ย.",1],["2026-11-14","ev","BE PEERAPAT","BE & BEYOND Concert",0],
+ ["2026-11-19","intl","GTA VI","เพลงประกอบเกม GTA VI (เกมออกวันเดียวกัน)",1],
+ ["2026-11-24","ev","Joji","คอนเสิร์ต SOLARIS กรุงเทพฯ",1],["2026-11-27","intl","OsamaSon","อัลบั้ม Nocturnal",0],["2026-11-27","intl","JID","Live From NPR's Tiny Desk",0],
+ ["2026-11-29","ev","Khalid","คอนเสิร์ตกรุงเทพฯ",0],
+ ["","th","Jeff Satur","ซิงเกิล ที่ชอบที่ชอบ (Grief Eaters) — เข้าชาร์ตใหม่สัปดาห์นี้",1],["","th","Timethai × BLVCKHEART","สะสมคำบอกเลิก (COLLECTING) — เพิ่งปล่อย",1],["","th","SERIOUS BACON × PURPEECH","เผื่อเราไม่ต้องลาจากกัน — เพิ่งปล่อย",0],["","th","Saran","DND (โหมดพระจันทร์) — เพิ่งปล่อย",0],["","th","JISOO","ADDICTED — เพิ่งปล่อย",1]
+],src:["HotNewHipHop: Hip-Hop Albums Dropping In November 2026","PPTV: คอนเสิร์ตเดือนพฤศจิกายน 2569","kworb: Spotify Weekly Chart Thailand 2026/11/05 (เพลงใหม่)"]};
+var sp=function(q){return "https://open.spotify.com/search/"+encodeURIComponent(q)},yt=function(q){return "https://www.youtube.com/results?search_query="+encodeURIComponent(q)};
+function moodSongs(moods,n){var out=[],seen={};(moods&&moods.length?moods:Object.keys(MOOD)).forEach(function(m){(MOOD[m]||[]).forEach(function(s){var k=(s[0]+"|"+s[1]).toLowerCase();if(!seen[k]){seen[k]=1;out.push({artist:s[0],title:s[1],genre:s[2],mood:m})}})});
+ for(var i=out.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=out[i];out[i]=out[j];out[j]=t}return n?out.slice(0,n):out}
+function slangPick(lang,era,n,extra){var B=SLANG[lang],pool=era=="now"?B.now:era=="old"?B.old:B.now.concat(B.old);pool=pool.concat(extra||[]);var a=pool.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a.slice(0,n||10)}
+function clash(dateStr){if(!dateStr)return[];var d=new Date(dateStr+"T12:00:00").getTime();return REL.items.filter(function(x){return x[0]}).map(function(x){return{d:x[0],t:x[1],a:x[2],w:x[3],big:!!x[4],gap:Math.round((new Date(x[0]+"T12:00:00").getTime()-d)/864e5)}}).filter(function(x){return Math.abs(x.gap)<=7}).sort(function(a,b){return Math.abs(a.gap)-Math.abs(b.gap)})}
+window.SNSData={MOOD:MOOD,SLANG:SLANG,AUD:AUD,GENZ:GENZ,REL:REL,moodSongs:moodSongs,slangPick:slangPick,clash:clash,sp:sp,yt:yt};
+})();
