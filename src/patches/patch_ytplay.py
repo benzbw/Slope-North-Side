@@ -1,7 +1,7 @@
 # เปิดบีต YouTube ในเครื่องเล่นของสมุดเนื้อ (ไม่ต้องออกไปแอป YouTube) + แก้สีหน้าต่างบรีฟเพลง/โมดัล · ใช้: python3 patch_ytplay.py <write.html>
 import sys
 p = sys.argv[1]; s = open(p, encoding='utf-8').read()
-if 'function snsYT(' in s: print('ytplay already'); sys.exit(0)
+OLD = 'function snsYT(' in s
 def R(a, b):
     global s
     assert s.count(a) == 1, a[:70]; s = s.replace(a, b)
@@ -15,7 +15,16 @@ HELP = r'''<style>
 .sx-modal select.sw-in option{background:#120d12;color:#f6eff1}
 </style><script>/* บีตจาก YouTube เล่นในแอป: ทำตัวให้เหมือน <audio> เพื่อให้ปุ่มเดิมทั้งหมดใช้ได้ */
 function snsYtId(u){var m=/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([\w-]{11})/.exec(u||"");return m?m[1]:null}
-function snsYT(id){var A={paused:true,_t:0,_r:1,duration:0,loop:true,src:"",el:null},fr=document.createElement("iframe");
+var SNS_WEB="https://benzbw.github.io/Slope-North-Side/write.html";
+function snsPack(o){try{return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}catch(e){return""}}
+function snsYT(id,n){var A={paused:true,_t:0,_r:1,duration:0,loop:true,src:"",el:null};
+ if(/claude\.ai|claudeusercontent/.test(location.hostname)){var d=document.createElement("div"),u="https://www.youtube.com/watch?v="+id,tx=document.getElementById("sw-tx"),ti=document.getElementById("sw-ti");
+  var pk=snsPack({t:(ti&&ti.value)||n&&n.title||"",b:(tx&&tx.value)||n&&n.body||"",l:(n&&n.link)||u,bpm:n&&n.bpm||0});
+  d.style.cssText="border:1px solid var(--sx-line2);border-radius:12px;padding:12px;margin:0 0 10px;background:rgba(255,51,71,.06)";
+  d.innerHTML='<b style="display:block;font-size:14px">claude.ai ไม่ให้เล่นคลิป YouTube ในหน้า</b><p class="sw-note" style="margin:4px 0 8px">เปิดเพลงนี้ในเว็บแอป (ลิงก์ GitHub) จะได้ชื่อเพลง เนื้อ และบีตเดิมไปด้วย แล้วกดเล่นบีตในสมุดได้เลย หรือฟังใน YouTube แล้วกลับมาเขียน</p><div class="sw-acts" style="margin-top:0"><a class="sx-btn" target="_blank" rel="noopener" href="'+SNS_WEB+'#import='+pk+'">เปิดเพลงนี้ในเว็บแอป ↗</a><a class="sw-ghost" target="_blank" rel="noopener" href="'+u+'">▶ ฟังใน YouTube</a></div>';
+  A.el=d;A.blocked=true;A.play=function(){window.open(SNS_WEB+"#import="+pk,"_blank");return Promise.resolve()};A.pause=function(){};A.kill=function(){};
+  Object.defineProperty(A,"currentTime",{get:function(){return 0},set:function(){}});return A}
+ var fr=document.createElement("iframe");
  fr.src="https://www.youtube-nocookie.com/embed/"+id+"?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&origin="+encodeURIComponent(location.origin);
  fr.allow="autoplay; encrypted-media";fr.setAttribute("allowfullscreen","");fr.title="บีตจาก YouTube";fr.style.cssText="width:100%;aspect-ratio:16/9;border:0;border-radius:10px;margin:0 0 10px;display:block;background:#000";A.el=fr;
  var send=function(o){try{fr.contentWindow.postMessage(JSON.stringify(o),"*")}catch(e){}},cmd=function(f,a){send({event:"command",func:f,args:a||[]})};
@@ -30,14 +39,20 @@ function snsYT(id){var A={paused:true,_t:0,_r:1,duration:0,loop:true,src:"",el:n
  A.play=function(){cmd("playVideo");return Promise.resolve()};A.pause=function(){cmd("pauseVideo")};A.kill=function(){window.removeEventListener("message",on)};return A}
 </script>
 '''
+if OLD:
+    a = s.index('<style>\n.sx-modal label{display:block}'); b = s.index('</script>', s.index('function snsYT(')) + 10
+    s = s[:a] + HELP + s[b:]
+    s = s.replace('A=W.audio=W.ytA=snsYT(YID);', 'A=W.audio=W.ytA=snsYT(YID,n);')
+    s = s.replace('$("sw-bh").textContent=YID?"เล่นบีตจาก YouTube ในแอป · ปุ่มวน/A-B/−5 วิใช้ได้ · ถ้าภาพไม่ขึ้นให้กดเปิด ↗ หรือใส่ไฟล์บีต":', '$("sw-bh").textContent=YID?(A.blocked?"หรือโหลดไฟล์บีตที่โปรดิวเซอร์แจก แล้วกด ♪ ใส่ไฟล์บีต เพื่อเปิดวนในหน้านี้":"เล่นบีตจาก YouTube ในแอป · ปุ่มวน/A-B/−5 วิใช้ได้ · ถ้าภาพไม่ขึ้นให้กดเปิด ↗ หรือใส่ไฟล์บีต"):')
+    open(p, 'w', encoding='utf-8').write(s); print('ytplay updated'); sys.exit(0)
 i = s.index('<script>(function(){\n"use strict";')
 s = s[:i] + HELP + s[i:]
 R('if(!src&&n.beat.url)src=n.beat.url}',
-  'if(!src&&n.beat.url)src=n.beat.url}\n if(W.ytA){try{W.ytA.kill()}catch(e){}W.ytA=null}var YID=!src&&snsYtId(n.link||(n.beatPick&&n.beatPick.url)||"");if(YID){A=W.audio=W.ytA=snsYT(YID);src="yt"}')
+  'if(!src&&n.beat.url)src=n.beat.url}\n if(W.ytA){try{W.ytA.kill()}catch(e){}W.ytA=null}var YID=!src&&snsYtId(n.link||(n.beatPick&&n.beatPick.url)||"");if(YID){A=W.audio=W.ytA=snsYT(YID,n);src="yt"}')
 R('$("sw-bn").textContent=n.beat?n.beat.name:"ยังไม่มีบีต";',
   'if(YID)pl.insertBefore(A.el,pl.firstChild);\n $("sw-bn").textContent=n.beat?n.beat.name:YID?((n.beatPick&&n.beatPick.name)||"บีตจาก YouTube"):"ยังไม่มีบีต";')
 R('$("sw-bh").textContent=src?"":',
-  '$("sw-bh").textContent=YID?"เล่นบีตจาก YouTube ในแอป · ปุ่มวน/A-B/−5 วิใช้ได้ · ถ้าภาพไม่ขึ้นให้กดเปิด ↗ หรือใส่ไฟล์บีต":src?"":')
+  '$("sw-bh").textContent=YID?(A.blocked?"หรือโหลดไฟล์บีตที่โปรดิวเซอร์แจก แล้วกด ♪ ใส่ไฟล์บีต เพื่อเปิดวนในหน้านี้":"เล่นบีตจาก YouTube ในแอป · ปุ่มวน/A-B/−5 วิใช้ได้ · ถ้าภาพไม่ขึ้นให้กดเปิด ↗ หรือใส่ไฟล์บีต"):src?"":')
 R('if(src)A.src=src;A.loop=true;', 'if(src&&!YID)A.src=src;A.loop=true;')
 R('bl.onchange=function(){n.link=bl.value.trim();upd();W.dirty=true;wSaveNow()};',
   'bl.onchange=function(){var was=snsYtId(n.link||"");n.link=bl.value.trim();upd();W.dirty=true;wSaveNow();if(!n.beat&&snsYtId(n.link)!=was)player()};')
