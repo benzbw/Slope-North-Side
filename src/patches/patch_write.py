@@ -90,3 +90,5 @@ import subprocess as _sp, os as _os
 _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_moods.py'), p], check=True)
 # AI ทำบีต (Beat Lab)
 _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_beatlab.py'), p], check=True)
+# จำหน้าเดิมเมื่อสลับแอป
+_sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_session.py'), p], check=True)
