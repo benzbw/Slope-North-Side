@@ -658,13 +658,13 @@ function beatTab(){var P=J("sns:wbeat",{}),gk=W.beatG||P.g||"rnb",R=W.beatRef||{
  $("sw-bud").querySelectorAll("button").forEach(function(b){b.onclick=function(){$("sw-bud").querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x==b)});if($("sw-bres").innerHTML)beatSearch()}});
  var ptb=function(){$("sw-ptb").innerHTML=PRICE.map(function(p){var x=p[0]=="Exclusive"?"+":"";return'<tr><td><b>'+p[0]+'</b></td><td class="num">$'+p[1]+'–'+fmtN(p[2])+x+'</td><td class="num">฿'+fmtN(thb(p[1]))+'–'+fmtN(thb(p[2]))+x+'</td><td style="color:var(--sx-mut)">'+p[3]+'</td></tr>'}).join("")};ptb();
  $("sw-fx").oninput=function(){var v=parseFloat(this.value);if(v>20&&v<60){S.raw.set("sns:fx",String(v));ptb();savedList();if($("sw-bres").innerHTML)beatSearch()}};
- $("sw-bgo").onclick=beatSearch;if($("sw-bai"))$("sw-bai").onclick=beatAI;
+ $("sw-bgo").onclick=function(){beatSearch()};if($("sw-bai"))$("sw-bai").onclick=beatAI;
  $("sw-sadd").onclick=function(){var u=$("sw-sl").value.trim(),n=$("sw-sn").value.trim();if(!u&&!n){toastS("ใส่ลิงก์หรือชื่อบีตก่อน");return}
   if(u&&!/^https?:\/\//i.test(u))u="https://"+u;var L=J("sns:beats:"+ST.uid,[]);L.unshift({id:rid(),url:u,name:n||u.replace(/^https?:\/\/(www\.)?/,"").slice(0,50),lic:$("sw-sk").value,usd:parseFloat($("sw-sp").value)||0,t:now()});JS("sns:beats:"+ST.uid,L.slice(0,60));
   $("sw-sl").value="";$("sw-sn").value="";$("sw-sp").value="";savedList();toastS("เก็บบีตแล้ว")};
  savedList();if(W.beatRef||W.beatG){var q=W.beatRef&&W.beatRef.q;W.beatG=null;W.beatRef=null;beatSearch(q)}}
 function budget(){var b=root.querySelector("#sw-bud [aria-pressed=true]");return b?b.dataset.b:"both"}
-function beatSearch(extra){var gk=$("sw-bg").value,G=GEN[gk],ar=$("sw-ba").value.trim(),sg=$("sw-bs").value.trim(),kw=$("sw-bk").value.trim(),bud=budget();
+function beatSearch(extra){extra=Array.isArray(extra)?extra:(typeof extra=="string"&&extra?[extra]:[]);var gk=$("sw-bg").value,G=GEN[gk],ar=$("sw-ba").value.trim(),sg=$("sw-bs").value.trim(),kw=$("sw-bk").value.trim(),bud=budget();
  JS("sns:wbeat",{g:gk,a:ar,s:sg,k:kw,bud:bud});
  var tb=ar?ar+" type beat":G.yt[0],k=kw?" "+kw:"",yr=" "+new Date().getFullYear(),bsTerm=ar?ar+" type beat":G.bs,like=sg?(ar?ar+" ":"")+sg+" type beat":"";
  var free=[["YouTube · "+tb+" free for profit",yt(tb+k+" free for profit"),"ลงสตรีมได้ถ้าเขียนชัด"]];
