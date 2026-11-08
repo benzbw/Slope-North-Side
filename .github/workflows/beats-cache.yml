@@ -1,0 +1,23 @@
+name: Beats cache (YouTube type beats, free)
+on:
+  schedule: [{cron: "17 20 * * *"}]   # ทุกวัน 03:17 เวลาไทย
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: {group: beats-cache, cancel-in-progress: false}
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q -U yt-dlp
+      - run: python3 ci/beats_cache.py data/beats.new.json
+      - name: Commit if changed
+        run: |
+          mv data/beats.new.json data/beats.json
+          git config user.name "sns-bot"; git config user.email "sns-bot@users.noreply.github.com"
+          git add data/beats.json
+          git diff --cached --quiet && echo "no change" && exit 0
+          git commit -m "data: refresh beats cache ($(date +%F))"
+          git pull --rebase -q origin main && git push -q origin HEAD:main
