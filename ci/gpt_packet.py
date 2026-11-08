@@ -21,6 +21,11 @@ def review():
     # ไฟล์ที่ประกอบออกมาแล้ว (index.html, write.html ที่ root) ไม่ต้องส่ง ดูจากต้นฉบับใน src/ แทน
     skip = re.compile(r'^(index\.html|write\.html|sw\.js|manifest\.json|.*\.png|.*\.jpg|src/data/.*)$')
     want = [f for f in files if not skip.match(f)]
+    # PR body บรรทัด "focus: a, b" → ส่งเฉพาะไฟล์เหล่านั้น (diff ใหญ่เกินรุ่นฟรี)
+    fm = re.search(r'^\s*focus\s*:\s*(.+)$', os.environ.get('BODY') or '', re.M | re.I)
+    if fm:
+        fl = [x.strip().strip('`') for x in re.split(r'[,\s]+', fm.group(1)) if x.strip()]
+        want = [f for f in want if f in fl] or want
     diff = sh('git', 'diff', '-U2', base + '...' + head, '--', *want) if want else ''
     cut = len(diff) > LIMIT
     out = [RULES, '',
