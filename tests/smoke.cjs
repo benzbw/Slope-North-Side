@@ -41,6 +41,13 @@ async function run(browser, label, viewport) {
   await p.screenshot({ path: path.join(SHOTS, label + '-step1.png') });
   for (const s of ['2', '3']) { await p.evaluate(s => { const b = document.querySelector('#dock nav button[data-s="' + s + '"]'); b && b.click() }, s); await p.waitForTimeout(500); }
   await p.screenshot({ path: path.join(SHOTS, label + '-step3.png') });
+  const rx = await p.evaluate(() => { const r = document.getElementById('rx'); if (!r) return 'no #rx';
+    const d = new Date(Date.now() + 20 * 864e5).toISOString().slice(0, 10), i = r.querySelector('[data-k="date"]'); i.value = d; i.dispatchEvent(new Event('change'));
+    r.querySelector('[data-k="title"]').value = 'CI Song'; r.querySelector('[data-k="title"]').dispatchEvent(new Event('input'));
+    return r.querySelectorAll('.rx-ev').length + ' events · ' + r.querySelectorAll('.rx-ck').length + ' checks · ' + /CI Song/.test(SNSRelease.sheet()) });
+  check(label + ': เตรียมส่งสตรีม + ปฏิทินปล่อยเพลง', /^12 events · 11 checks · true/.test(rx), rx);
+  await p.evaluate(() => document.getElementById('rx').scrollIntoView()); await p.waitForTimeout(200);
+  await p.screenshot({ path: path.join(SHOTS, label + '-release.png') });
   check(label + ': ไม่มี error ในหน้าเว็บ', errs.length === 0, errs.slice(0, 3).join(' | '));
   await p.close();
 }

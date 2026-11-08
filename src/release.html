@@ -1,0 +1,114 @@
+<style>
+.rx-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:14px 0}
+.rx-card h4{margin:0 0 4px;font-size:15.5px}
+.rx-note{font-size:12px;color:var(--mut);line-height:1.6;margin:4px 0 8px}
+.rx-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:480px){.rx-grid{grid-template-columns:1fr}}
+.rx-f{display:block}.rx-f span{display:block;font-size:11.5px;color:var(--mut);margin:0 0 3px}
+.rx-f input,.rx-f select,.rx-f textarea{width:100%;box-sizing:border-box;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);padding:9px 10px;font:14px/1.4 inherit;font-family:inherit}
+.rx-f textarea{min-height:90px;resize:vertical}
+.rx-ck{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);font-size:13px;line-height:1.5}
+.rx-ck:first-child{border-top:0}
+.rx-ck b{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px}
+.rx-ck b.y{background:rgba(111,224,160,.18);color:#7ee2a0}.rx-ck b.n{background:rgba(255,51,71,.18);color:#ff8b97}.rx-ck b.w{background:rgba(255,196,107,.18);color:#ffc46b}
+.rx-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.rx-acts button,.rx-acts a{min-height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);font:600 13px inherit;font-family:inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.rx-acts .pri{background:var(--red,#ff3347);border-color:var(--red,#ff3347);color:#fff}
+.rx-cd{display:flex;align-items:baseline;gap:10px;margin:6px 0 4px}.rx-cd b{font:400 40px/1 Anton,system-ui;color:var(--red,#ff3347)}
+.rx-tl{position:relative;margin:8px 0 0;padding-left:18px}
+.rx-tl:before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--line)}
+.rx-ev{position:relative;padding:7px 0 9px}
+.rx-ev:before{content:"";position:absolute;left:-16px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--mut)}
+.rx-ev.today:before{background:var(--red,#ff3347);box-shadow:0 0 0 4px rgba(255,51,71,.25)}
+.rx-ev.done{opacity:.55}.rx-ev.done:before{background:#7ee2a0}
+.rx-ev label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.rx-ev input{margin-top:3px;accent-color:#ff3347}
+.rx-ev em{font-style:normal;font-size:11.5px;color:var(--mut);display:block}
+.rx-ev strong{font-size:13.5px}
+.rx-ev small{display:block;font-size:12px;color:var(--mut);line-height:1.5}
+.rx-day{font:700 11px system-ui;letter-spacing:.06em;color:#ff8b97}
+</style>
+<script>/* ===== Slope North Side · เตรียมส่งสตรีมครบชุด + ปฏิทินปล่อยเพลง & แผนคอนเทนต์ ===== */
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i)};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+var K="bwdist",KP="bwplan";/* ขึ้นต้น bw → แยกตามโปรเจกต์อัตโนมัติ */
+function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function JS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function val(id){var e=$(id);return e?String(e.value||"").trim():""}
+function song(){try{return window.SNSSong?SNSSong():null}catch(e){return null}}
+function lyrics(){var S=song();if(!S||!S.lines)return"";return S.lines.map(function(l){return String(l.t||"").replace(/\(.*?\)/g,"").trim()}).filter(Boolean).join("\n")}
+function toast(m){try{window.toast?window.toast(m):0}catch(e){}}
+var GEN=["Hip-Hop/Rap","R&B/Soul","Pop","Alternative","Electronic","Rock","Indie","Thai Pop","Lo-Fi"];
+var D=J(K,{});
+function F(){var S=song()||{};return{
+ title:D.title||val("rl-title")||S.title||"",artist:D.artist||val("rl-artist")||"",feat:D.feat!=null?D.feat:val("rl-feat"),
+ writer:D.writer||"",composer:D.composer||"",producer:D.producer||val("rl-prod")||"",label:D.label||val("rl-label")||"Slope North Side",
+ year:D.year||String(new Date().getFullYear()),isrc:D.isrc||"",upc:D.upc||"",g1:D.g1||"Hip-Hop/Rap",g2:D.g2||"R&B/Soul",
+ lang:D.lang||"ไทย",explicit:D.explicit||"no",date:D.date||val("rl-date")||"",dist:D.dist||"DistroKid",
+ beat:D.beat||"",cover:!!D.cover,wav:!!D.wav}}
+function save(){var o={};document.querySelectorAll("#rx-form [data-k]").forEach(function(e){o[e.dataset.k]=e.type=="checkbox"?e.checked:e.value.trim()});D=o;JS(K,o);check();plan()}
+function fld(k,lab,v,type,opts){if(type=="sel")return'<label class="rx-f"><span>'+lab+'</span><select data-k="'+k+'">'+opts.map(function(o){var x=Array.isArray(o)?o:[o,o];return'<option value="'+esc(x[0])+'"'+(x[0]==v?" selected":"")+'>'+esc(x[1])+'</option>'}).join("")+'</select></label>';
+ return'<label class="rx-f"><span>'+lab+'</span><input data-k="'+k+'" type="'+(type||"text")+'" value="'+esc(v)+'"></label>'}
+function render(){var host=$("rx");if(!host)return;var f=F();
+ host.innerHTML='<div class="rx-card" id="rx-form"><h4>เตรียมส่งสตรีมครบชุด</h4><p class="rx-note">กรอกครั้งเดียว ใช้ได้กับทุกผู้จัดจำหน่าย (DistroKid, TuneCore, CD Baby, ONErpm) แอปเช็กว่าขาดอะไร แล้วรวมเป็นไฟล์เดียวให้คัดลอกไปวาง</p>'+
+  '<div class="rx-grid">'+fld("title","ชื่อเพลง",f.title)+fld("artist","ศิลปินหลัก",f.artist)+fld("feat","Featured (คั่นด้วย ,)",f.feat)+fld("producer","โปรดิวเซอร์ / คนทำบีต",f.producer)+
+  fld("writer","คนแต่งเนื้อ (ชื่อจริง ตามที่ผู้จัดจำหน่ายขอ)",f.writer)+fld("composer","คนแต่งทำนอง",f.composer)+fld("label","ค่าย / Label",f.label)+fld("year","ปี ℗/©",f.year)+
+  fld("g1","แนวหลัก",f.g1,"sel",GEN)+fld("g2","แนวรอง",f.g2,"sel",GEN)+fld("lang","ภาษาเนื้อ",f.lang,"sel",["ไทย","อังกฤษ","ไทย + อังกฤษ","ไม่มีเนื้อ"])+fld("explicit","คำหยาบ / Explicit",f.explicit,"sel",[["no","ไม่มี (Clean)"],["yes","มี (Explicit)"]])+
+  fld("date","วันปล่อย","" +f.date,"date")+fld("dist","ผู้จัดจำหน่าย",f.dist,"sel",["DistroKid","TuneCore","CD Baby","ONErpm","อื่นๆ"])+
+  fld("isrc","ISRC (ไม่ใส่ก็ได้ ผู้จัดจำหน่ายออกให้ฟรี)",f.isrc)+fld("upc","UPC (ไม่ใส่ก็ได้)",f.upc)+'</div>'+
+  '<label class="rx-f" style="margin-top:8px"><span>บีต: หลักฐานสิทธิ์ (ลิงก์/เลขใบเสร็จ/ประเภทไลเซนส์)</span><input data-k="beat" value="'+esc(f.beat)+'" placeholder="เช่น BeatStars order #1234 · Lease WAV"></label>'+
+  '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px"><label><input type="checkbox" data-k="cover"'+(f.cover?" checked":"")+'> โหลดปก 3000×3000 แล้ว</label><label><input type="checkbox" data-k="wav"'+(f.wav?" checked":"")+'> มีไฟล์ WAV ที่มาสเตอร์แล้ว</label></div>'+
+  '<div id="rx-ck" style="margin-top:10px"></div>'+
+  '<div class="rx-acts"><button class="pri" id="rx-copy">คัดลอกข้อมูลทั้งหมด</button><button id="rx-dl">ดาวน์โหลด .txt</button><button id="rx-cv">ทำ/โหลดปก 3000</button></div></div>'+
+  '<div class="rx-card"><h4>ปฏิทินปล่อยเพลง & แผนคอนเทนต์</h4><div id="rx-plan"></div></div>';
+ host.querySelectorAll("#rx-form [data-k]").forEach(function(e){e.addEventListener(e.tagName=="SELECT"||e.type=="checkbox"||e.type=="date"?"change":"input",save)});
+ $("rx-copy").onclick=function(){var t=sheet();try{navigator.clipboard.writeText(t).then(function(){toast("คัดลอกข้อมูลส่งสตรีมแล้ว")},function(){prompt("คัดลอก",t)})}catch(e){prompt("คัดลอก",t)}};
+ $("rx-dl").onclick=function(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([sheet()],{type:"text/plain"}));a.download=(F().title||"release").replace(/[\\/:*?"<>|]/g,"")+"-release-info.txt";document.body.appendChild(a);a.click();a.remove()};
+ $("rx-cv").onclick=function(){var b=document.querySelector("#cv-open")||[].slice.call(document.querySelectorAll("button")).filter(function(x){return/ทำปกเพลง/.test(x.textContent)})[0];if(b)b.click();else toast("ไปที่ MV & ปก › ทำปกเพลง")};
+ check();plan()}
+function check(){var f=F(),ly=lyrics(),ck=[
+ [!!f.title,"ชื่อเพลง","ใส่ชื่อเพลงล้วน ไม่ต้องใส่ feat. ในชื่อ"],
+ [!!f.artist,"ชื่อศิลปินหลัก","สะกดให้ตรงกับหน้า Spotify/Apple เดิมทุกครั้ง"],
+ [!/feat|ft\./i.test(f.title),"ชื่อเพลงไม่มี feat.","ใส่คน feat ในช่อง Featured แทน"],
+ [!!f.writer,"เครดิตคนแต่ง","ต้องเป็นชื่อจริง-นามสกุล (Spotify/Apple ขอ)"],
+ [!!f.producer,"เครดิตโปรดิวเซอร์",""],
+ [!!f.beat,"หลักฐานสิทธิ์บีต","บีตฟรีห้ามหารายได้ = ห้ามส่งสตรีม · เก็บใบเสร็จ/ไลเซนส์ไว้"],
+ [f.cover,"ปก 3000×3000 JPG","ห้ามมีโลโก้ร้าน/URL/ราคาบนปก · ตัวหนังสือต้องอ่านออก"],
+ [f.wav,"ไฟล์เสียง WAV","16 หรือ 24-bit 44.1kHz ขึ้นไป (สตูดิโอมิกซ์ส่งออก WAV 24-bit ให้แล้ว)"],
+ [!!ly,"เนื้อเพลง","ใช้ส่ง Apple Music/Spotify lyrics (มาจากเนื้อในโปรเจกต์)"],
+ [!!f.date,"วันปล่อย","แนะนำวันศุกร์"],
+ [f.date?days(f.date)>=14:false,"ส่งล่วงหน้าอย่างน้อย 2 สัปดาห์",f.date?"อีก "+days(f.date)+" วัน · ส่งให้ผู้จัดจำหน่ายก่อน 2–3 สัปดาห์ เพื่อให้ทัน pitch Spotify (ต้อง pitch อย่างน้อย 7 วันก่อนปล่อย)":"ตั้งวันปล่อยก่อน"]];
+ var ok=ck.filter(function(x){return x[0]}).length,el=$("rx-ck");if(!el)return;
+ el.innerHTML='<p class="rx-note" style="margin:0 0 4px"><b style="color:var(--ink)">พร้อมส่ง '+ok+'/'+ck.length+'</b></p>'+ck.map(function(x){return'<div class="rx-ck"><b class="'+(x[0]?"y":"n")+'">'+(x[0]?"✓":"!")+'</b><div><b style="width:auto;height:auto;display:inline;background:none">'+esc(x[1])+'</b>'+(x[2]?'<br><span style="color:var(--mut);font-size:12px">'+esc(x[2])+'</span>':"")+'</div></div>'}).join("")}
+function days(d){var t=new Date(d+"T00:00:00"),n=new Date();n.setHours(0,0,0,0);return Math.round((t-n)/864e5)}
+function sheet(){var f=F(),ly=lyrics(),feat=(f.feat||"").split(",").map(function(x){return x.trim()}).filter(Boolean);
+ return["ข้อมูลส่งสตรีม · "+f.title,"","Title: "+f.title,"Primary artist: "+f.artist,"Featured: "+(feat.join(", ")||"-"),"Producer: "+(f.producer||"-"),"Songwriter (lyrics): "+(f.writer||"-"),"Composer: "+(f.composer||"-"),
+  "Label: "+f.label,"℗ "+f.year+" "+f.label,"© "+f.year+" "+f.label,"Primary genre: "+f.g1,"Secondary genre: "+f.g2,"Language: "+f.lang,"Explicit: "+(f.explicit=="yes"?"Yes":"No"),
+  "Release date: "+(f.date||"-"),"Distributor: "+f.dist,"ISRC: "+(f.isrc||"(ให้ผู้จัดจำหน่ายออกให้)"),"UPC: "+(f.upc||"(ให้ผู้จัดจำหน่ายออกให้)"),"Beat license: "+(f.beat||"-"),"","LYRICS",ly||"(ยังไม่มีเนื้อ)"].join("\n")}
+/* ---------- ปฏิทิน ---------- */
+var STEPS=[[-21,"ส่งเพลงให้ผู้จัดจำหน่าย","อัปโหลด WAV + ปก + ข้อมูลจากการ์ดด้านบน","dist"],[-14,"Pitch Spotify for Artists","เขียนเล่าเพลงจากแคปชัน pitch ในการ์ดปล่อยเพลง (ต้องทำก่อนปล่อย ≥7 วัน)","pitch"],
+ [-10,"ประกาศชื่อเพลง + ปก","โพสต์ปกจาก MV & ปก › ชุดภาพโปรโมท","cover"],[-7,"ทีเซอร์ 15 วิ (ท่อนฮุค)","ส่งออก › ฮุค 15 วิ · ลง Reels/TikTok/Shorts","teaser"],
+ [-5,"เบื้องหลัง / ตอนอัด","คลิปสั้นตอนแต่ง/อัด ใช้ภาพสตอรี่ได้","bts"],[-3,"ลิงก์พรีเซฟ","ลิงก์ pre-save จากผู้จัดจำหน่าย ใส่ในโปรไฟล์","presave"],
+ [-1,"นับถอยหลังพรุ่งนี้","ภาพสตอรี่ \"พรุ่งนี้\" + เนื้อท่อนฮุคบรรทัดแรก","count"],[0,"วันปล่อย","เพลงขึ้นเที่ยงคืน · โพสต์ลิงก์ทุกช่องทาง · Lyric video บน YouTube","out"],
+ [1,"คลิปเบื้องหลัง / ขอบคุณคนฟัง","ตอบคอมเมนต์ · แชร์สตอรี่คนที่ฟัง","d1"],[3,"YouTube Shorts ท่อนเด่น","ส่งออก › YouTube Shorts (AI เลือกท่อน)","shorts"],
+ [7,"คลิปท่อนที่ 2 / ฟีดแบ็ก","ดูยอดใน Spotify for Artists ว่าคนฟังจบไหม","d7"],[14,"สรุปผล 2 สัปดาห์","จดยอดฟัง/วิว/ผู้ติดตาม เพื่อวางเพลงต่อไป","d14"]];
+function plan(){var el=$("rx-plan");if(!el)return;var f=F();
+ if(!f.date){el.innerHTML='<p class="rx-note">ตั้ง "วันปล่อย" ในการ์ดด้านบน แล้วแอปจะวางแผนให้ตั้งแต่ D-21 ถึง D+14 พร้อมบอกว่าแต่ละวันใช้เครื่องมือไหนในแอป</p>';return}
+ var P=J(KP,{}),t0=new Date(f.date+"T00:00:00"),dd=days(f.date),TH=["อา.","จ.","อ.","พ.","พฤ.","ศ.","ส."];
+ el.innerHTML='<div class="rx-cd"><b>'+(dd>0?dd:dd==0?"วันนี้":"+"+(-dd))+'</b><span class="rx-note" style="margin:0">'+(dd>0?"วันก่อนปล่อย":dd==0?"ปล่อยเพลงวันนี้":"วันหลังปล่อย")+' · '+esc(f.title||"เพลงนี้")+' · '+TH[t0.getDay()]+' '+t0.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"numeric"})+(t0.getDay()!=5?' (แนะนำวันศุกร์)':'')+'</span></div>'+
+  '<div class="rx-tl">'+STEPS.map(function(s){var d=new Date(t0.getTime()+s[0]*864e5),rel=Math.round((d-new Date(new Date().toDateString()))/864e5),done=!!P[s[3]];
+   return'<div class="rx-ev'+(done?" done":"")+(rel==0?" today":"")+'"><label><input type="checkbox" data-p="'+s[3]+'"'+(done?" checked":"")+'><div><span class="rx-day">D'+(s[0]>0?"+":s[0]<0?"":"±")+(s[0]||0)+'</span> <em style="display:inline">'+TH[d.getDay()]+' '+d.toLocaleDateString("th-TH",{day:"numeric",month:"short"})+(rel==0?" · วันนี้":rel<0&&!done?" · เลยมาแล้ว":"")+'</em><br><strong>'+esc(s[1])+'</strong><small>'+esc(s[2])+'</small></div></label></div>'}).join("")+'</div>'+
+  '<div class="rx-acts"><button id="rx-ics">เพิ่มลงปฏิทินในมือถือ (.ics)</button></div><p class="rx-note">ติ๊กเมื่อทำเสร็จ แอปจำไว้ในโปรเจกต์นี้</p>';
+ el.querySelectorAll("[data-p]").forEach(function(c){c.onchange=function(){var P2=J(KP,{});P2[c.dataset.p]=c.checked;JS(KP,P2);plan()}});
+ $("rx-ics").onclick=function(){var pad=function(n){return(n<10?"0":"")+n},ymd=function(d){return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())};
+  var L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Slope North Side//Release plan//TH"];
+  STEPS.forEach(function(s,i){var d=new Date(t0.getTime()+s[0]*864e5),e=new Date(d.getTime()+864e5);L.push("BEGIN:VEVENT","UID:sns-"+ymd(t0)+"-"+i+"@slopenorthside","DTSTAMP:"+ymd(new Date())+"T000000Z","DTSTART;VALUE=DATE:"+ymd(d),"DTEND;VALUE=DATE:"+ymd(e),"SUMMARY:"+(f.title||"เพลงใหม่")+" · "+s[1],"DESCRIPTION:"+s[2].replace(/[,;]/g," "),"END:VEVENT")});
+  L.push("END:VCALENDAR");var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([L.join("\r\n")],{type:"text/calendar"}));a.download=(f.title||"release").replace(/[\\/:*?"<>|]/g,"")+"-plan.ics";document.body.appendChild(a);a.click();a.remove()}}
+function mount(){if($("rx"))return;var anchor=$("rl-out");if(!anchor)return;var d=document.createElement("div");d.id="rx";anchor.parentNode.insertBefore(d,anchor.nextSibling);D=J(K,{});render()}
+function wire(){mount();["rl-title","rl-artist","rl-feat","rl-prod","rl-label","rl-date"].forEach(function(id){var e=$(id);if(e)e.addEventListener("change",function(){if(!D[id.slice(3)])render()})})}
+if(document.readyState=="loading")document.addEventListener("DOMContentLoaded",function(){setTimeout(wire,300)});else setTimeout(wire,300);
+window.SNSRelease={render:render,sheet:sheet,mount:mount};
+})();
+</script>

@@ -16,7 +16,8 @@ MIXS=open(os.environ.get('MIXST',W0+'/mixstudio.html'),encoding='utf-8').read().
 s=rep(s,'</script>\n</body>','</script>\n'+MIXS+'\n</body>')
 XD=open(os.environ.get('XDATA',W0+'/xdata.js'),encoding='utf-8').read()  # ข้อมูลเพลงร่วม (src/xdata.js)
 EXP=open(os.environ.get('EXPLORE',W0+'/explore.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าค้นหาแนวเพลง (src/explore.html)
-s=rep(s,'</script>\n</body>','</script>\n<script>'+XD+'</script>\n'+EXP+'\n</body>')
+REL=open(os.environ.get('RELEASE',W0+'/release.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # เตรียมส่งสตรีม + ปฏิทินปล่อยเพลง (src/release.html)
+s=rep(s,'</script>\n</body>','</script>\n<script>'+XD+'</script>\n'+EXP+'\n'+REL+'\n</body>')
 M='<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050305"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">\n'
 W='<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){})</script>\n'
 app=rep(s,'</style>\n','</style>\n'+M); app=rep(app,'</script>\n</body>','</script>\n'+W+'</body>')
