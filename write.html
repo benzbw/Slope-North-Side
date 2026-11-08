@@ -289,6 +289,30 @@ function boot(){load().then(function(){setTimeout(upd,600)}).catch(function(){})
 if(document.readyState=="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
+<style>
+.sx-modal label{display:block}
+.sx-modal .sw-lab{display:block;font:600 12px var(--sx-lab,system-ui);letter-spacing:.04em;color:var(--sx-mut,#a9989e);margin:12px 0 6px}
+.sx-modal .sx-in,.sx-modal .sw-in{display:block;width:100%;box-sizing:border-box;min-height:46px;padding:10px 13px;border-radius:12px;border:1px solid var(--sx-line2,rgba(255,232,238,.16));background:rgba(0,0,0,.35);color:var(--sx-fg,#f6eff1);font:15px/1.5 var(--sx-body,system-ui);outline:none;-webkit-text-fill-color:var(--sx-fg,#f6eff1)}
+.sx-modal textarea.sx-in{min-height:110px;resize:vertical}
+.sx-modal .sx-in::placeholder,.sx-modal .sw-in::placeholder{color:var(--sx-dim,#6f6168);-webkit-text-fill-color:var(--sx-dim,#6f6168)}
+.sx-modal .sx-in:focus,.sx-modal .sw-in:focus{border-color:var(--sx-hot,#ff3347)}
+.sx-modal select.sw-in option{background:#120d12;color:#f6eff1}
+</style><script>/* บีตจาก YouTube เล่นในแอป: ทำตัวให้เหมือน <audio> เพื่อให้ปุ่มเดิมทั้งหมดใช้ได้ */
+function snsYtId(u){var m=/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([\w-]{11})/.exec(u||"");return m?m[1]:null}
+function snsYT(id){var A={paused:true,_t:0,_r:1,duration:0,loop:true,src:"",el:null},fr=document.createElement("iframe");
+ fr.src="https://www.youtube-nocookie.com/embed/"+id+"?enablejsapi=1&playsinline=1&rel=0&modestbranding=1&origin="+encodeURIComponent(location.origin);
+ fr.allow="autoplay; encrypted-media";fr.setAttribute("allowfullscreen","");fr.title="บีตจาก YouTube";fr.style.cssText="width:100%;aspect-ratio:16/9;border:0;border-radius:10px;margin:0 0 10px;display:block;background:#000";A.el=fr;
+ var send=function(o){try{fr.contentWindow.postMessage(JSON.stringify(o),"*")}catch(e){}},cmd=function(f,a){send({event:"command",func:f,args:a||[]})};
+ var listen=function(){send({event:"listening",id:1,channel:"widget"})};fr.addEventListener("load",function(){listen();setTimeout(listen,600);setTimeout(listen,1800)});
+ var state=function(st){if(st==1&&A.paused){A.paused=false;if(A.onplay)A.onplay()}else if((st==2||st==0)&&!A.paused){A.paused=true;if(A.onpause)A.onpause()}if(st==0&&A.loop){cmd("seekTo",[0,true]);cmd("playVideo")}};
+ var on=function(e){if(e.source!==fr.contentWindow)return;var d;try{d=typeof e.data=="string"?JSON.parse(e.data):e.data}catch(x){return}if(!d)return;
+  if(d.event=="infoDelivery"&&d.info){var f=d.info;if(f.duration){var first=!A.duration;A.duration=f.duration;if(first&&A.onloadedmetadata)A.onloadedmetadata()}if(f.currentTime!=null){A._t=f.currentTime;if(A.ontimeupdate)A.ontimeupdate()}if(f.playerState!=null)state(f.playerState)}
+  else if(d.event=="onStateChange")state(d.info);else if(d.event=="onReady")listen()};
+ window.addEventListener("message",on);
+ Object.defineProperty(A,"currentTime",{get:function(){return A._t},set:function(v){A._t=v;cmd("seekTo",[v,true])}});
+ Object.defineProperty(A,"playbackRate",{get:function(){return A._r},set:function(v){A._r=v;cmd("setPlaybackRate",[v])}});
+ A.play=function(){cmd("playVideo");return Promise.resolve()};A.pause=function(){cmd("pauseVideo")};A.kill=function(){window.removeEventListener("message",on)};return A}
+</script>
 <script>(function(){
 "use strict";
 var $=function(i){return document.getElementById(i)};
@@ -801,17 +825,19 @@ async function player(){var n=W.note,pl=$("sw-pl");if(!pl)return;
  if(W.url){try{URL.revokeObjectURL(W.url)}catch(e){}W.url=null}
  W.audio=new Audio();W.audio.preload="auto";W.loopA=W.loopB=null;var A=W.audio,src=null;
  if(n.beat){try{var r=await IDB.get("beat:"+n.id);if(r&&r.blob){src=W.url=URL.createObjectURL(r.blob)}}catch(e){}if(!src&&n.beat.url)src=n.beat.url}
+ if(W.ytA){try{W.ytA.kill()}catch(e){}W.ytA=null}var YID=!src&&snsYtId(n.link||(n.beatPick&&n.beatPick.url)||"");if(YID){A=W.audio=W.ytA=snsYT(YID);src="yt"}
  pl.innerHTML='<div class="sw-pl1"><button class="sw-play" id="sw-pp" aria-label="เล่น" '+(src?"":"disabled")+'>▶</button><div class="b"><b id="sw-bn"></b><small id="sw-bt">0:00 / 0:00</small></div></div>'+
   '<input type="range" class="sw-seek" id="sw-sk2" min="0" max="1000" value="0" aria-label="ตำแหน่งบีต" '+(src?"":"disabled")+'>'+
   '<div class="sw-pl2"><button id="sw-lp" aria-pressed="true">⟳ วน</button><button id="sw-ab">A-B</button><button id="sw-bk5">−5 วิ</button><button id="sw-sp">1×</button><button id="sw-tap">แตะหา BPM</button>'+
   '<label><input type="file" id="sw-bf" accept="audio/*,.mp3,.wav,.m4a" hidden>♪ '+(n.beat?"เปลี่ยนบีต":"ใส่ไฟล์บีต")+'</label></div>'+
   '<div class="sw-row" style="margin-top:8px;grid-template-columns:1fr auto"><input class="sw-in" id="sw-bl" placeholder="หรือวางลิงก์บีต (YouTube/BeatStars)" style="min-height:38px;font-size:13.5px"><a class="sw-ghost" id="sw-blo" target="_blank" rel="noopener" style="min-height:38px">เปิด ↗</a></div>'+
   '<p class="sw-note" id="sw-bh" style="font-size:12px"></p>';
- $("sw-bn").textContent=n.beat?n.beat.name:"ยังไม่มีบีต";
- $("sw-bh").textContent=src?"":(n.beat&&n.beat.localOnly?"ไฟล์บีตอยู่ในอีกเครื่อง ใส่ไฟล์ในเครื่องนี้อีกครั้ง":"โหลดบีตจาก BeatStars/YouTube (ที่โปรดิวเซอร์ให้ดาวน์โหลด) แล้วกด ♪ ใส่ไฟล์บีต เพื่อเปิดวนไปพร้อมเขียน");
+ if(YID)pl.insertBefore(A.el,pl.firstChild);
+ $("sw-bn").textContent=n.beat?n.beat.name:YID?((n.beatPick&&n.beatPick.name)||"บีตจาก YouTube"):"ยังไม่มีบีต";
+ $("sw-bh").textContent=YID?"เล่นบีตจาก YouTube ในแอป · ปุ่มวน/A-B/−5 วิใช้ได้ · ถ้าภาพไม่ขึ้นให้กดเปิด ↗ หรือใส่ไฟล์บีต":src?"":(n.beat&&n.beat.localOnly?"ไฟล์บีตอยู่ในอีกเครื่อง ใส่ไฟล์ในเครื่องนี้อีกครั้ง":"โหลดบีตจาก BeatStars/YouTube (ที่โปรดิวเซอร์ให้ดาวน์โหลด) แล้วกด ♪ ใส่ไฟล์บีต เพื่อเปิดวนไปพร้อมเขียน");
  var bl=$("sw-bl"),blo=$("sw-blo");bl.value=n.link||"";var upd=function(){var v=bl.value.trim();blo.style.display=v?"":"none";if(v)blo.href=/^https?:/i.test(v)?v:"https://"+v};upd();
- bl.onchange=function(){n.link=bl.value.trim();upd();W.dirty=true;wSaveNow()};bl.oninput=upd;
- if(src)A.src=src;A.loop=true;
+ bl.onchange=function(){var was=snsYtId(n.link||"");n.link=bl.value.trim();upd();W.dirty=true;wSaveNow();if(!n.beat&&snsYtId(n.link)!=was)player()};bl.oninput=upd;
+ if(src&&!YID)A.src=src;A.loop=true;
  var pp=$("sw-pp"),sk=$("sw-sk2"),bt=$("sw-bt");
  pp.onclick=function(){if(A.paused){A.play().catch(function(){toastS("เล่นไม่ได้ ลองใส่ไฟล์ใหม่")})}else A.pause()};
  A.onplay=function(){pp.textContent="❚❚";pp.setAttribute("aria-label","หยุด")};A.onpause=function(){pp.textContent="▶";pp.setAttribute("aria-label","เล่น")};
