@@ -29,4 +29,5 @@ for k, q in GEN.items():
 ok = sum(len(v) for v in res["artists"].values()) + sum(len(v) for v in res["genres"].values())
 if ok < 30:
     print("too few results (%d) — YouTube may be blocking; keep old file" % ok); sys.exit(1)
+import os; os.makedirs(os.path.dirname(sys.argv[1]) or ".", exist_ok=True)
 json.dump(res, open(sys.argv[1], "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":")); print("total", ok)
