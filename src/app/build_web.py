@@ -1,5 +1,6 @@
 # เว็บแอปสาธารณะ (GitHub Pages) — ไม่ฝังไฟล์เพลง, ติดตั้งเป็นแอปได้ (PWA)
 import re,os,sys,shutil,json
+W0=os.environ.get('SNS_W','/tmp/w'); APP=os.environ.get('SNS_APP','/home/claude/app')  # CI ตั้งเป็นโฟลเดอร์ชั่วคราวที่คัดจาก src/
 src=sys.argv[1]; out=sys.argv[2]; swv=sys.argv[3] if len(sys.argv)>3 else 'web-v1'
 z=open(src+'/synced/slope-north-side-synced.html',encoding='utf-8').read()
 z,n=re.subn(r'window\.SNS_AUDIO="data:audio/mpeg;base64,[^"]*"','window.SNS_AUDIO="data:audio/mpeg;base64,"',z); assert n==1
@@ -9,10 +10,10 @@ assert z.count('</head>')==1 and z.count('</script>\n</body>')==1
 z=z.replace('</head>',M+'</head>').replace('</script>\n</body>','</script>\n'+W+'</body>')
 os.makedirs(out,exist_ok=True)
 open(out+'/index.html','w',encoding='utf-8').write(z)
-open(out+'/sw.js','w').write(open('/home/claude/app/sw.js').read().replace('__V__',swv))
-m=json.load(open('/home/claude/app/manifest.json')); m.update({"name":"Slope North Side","short_name":"Slope North Side","description":"สตูดิโอทำวิดีโอเนื้อเพลง ปก มิกซ์ และปล่อยเพลง","id":"./","lang":"th"})
+open(out+'/sw.js','w').write(open(APP+'/sw.js').read().replace('__V__',swv))
+m=json.load(open(APP+'/manifest.json')); m.update({"name":"Slope North Side","short_name":"Slope North Side","description":"สตูดิโอทำวิดีโอเนื้อเพลง ปก มิกซ์ และปล่อยเพลง","id":"./","lang":"th"})
 json.dump(m,open(out+'/manifest.json','w'),ensure_ascii=False)
-for f in ('icon-192.png','icon-512.png'): shutil.copy('/home/claude/app/'+f,out+'/'+f)
+for f in ('icon-192.png','icon-512.png'): shutil.copy(APP+'/'+f,out+'/'+f)
 open(out+'/.nojekyll','w').write('')
 WR=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','write.html')
 if os.path.exists(WR): shutil.copy(WR,out+'/write.html')  # หน้าแต่งเพลง & หาบีต (ในแอปเดียวกัน)

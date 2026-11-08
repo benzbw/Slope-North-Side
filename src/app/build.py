@@ -1,29 +1,30 @@
 # สร้าง index.html (PWA) และไฟล์ซิงค์ฝังเวลา จาก /tmp/w/new.html
 import json,os,sys
+W0=os.environ.get('SNS_W','/tmp/w'); APP=os.environ.get('SNS_APP','/home/claude/app')  # CI ตั้งเป็นโฟลเดอร์ชั่วคราวที่คัดจาก src/
 def rep(s,o,n):
     assert s.count(o)==1,(s.count(o),o[:60]); return s.replace(o,n)
 out=sys.argv[1]; key=sys.argv[2] if len(sys.argv)>2 else 'bw3s57l'
-b=open('/tmp/w/audio.b64').read().strip()
-s=open('/tmp/w/new.html',encoding='utf-8').read().replace('__AUDIO__',b)
-BOOT=open('/tmp/w/shell_boot.js',encoding='utf-8').read();SCSS=open('/tmp/w/shell.css',encoding='utf-8').read();SJS=open('/tmp/w/shell.js',encoding='utf-8').read()
+b=open(W0+'/audio.b64').read().strip()
+s=open(W0+'/new.html',encoding='utf-8').read().replace('__AUDIO__',b)
+BOOT=open(W0+'/shell_boot.js',encoding='utf-8').read();SCSS=open(W0+'/shell.css',encoding='utf-8').read();SJS=open(W0+'/shell.js',encoding='utf-8').read()
 s=rep(s,'<title>Slope North Side</title>','<title>Slope North Side</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n<script>'+BOOT+'</script>')
 s=rep(s,'</head>','<style>'+SCSS+'</style></head>')
 s=rep(s,'</script>\n</body>','</script>\n<script>'+SJS+'</script>\n</body>')
-TRD=open(os.environ.get('TREND','/tmp/w/trend.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าเทรนด์ & โอกาสแมส (src/trend.html)
+TRD=open(os.environ.get('TREND',W0+'/trend.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าเทรนด์ & โอกาสแมส (src/trend.html)
 s=rep(s,'</script>\n</body>','</script>\n'+TRD+'\n</body>')
-MIXS=open(os.environ.get('MIXST','/tmp/w/mixstudio.html'),encoding='utf-8').read().rstrip('\n')  # สตูดิโอมิกซ์ + แนวเพลง + ฟังเทียบ (src/mixstudio.html)
+MIXS=open(os.environ.get('MIXST',W0+'/mixstudio.html'),encoding='utf-8').read().rstrip('\n')  # สตูดิโอมิกซ์ + แนวเพลง + ฟังเทียบ (src/mixstudio.html)
 s=rep(s,'</script>\n</body>','</script>\n'+MIXS+'\n</body>')
-XD=open(os.environ.get('XDATA','/tmp/w/xdata.js'),encoding='utf-8').read()  # ข้อมูลเพลงร่วม (src/xdata.js)
-EXP=open(os.environ.get('EXPLORE','/tmp/w/explore.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าค้นหาแนวเพลง (src/explore.html)
+XD=open(os.environ.get('XDATA',W0+'/xdata.js'),encoding='utf-8').read()  # ข้อมูลเพลงร่วม (src/xdata.js)
+EXP=open(os.environ.get('EXPLORE',W0+'/explore.html'),encoding='utf-8').read().rstrip('\n').replace('</style>\n','</style>')  # หน้าค้นหาแนวเพลง (src/explore.html)
 s=rep(s,'</script>\n</body>','</script>\n<script>'+XD+'</script>\n'+EXP+'\n</body>')
 M='<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#050305"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">\n'
 W='<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){})</script>\n'
 app=rep(s,'</style>\n','</style>\n'+M); app=rep(app,'</script>\n</body>','</script>\n'+W+'</body>')
-sw=open('/home/claude/app/sw.js').read().replace('__V__',os.environ.get('SWV','bw-v28'))
+sw=open(APP+'/sw.js').read().replace('__V__',os.environ.get('SWV','bw-v28'))
 for x in ('pc','space'):
     os.makedirs(out+'/'+x,exist_ok=True)
     open(out+'/'+x+'/index.html','w',encoding='utf-8').write(app); open(out+'/'+x+'/sw.js','w').write(sw)
-f=json.load(open(os.environ.get('FUSED','/tmp/w/al/fused.json')))
+f=json.load(open(os.environ.get('FUSED',W0+'/al/fused.json')))
 z=rep(s,'var T=EST.slice(),E=null,off=0,synced=false,','var T=SNS.baked?%s:EST.slice(),E=SNS.baked?%s:null,off=0,synced=!!SNS.baked,'%(json.dumps(f['S']),json.dumps(f['E'])))
 z=rep(z,'var VSEG=null,SYL=null,UT=null,WTC={},CONF=null,VER=[]','var VSEG=SNS.baked?%s:null,SYL=SNS.baked?%s:null,UT=SNS.baked?%s:null,WTC={},CONF=SNS.baked?%s:null,VER=[]'%(json.dumps(f.get('Q')),json.dumps(f.get('Y')),json.dumps(f.get('U'),ensure_ascii=False),json.dumps(f['C'])))
 z=rep(z,'localStorage.getItem("bw3")','localStorage.getItem("%s")'%key)
@@ -40,6 +41,6 @@ os.makedirs(out+'/artifact',exist_ok=True)
 open(out+'/artifact/slope-north-side.html','w',encoding='utf-8').write(art)
 print('artifact ok')
 # ไฟล์ต้นทางของลิงก์ถาวร https://claude.ai/artifact/8AxN6jBbSnhs5148EB2CeK — ต้อง publish จาก path นี้เสมอ
-FIX='/mnt/user-data/outputs/fresh37/artifact/slope-north-side.html'
-if out.rstrip('/')!='/mnt/user-data/outputs/fresh37':
+FIX=os.environ.get('SNS_FIX','/mnt/user-data/outputs/fresh37/artifact/slope-north-side.html')  # CI ตั้ง SNS_FIX=off
+if FIX!='off' and out.rstrip('/')!='/mnt/user-data/outputs/fresh37':
     open(FIX,'w',encoding='utf-8').write(art); print('artifact ->',FIX)

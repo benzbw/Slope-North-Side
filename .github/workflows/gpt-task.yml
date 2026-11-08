@@ -1,0 +1,89 @@
+# GPT ลงมือแก้โค้ด (งานเล็ก) แบบฟรี: ติดป้าย gpt-task ที่ Issue ที่มีบรรทัด "files: path/a, path/b"
+# GPT ตอบเป็น patch → นำไปใช้ → ประกอบแอป + ทดสอบ → เปิด PR บน branch gpt/issue-N ให้ Claude ตรวจ (ไม่ merge เอง)
+name: GPT task
+on:
+  issues:
+    types: [labeled]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  models: read
+concurrency:
+  group: gpt-task-${{ github.event.issue.number }}
+  cancel-in-progress: false
+jobs:
+  task:
+    if: github.event.label.name == 'gpt-task'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build task packet
+        id: pk
+        env:
+          TITLE: ${{ github.event.issue.title }}
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          mkdir -p .gpt
+          if python3 ci/gpt_packet.py task > .gpt/prompt.txt 2> .gpt/err.txt; then echo "ok=1" >> "$GITHUB_OUTPUT"; else echo "ok=0" >> "$GITHUB_OUTPUT"; fi
+      - name: Ask GPT for a patch
+        if: steps.pk.outputs.ok == '1'
+        id: ai
+        uses: actions/ai-inference@v1
+        with:
+          model: openai/gpt-4.1
+          prompt-file: .gpt/prompt.txt
+          max-tokens: 3500
+      - name: Apply patch
+        if: steps.pk.outputs.ok == '1'
+        id: ap
+        env:
+          RESP: ${{ steps.ai.outputs.response }}
+        run: |
+          printf '%s' "$RESP" > .gpt/response.md
+          python3 - <<'PY'
+          import re
+          t=open('.gpt/response.md',encoding='utf-8').read()
+          m=re.search(r'```(?:diff|patch)?\n(.*?)```',t,re.S)
+          open('.gpt/change.patch','w',encoding='utf-8').write((m.group(1) if m else '').rstrip('\n')+'\n')
+          PY
+          if git apply --recount --whitespace=fix .gpt/change.patch; then echo "applied=1" >> "$GITHUB_OUTPUT"; else echo "applied=0" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@v4
+        if: steps.ap.outputs.applied == '1'
+        with:
+          node-version: 20
+      - name: Build + smoke test
+        if: steps.ap.outputs.applied == '1'
+        id: t
+        run: |
+          npm init -y >/dev/null && npm i --no-save playwright@1.49.1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
+          rm -f package.json package-lock.json; rm -rf node_modules/.package-lock.json
+          if bash ci/build.sh /tmp/out && node tests/smoke.cjs /tmp/out/web /tmp/out/shots > .gpt/test.txt 2>&1; then echo "pass=1" >> "$GITHUB_OUTPUT"; else echo "pass=0" >> "$GITHUB_OUTPUT"; fi
+          cat .gpt/test.txt || true
+      - name: Open PR for Claude
+        if: steps.ap.outputs.applied == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+          PASS: ${{ steps.t.outputs.pass }}
+        run: |
+          B="gpt/issue-$N"
+          git config user.name "gpt-co-developer[bot]"; git config user.email "gpt-co-developer@users.noreply.github.com"
+          git checkout -b "$B"
+          git add -A -- . ':!.gpt' ':!node_modules' ':!out'
+          git commit -m "GPT: issue #$N" -m "สร้างโดย GPT (GitHub Models) ผ่าน workflow gpt-task — รอ Claude ตรวจ"
+          git push -f origin "$B"
+          { echo "งานจาก Issue #$N โดย GPT (Co-Developer)"; echo; echo "ผลทดสอบในเครื่อง GitHub: $([ "$PASS" = 1 ] && echo 'ผ่าน' || echo 'ไม่ผ่าน — ต้องแก้')"; echo; echo '```'; tail -20 .gpt/test.txt; echo '```'; echo; echo "หมายเหตุ: PR ที่สร้างด้วย GITHUB_TOKEN จะไม่สั่ง CI ซ้ำเอง ผลทดสอบด้านบนรันใน workflow นี้แล้ว"; echo; echo "---"; sed -n '/```$/,$p' .gpt/response.md | tail -n +2; } > .gpt/pr.md
+          gh pr create --base main --head "$B" --title "GPT: $(gh issue view $N --json title -q .title)" --body-file .gpt/pr.md --label from-gpt || gh pr edit "$B" --body-file .gpt/pr.md
+      - name: Report back on the issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number }}
+        run: |
+          if [ "${{ steps.pk.outputs.ok }}" != "1" ]; then msg="GPT ยังไม่เริ่มงาน: $(cat .gpt/err.txt 2>/dev/null)";
+          elif [ "${{ steps.ap.outputs.applied }}" != "1" ]; then msg="GPT ตอบแล้วแต่ patch ใช้กับโค้ดไม่ได้ — Claude จะดูคำตอบใน log ของ workflow นี้แล้วตัดสินใจ";
+          else msg="GPT ส่งงานแล้ว: เปิด PR บน branch gpt/issue-$N ให้ Claude ตรวจ"; fi
+          gh issue comment "$N" --body "$msg"
+          gh issue edit "$N" --remove-label gpt-task || true
