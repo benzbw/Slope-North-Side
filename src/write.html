@@ -911,16 +911,17 @@ window.SNSData={MOOD:MOOD,SLANG:SLANG,AUD:AUD,GENZ:GENZ,REL:REL,moodSongs:moodSo
 var SLERA="now";function slEsc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function slangMine(){try{return JSON.parse(localStorage.getItem("sns:slang:mine")||"[]")}catch(e){return[]}}
 function slangUI(){var box=document.getElementById("sw-slang");if(!box||!window.SNSData)return;var M=slangMine(),th=SNSData.slangPick("th",SLERA,10,M.filter(function(w){return/[฀-๿]/.test(w[0])})),en=SNSData.slangPick("en",SLERA,10,M.filter(function(w){return!/[฀-๿]/.test(w[0])}));
- var col=function(L){return L.map(function(w){return'<button class="sw-chip" data-w="'+slEsc(w[0])+'" title="'+slEsc(w[1]||"")+'">'+slEsc(w[0])+'</button>'}).join("")};
+ var col=function(L){return L.map(function(w){return'<button class="sw-chip" data-w="'+slEsc(w[0])+'" title="'+slEsc(w[1]||"")+'" style="height:auto;padding:6px 12px;text-align:left;line-height:1.25">'+slEsc(w[0])+(w[1]?'<small style="display:block;font-size:11px;opacity:.72;font-weight:400">'+slEsc(w[1])+'</small>':'')+'</button>'}).join("")};
  box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 style="font-size:15px;margin:0">คำฮิต & สแลง</h3><button class="sw-ghost" id="sw-slre">↻ สุ่มใหม่</button></div>'+
   '<div class="sw-chips" style="margin:8px 0 4px">'+[["now","ตอนนี้"],["old","ยุคก่อน"],["mix","ผสม"]].map(function(e){return'<button class="sw-chip" data-era="'+e[0]+'" aria-pressed="'+(SLERA==e[0])+'">'+e[1]+'</button>'}).join("")+'</div>'+
   '<p class="sw-note" style="margin:6px 0 2px">ไทย</p><div class="sw-chips">'+col(th)+'</div><p class="sw-note" style="margin:8px 0 2px">อังกฤษ / แร็ปเปอร์ฝรั่ง</p><div class="sw-chips">'+col(en)+'</div>'+
-  '<p class="sw-note" id="sw-slm" style="min-height:18px;margin:8px 0 0">แตะคำเพื่อดูความหมายและใส่ในเนื้อตรงเคอร์เซอร์</p>'+
+  '<div id="sw-slm" class="sw-note" style="min-height:18px;margin:8px 0 0">ความหมายภาษาไทยอยู่ใต้แต่ละคำ · แตะคำเพื่อดูคำแปลเต็ม แล้วกด "ใส่ในเนื้อ"</div>'+
   '<div style="display:flex;gap:6px;margin-top:6px"><input class="sw-in" id="sw-slin" maxlength="40" placeholder="เพิ่มคำของคุณ เช่น คำที่ฮิตในกลุ่ม" style="flex:1;min-width:0"><button class="sw-ghost" id="sw-sladd">+ เก็บ</button></div>';
  box.querySelectorAll("[data-era]").forEach(function(b){b.onclick=function(){SLERA=b.dataset.era;slangUI()}});
  document.getElementById("sw-slre").onclick=slangUI;
- box.querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){var w=b.dataset.w,tx=document.getElementById("sw-tx");document.getElementById("sw-slm").textContent=w+(b.title?" — "+b.title:"")+" · ใส่ในเนื้อแล้ว";
-  if(tx){var a=tx.selectionStart||tx.value.length,e=tx.selectionEnd||a,pre=tx.value.slice(0,a),sp=pre&&!/\s$/.test(pre)?" ":"";tx.value=pre+sp+w+" "+tx.value.slice(e);tx.focus();var c=a+sp.length+w.length+1;try{tx.setSelectionRange(c,c)}catch(x){}tx.dispatchEvent(new Event("input"))}}});
+ box.querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){var w=b.dataset.w,m=document.getElementById("sw-slm");box.querySelectorAll("[data-w]").forEach(function(x){x.setAttribute("aria-pressed",x==b)});
+  m.innerHTML='<b style="color:var(--sx-fg);font-size:15px">'+slEsc(w)+'</b> — '+slEsc(b.title||"คำของคุณ")+' <button class="sw-ghost" id="sw-slput" style="min-height:34px;margin-left:6px">+ ใส่ในเนื้อ</button>';
+  document.getElementById("sw-slput").onclick=function(){var tx=document.getElementById("sw-tx");if(!tx)return;var a=tx.selectionStart||tx.value.length,e=tx.selectionEnd||a,pre=tx.value.slice(0,a),sp=pre&&!/\s$/.test(pre)?" ":"";tx.value=pre+sp+w+" "+tx.value.slice(e);tx.focus();var c=a+sp.length+w.length+1;try{tx.setSelectionRange(c,c)}catch(x){}tx.dispatchEvent(new Event("input"));m.textContent="ใส่ “"+w+"” ในเนื้อแล้ว"}}});
  document.getElementById("sw-sladd").onclick=function(){var v=document.getElementById("sw-slin").value.trim();if(!v)return;var L=slangMine();if(!L.some(function(w){return w[0]==v})){L.push([v,"คำของคุณ"]);try{localStorage.setItem("sns:slang:mine",JSON.stringify(L.slice(-60)))}catch(e){}}slangUI();document.getElementById("sw-slm").textContent="เก็บ “"+v+"” ไว้ในคลังคำแล้ว"}}
 </script>
 </body></html>
