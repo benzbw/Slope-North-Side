@@ -1,4 +1,4 @@
-import sys
+import sys, os
 p=sys.argv[1]; s=open(p,encoding='utf-8').read()
 def R(a,b,n=1):
     global s
@@ -22,7 +22,7 @@ R('<div class="sw-stat" id="sw-stt"></div></div>\'+','<div class="sw-stat" id="s
 # bug: ปุ่มค้นหาบีตส่ง event เข้ามาแทนคำค้น → (extra||[]).slice พัง
 R('$("sw-bgo").onclick=beatSearch;','$("sw-bgo").onclick=function(){beatSearch()};')
 R('function beatSearch(extra){','function beatSearch(extra){extra=Array.isArray(extra)?extra:(typeof extra=="string"&&extra?[extra]:[]);')
-R('function padEditor(){var n=W.note;','function padEditor(){window.SNSW={W:W,can:function(){return!!ST.sample},ai:function(q){return aiJSON(q)}};setTimeout(slangUI,0);var n=W.note;')
+R('function padEditor(){var n=W.note;','function padEditor(){window.SNSW={W:W,can:function(){return!!ST.sample&&(!window.SNSFreeAI||ST.sample!==SNSFreeAI.sample||SNSFreeAI.signedIn())},ai:function(q){return aiJSON(q)}};setTimeout(slangUI,0);var n=W.note;')
 SL0=r'''<style>#sx u.slw{text-decoration:underline 2px var(--sx-hot,#ff3347);text-underline-offset:4px}#sx u.slw.no{text-decoration:none}</style><script>/* คำฮิต & สแลง: เลือกให้เข้ากับคอนเซปต์เพลงที่กำลังเขียนเองอัตโนมัติ (ชื่อเพลง คอนเซปต์ อารมณ์ เนื้อ) + AI คิดเฉพาะเพลงนี้ */
 var SLERA="now",SLSIG="",SLT0=0,SLAI={busy:0,last:0};
 function slangMine(){try{return JSON.parse(localStorage.getItem("sns:slang:mine")||"[]")}catch(e){return[]}}
@@ -76,6 +76,15 @@ SL=SL0[:SL0.index('/* คำฮิต')]+SL0[SL0.index('/* คำฮิต'):].r
 i=s.rindex('</body>')
 s=s[:i]+'<script>'+X+'</script>\n'+SL+s[i:]
 open(p,'w',encoding='utf-8').write(s);print('ok')
+# AI ฟรีบนเว็บ GitHub (Puter): ใส่ก่อนสคริปต์หลัก แล้วให้ boot ใช้เมื่อไม่มี AI ของ claude.ai
+FA=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','freeai.js'),encoding='utf-8').read()
+s=open(p,encoding='utf-8').read()
+if 'SNSFreeAI={' not in s:
+    i=s.index('<script>(function(){\n"use strict";')
+    s=s[:i]+'<script>'+FA+'</script>\n'+s[i:]
+    a='var t=(location.hash||"").replace("#","");writer(t=="beat"'
+    assert s.count(a)==1; s=s.replace(a,'if(!ST.sample&&window.SNSFreeAI)ST.sample=SNSFreeAI.sample;document.addEventListener("sns:freeai",function(){if(document.getElementById("sw-slang")&&window.slangUI)slangUI()});'+a)
+    open(p,'w',encoding='utf-8').write(s)
 # อารมณ์เพิ่ม + พิมพ์อารมณ์เอง
 import subprocess as _sp, os as _os
 _sp.run([sys.executable, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'patch_moods.py'), p], check=True)
