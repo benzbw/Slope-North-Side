@@ -2,7 +2,7 @@
 # ใช้: python3 ci/gpt_packet.py review|task  > .gpt/prompt.txt
 import os, re, subprocess, sys
 
-LIMIT = int(os.environ.get('PACKET_CHARS', '12000'))
+LIMIT = int(os.environ.get('PACKET_CHARS', '8000'))
 RULES = """คุณคือ GPT ทำหน้าที่ Co-Developer ของโปรเจกต์ Slope North Side (แอปทำเพลง/วิดีโอเนื้อเพลง เป็น HTML+JavaScript ไฟล์เดียว ประกอบจาก src/)
 Claude เป็น Lead Developer ผู้ตัดสินใจขั้นสุดท้าย งานของคุณส่งเป็นความเห็นหรือ patch ให้ Claude ตรวจ
 กติกา: ห้ามเปลี่ยนโครงสร้างหลัก ห้ามลบฟีเจอร์เดิม ห้ามใส่ key/รหัสผ่าน ต้องใช้ได้ทั้งมือถือ 390px และคอม ถ้าไม่แน่ใจให้บอกตรงๆ
