@@ -2,5 +2,5 @@
 
 | วันที่ | เรื่อง | ทางเลือก | ตัดสิน | เหตุผล |
 |---|---|---|---|---|
-| 2026-11-08 | วิธีเชื่อม GPT | OpenAI API / Codex / MCP / GitHub Models | GitHub Models ฟรีผ่าน Actions (ช่วงทดลอง) | เจ้าของยังไม่ให้เสียเงิน · ใช้สิทธิ์ของ repo ไม่ต้องมี key |
+| 2026-11-08 | วิธีเชื่อม GPT | OpenAI API / Codex / MCP / GitHub Models / gpt-oss บน Actions | gpt-oss-20b รันบน GitHub Actions (ช่วงทดลอง) | เจ้าของยังไม่ให้เสียเงิน · GitHub Models ฟรีปิดถาวร 30 ก.ค. 2026 (ทดสอบแล้วได้ "OK" แทนคำตอบ) |
 | 2026-11-08 | กติกา deploy | อัปเดต 3 ที่ทุกครั้ง / แยก dev-staging-prod | Production ต้องรออนุมัติ | เจ้าของกำหนด (ข้อเสนอจาก GPT) |

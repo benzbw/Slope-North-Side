@@ -1,7 +1,7 @@
 # Slope North Side · กติกาทำงานร่วม Claude + GPT (ช่วงทดลองฟรี)
 
 - **Claude = Lead Developer** รับคำสั่งจากเจ้าของ วางแผน แก้โค้ดหลัก ตรวจและ merge ทุก PR ตัดสินใจขั้นสุดท้าย
-- **GPT = Co-Developer** ทำงานผ่าน GitHub เท่านั้น ใช้ GitHub Models รุ่นฟรี (ไม่มี OpenAI API key, ไม่มีค่าใช้จ่าย)
+- **GPT = Co-Developer** ทำงานผ่าน GitHub เท่านั้น ใช้ gpt-oss-20b (โมเดลเปิดของ OpenAI) รันฟรีบนเครื่อง GitHub Actions (ไม่มี API key ไม่มีค่าใช้จ่าย) — GitHub Models ฟรีถูกปิดถาวรแล้วตั้งแต่ 30 ก.ค. 2026
 
 ## เรียก GPT ยังไง
 | ต้องการ | ทำ | ผล |
@@ -26,10 +26,10 @@ CI ต้องผ่าน (ประกอบแอปจาก `src/` + ท�
 GPT เขียนเหตุผลใน PR → Claude ตอบ → ไม่เกิน 2 รอบ → Claude ตัดสิน และจดไว้ใน `DECISIONS.md`
 
 ## ข้อจำกัดของรุ่นฟรี (ต้องรู้)
-- ส่งให้ GPT ได้ครั้งละ ~8,000 token (~14,000 ตัวอักษร) จึงส่งเฉพาะส่วนที่แก้ อ่านทั้ง `new.html` ไม่ได้
-- วันละ 50–150 ครั้งตามรุ่น และ GitHub เปลี่ยนเกณฑ์ได้ · workflow รีวิวตั้งเพดานเองวันละ 30 ครั้ง
-- GPT ไม่ได้เป็นเอเจนต์เต็มตัว แก้ได้เฉพาะงานเล็กที่ระบุไฟล์ชัด · ไม่มีการสร้างภาพ
+- GPT ที่ใช้คือ gpt-oss-20b (โมเดลเปิดของ OpenAI) ไม่ใช่ GPT-5 ใน ChatGPT เก่งน้อยกว่า และรันบน CPU ของ GitHub จึงช้า ราว 5–15 นาทีต่อครั้ง
+- ส่งให้ GPT ได้ครั้งละ ~12,000 ตัวอักษร จึงส่งเฉพาะส่วนที่แก้ อ่านทั้ง `new.html` ไม่ได้
+- workflow รีวิวตั้งเพดานเองวันละ 30 ครั้ง · GPT แก้ได้เฉพาะงานเล็กที่ระบุไฟล์ชัด · ไม่มีการสร้างภาพ
 - PR ที่ GPT เปิดด้วย GITHUB_TOKEN จะไม่สั่ง CI ซ้ำเอง (ผลทดสอบรันใน workflow ของ GPT แล้ว)
 
 ## สิ่งที่ต้องเสียเงิน (ยังไม่เปิดใช้ — ต้องให้เจ้าของอนุมัติก่อน)
-OpenAI API (Codex เต็มตัว, สร้างภาพ) · ChatGPT Plus/Pro (Codex cloud) · Copilot Pro (coding agent, รีวิว PR, โควตา Models สูงขึ้น) · GitHub Models pay-as-you-go (ห้ามเปิด) · GitHub Pro (repo Private + เว็บ)
+OpenAI API (Codex เต็มตัว, สร้างภาพ) · ChatGPT Plus/Pro (Codex cloud) · Copilot Pro (coding agent, รีวิว PR, โควตา Models สูงขึ้น) · GitHub Pro (repo Private + เว็บ)

@@ -1,8 +1,8 @@
-# สร้างคำถาม (prompt) สั้นๆ ส่งให้ GPT ผ่าน GitHub Models ฟรี — จำกัดขนาดเพราะรุ่นฟรีรับได้ราว 8,000 token ต่อครั้ง
+# สร้างคำถาม (prompt) สั้นๆ ส่งให้ GPT แบบฟรี (gpt-oss บนเครื่อง GitHub) — จำกัดขนาดให้ทำงานจบในเวลา
 # ใช้: python3 ci/gpt_packet.py review|task  > .gpt/prompt.txt
 import os, re, subprocess, sys
 
-LIMIT = int(os.environ.get('PACKET_CHARS', '14000'))
+LIMIT = int(os.environ.get('PACKET_CHARS', '12000'))
 RULES = """คุณคือ GPT ทำหน้าที่ Co-Developer ของโปรเจกต์ Slope North Side (แอปทำเพลง/วิดีโอเนื้อเพลง เป็น HTML+JavaScript ไฟล์เดียว ประกอบจาก src/)
 Claude เป็น Lead Developer ผู้ตัดสินใจขั้นสุดท้าย งานของคุณส่งเป็นความเห็นหรือ patch ให้ Claude ตรวจ
 กติกา: ห้ามเปลี่ยนโครงสร้างหลัก ห้ามลบฟีเจอร์เดิม ห้ามใส่ key/รหัสผ่าน ต้องใช้ได้ทั้งมือถือ 390px และคอม ถ้าไม่แน่ใจให้บอกตรงๆ
