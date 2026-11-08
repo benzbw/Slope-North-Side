@@ -462,13 +462,17 @@ function aiErr(e){return e&&e.code=="not_granted"?"ยังไม่ได้�
 /* ----- ที่เก็บโน้ต ----- */
 function nCol(){return"data/users/"+ST.uid+"/account/notes"}
 function nKey(){return"sns:notes:"+ST.uid}
+function snsEmpty(n){return!n||(!String(n.title||"").trim()&&!String(n.body||"").replace(/\[[^\]]*\]|\/\/[^\n]*/g,"").trim()&&!n.beat&&!n.beatPick&&!n.link&&!(n.takes&&n.takes.length)&&!n.brief&&!n.idea)}
+function snsDelKey(){return"sns:notes:del:"+ST.uid}
 var Notes={
  list:async function(){var L=J(nKey(),[]);if(ST.mode=="cloud"&&ST.db){try{var q=await ST.db.collection(nCol()).get();var C=q.docs.map(function(d){var x=cp(d.data())||{};x.id=d.id;return x});
    var m={};L.forEach(function(x){m[x.id]=x});C.forEach(function(x){if(!m[x.id]||(x.updated||0)>=(m[x.id].updated||0))m[x.id]=x});L=Object.keys(m).map(function(k){return m[k]})}catch(e){Store.log("error",{msg:"notes list: "+(e&&e.message||e)})}}
+  var DEL=J(snsDelKey(),[]),cur=W.note&&W.note.id,old=now()-6e5;L=L.filter(function(x){if(DEL.indexOf(x.id)>=0){if(ST.mode=="cloud"&&ST.db)ST.db.doc(nCol()+"/"+x.id).delete().catch(function(){});return false}
+   if(x.id!=cur&&snsEmpty(x)&&(x.updated||0)<old){if(ST.mode=="cloud"&&ST.db)ST.db.doc(nCol()+"/"+x.id).delete().catch(function(){});return false}return true});
   L.sort(function(a,b){return(b.updated||0)-(a.updated||0)});JS(nKey(),L);return L},
- save:async function(n){n.updated=now();var L=J(nKey(),[]).filter(function(x){return x.id!=n.id});L.unshift(n);JS(nKey(),L);
+ save:async function(n){if(snsEmpty(n)){JS(nKey(),J(nKey(),[]).filter(function(x){return x.id!=n.id}));return}n.updated=now();var L=J(nKey(),[]).filter(function(x){return x.id!=n.id});L.unshift(n);JS(nKey(),L);
   if(ST.mode=="cloud"&&ST.db){var d=cp(n);delete d.id;await ST.db.doc(nCol()+"/"+n.id).set(d)}},
- del:async function(n){JS(nKey(),J(nKey(),[]).filter(function(x){return x.id!=n.id}));try{await IDB.del("beat:"+n.id)}catch(e){}
+ del:async function(n){var DL=J(snsDelKey(),[]);if(DL.indexOf(n.id)<0){DL.push(n.id);JS(snsDelKey(),DL.slice(-300))}JS(nKey(),J(nKey(),[]).filter(function(x){return x.id!=n.id}));try{await IDB.del("beat:"+n.id)}catch(e){}
   (n.takes||[]).forEach(function(t){IDB.del("take:"+t.id).catch(function(){})});
   if(ST.mode=="cloud"&&ST.db){await ST.db.doc(nCol()+"/"+n.id).delete();if(n.beat&&n.beat.aid&&ST.assets)try{await ST.assets.delete(n.beat.aid)}catch(e){}}}};
 function newNote(o){return Object.assign({id:"n"+rid(),title:"",body:"",beat:null,takes:[],created:now(),updated:now()},o||{})}
@@ -876,7 +880,7 @@ function padEditor(){window.SNSW={W:W,can:function(){return!!ST.sample},ai:funct
   var v=tx.value,pos=tx.selectionStart,pre=v.slice(0,pos),k=(s=="Verse")?" "+((v.match(/^\[Verse/gm)||[]).length+1):"";ins((pre&&!/\n\n$/.test(pre)?(/\n$/.test(pre)?"\n":"\n\n"):"")+"["+s+k+"]\n")}});
  $("sw-ts").onclick=function(){if(!W.audio||!W.audio.duration){toastS("เปิดบีตก่อน แล้วกดตอนบีตถึงจุดที่ต้องการ");return}ins("["+mmss(W.audio.currentTime)+"] ")};
  $("sw-nb").onclick=function(){wLeave(function(){W.note=null;padTab()})};
- $("sw-more").onclick=function(ev){ev.stopPropagation();menuAt($("sw-more"),[["คัดลอกเนื้อทั้งหมด",function(){copyTxt(tx.value)}],["ดาวน์โหลดเป็น .txt",function(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([(n.title?n.title+"\n\n":"")+tx.value],{type:"text/plain"}));a.download=(n.title||"lyrics").replace(/[\\/:*?"<>|]/g,"")+".txt";a.click()}],["ลบเพลงนี้",function(){var m=modal('<h3>ลบเพลงนี้?</h3><p class="sx-note">ลบเนื้อ บีต และเสียงที่อัดไว้ ย้อนกลับไม่ได้</p><div class="sx-row2" style="margin-top:14px"><button class="sx-btn ghost" id="sw-dn">ยกเลิก</button><button class="sx-btn" id="sw-dy">ลบ</button></div>');$("sw-dn").onclick=function(){m.remove()};$("sw-dy").onclick=function(){m.remove();Notes.del(n).catch(function(){});W.note=null;W.dirty=false;wStop();padTab();toastS("ลบแล้ว")}},"del"]],true)};
+ $("sw-more").onclick=function(ev){ev.stopPropagation();menuAt($("sw-more"),[["คัดลอกเนื้อทั้งหมด",function(){copyTxt(tx.value)}],["ดาวน์โหลดเป็น .txt",function(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([(n.title?n.title+"\n\n":"")+tx.value],{type:"text/plain"}));a.download=(n.title||"lyrics").replace(/[\\/:*?"<>|]/g,"")+".txt";a.click()}],["ลบเพลงนี้",function(){var m=modal('<h3>ลบเพลงนี้?</h3><p class="sx-note">ลบเนื้อ บีต และเสียงที่อัดไว้ ย้อนกลับไม่ได้</p><div class="sx-row2" style="margin-top:14px"><button class="sx-btn ghost" id="sw-dn">ยกเลิก</button><button class="sx-btn" id="sw-dy">ลบ</button></div>');$("sw-dn").onclick=function(){m.remove()};$("sw-dy").onclick=async function(){m.remove();W.note=null;W.dirty=false;wStop();try{await Notes.del(n)}catch(e){}padTab();toastS("ลบแล้ว")}},"del"]],true)};
  $("sw-mk").onclick=function(){wSaveNow();toProject(n)};
  if($("sw-rec"))$("sw-rec").onclick=recToggle;
  root.querySelectorAll(".sw-chip[data-a]").forEach(function(b){b.onclick=function(){aiHelp(b.dataset.a)}});
@@ -977,12 +981,14 @@ async function boot(){mount();
  window.SNSWX={savedList:function(){try{savedList()}catch(e){}},W:W,IDB:IDB,save:wSaveNow,writer:writer,newNote:newNote,wGen:wGen,ST:ST,can:function(){return!!ST.sample&&(!window.SNSFreeAI||ST.sample!==SNSFreeAI.sample||SNSFreeAI.signedIn())},ai:function(q){return aiJSON(q)}};if(!ST.sample&&window.SNSFreeAI)ST.sample=SNSFreeAI.sample;document.addEventListener("sns:freeai",function(){if(document.getElementById("sw-slang")&&window.slangUI)slangUI()});var t=(location.hash||"").replace("#","");(async function(){var Ss=null,rs=false;try{Ss=JSON.parse(localStorage.getItem("sns:wsess")||"null")}catch(e){}
  var IM=/^#import=([\w-]+)/.exec(location.hash||"");if(IM){try{var o=JSON.parse(decodeURIComponent(escape(atob(IM[1].replace(/-/g,"+").replace(/_/g,"/")))));var L0=[];try{L0=await Notes.list()}catch(e){}
   var nn=L0.filter(function(x){return o.t&&x.title==o.t})[0]||newNote({title:o.t||""});if(o.b)nn.body=o.b;if(o.l)nn.link=o.l;if(o.bpm)nn.bpm=o.bpm;W.note=nn;W.dirty=true;try{await wSaveNow()}catch(e){}t="pad";Ss=null;try{history.replaceState(null,"","#pad")}catch(e){}}catch(e){}}
+ if(ST.mode=="cloud"&&ST.db){try{var qs=await ST.db.collection("data/users/"+ST.uid+"/account/wsess").get();qs.docs.forEach(function(d){if(d.id=="cur"){var cs=cp(d.data());if(cs&&cs.t&&(!Ss||cs.t>(Ss.t||0)))Ss=cs}})}catch(e){}}
  if(!(t=="beat"||t=="pad")&&Ss&&now()-(Ss.t||0)<864e5*2){rs=true;t=Ss.tab||"idea";if(Ss.lastIdeas&&!W.lastIdeas)W.lastIdeas=Ss.lastIdeas;if(Ss.mood&&Ss.mood.length)W.mood=Ss.mood;
   if(t=="pad"&&Ss.note){try{var L=await Notes.list();W.note=L.filter(function(x){return x.id==Ss.note})[0]||null}catch(e){}}}
  var _w=writer;writer=function(tab){_w(tab);setTimeout(snsSave,80)};
  writer(t=="beat"||t=="pad"?t:"idea");
  if(rs&&Ss.y)[250,800,1600].forEach(function(d){setTimeout(function(){var r=$("sx");if(r&&r.scrollTop<20)r.scrollTop=Ss.y},d)})})();
- function snsSave(){try{var r=$("sx");localStorage.setItem("sns:wsess",JSON.stringify({tab:W.tab,note:W.tab=="pad"&&W.note?W.note.id:null,y:r?r.scrollTop:0,lastIdeas:W.lastIdeas||null,mood:W.mood||[],t:now()}))}catch(e){}}
+ var snsCT=0,snsLast="";function snsSave(){try{var r=$("sx"),o={tab:W.tab,note:W.tab=="pad"&&W.note&&!snsEmpty(W.note)?W.note.id:null,y:r?r.scrollTop:0,lastIdeas:W.lastIdeas||null,mood:W.mood||[],t:now()};localStorage.setItem("sns:wsess",JSON.stringify(o));
+  var key=[o.tab,o.note,Math.round(o.y/200)].join("|");if(ST.mode=="cloud"&&ST.db&&key!=snsLast){snsLast=key;clearTimeout(snsCT);snsCT=setTimeout(function(){ST.db.doc("data/users/"+ST.uid+"/account/wsess/cur").set(cp(o)).catch(function(){})},1200)}}catch(e){}}
  var snsT=0;function snsLater(){clearTimeout(snsT);snsT=setTimeout(snsSave,400)}
  document.addEventListener("scroll",snsLater,true);document.addEventListener("click",snsLater,true);
  document.addEventListener("input",function(e){var id=e.target&&e.target.id;if(/^sw-(art|song|story)$/.test(id)){var P=J("sns:wprefs",{}),k=id=="sw-art"?"art":id=="sw-song"?"song":"story";P[k]=e.target.value;JS("sns:wprefs",P)}snsLater()},true);
