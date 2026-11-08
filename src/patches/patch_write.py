@@ -19,6 +19,9 @@ R('2) แนะนำเพลงที่มีอยู่จริง 6 เ�
   '2) แนะนำเพลงที่มีอยู่จริง 6 เพลงให้ฟังเป็นแรงบันดาลใจ: 2 เพลงของศิลปินที่อิน (ถ้ามี), 2 เพลงที่ดนตรี/แนวคล้ายเพลงที่อิน และ 2 เพลงที่สื่อสารเรื่องเดียวกันหรือเข้ากับอารมณ์ตอนนี้ แนวไหนก็ได้ ไม่จำเป็นต้องเป็นฮิปฮอป (ป๊อป ร็อก อินดี้ R&B เพลงไทยก็ได้) ใน why บอกว่าคล้ายตรงไหน (ดนตรี/แนว/สื่อสาร/อารมณ์) และฟังเพื่อเรียนรู้อะไร (ฮุค ฟลว์ ทิศทางทำนอง โครงเพลง)')
 # slang / hot words in the lyric notebook
 R('<div class="sw-stat" id="sw-stt"></div></div>\'+','<div class="sw-stat" id="sw-stt"></div><div class="sw-box" id="sw-slang"></div></div>\'+')
+# bug: ปุ่มค้นหาบีตส่ง event เข้ามาแทนคำค้น → (extra||[]).slice พัง
+R('$("sw-bgo").onclick=beatSearch;','$("sw-bgo").onclick=function(){beatSearch()};')
+R('function beatSearch(extra){','function beatSearch(extra){extra=Array.isArray(extra)?extra:(typeof extra=="string"&&extra?[extra]:[]);')
 R('function padEditor(){var n=W.note;','function padEditor(){window.SNSW={W:W,can:function(){return!!ST.sample},ai:function(q){return aiJSON(q)}};setTimeout(slangUI,0);var n=W.note;')
 SL0=r'''<script>/* คำฮิต & สแลง: เลือกให้เข้ากับคอนเซปต์เพลงที่กำลังเขียนเองอัตโนมัติ (ชื่อเพลง คอนเซปต์ อารมณ์ เนื้อ) + AI คิดเฉพาะเพลงนี้ */
 var SLERA="now",SLSIG="",SLT0=0,SLAI={busy:0,last:0};
