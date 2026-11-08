@@ -25,7 +25,16 @@ def review():
     fm = re.search(r'^\s*focus\s*:\s*(.+)$', os.environ.get('BODY') or '', re.M | re.I)
     if fm:
         fl = [x.strip().strip('`') for x in re.split(r'[,\s]+', fm.group(1)) if x.strip()]
-        want = [f for f in want if f in fl] or want
+        fl = [f for f in fl if os.path.isfile(f)]
+        if fl:  # ส่งไฟล์เต็ม (โค้ดอาจอยู่บน main แล้ว diff จึงว่าง)
+            body = ''
+            for f in fl:
+                body += '=== FILE: %s ===\n%s\n' % (f, open(f, encoding='utf-8', errors='replace').read())
+            cut = len(body) > LIMIT
+            return '\n'.join([RULES, '', 'งาน: รีวิวโค้ดในไฟล์ต่อไปนี้ หา bug ที่ทำให้ใช้งานพัง ข้อมูลหาย มือถือใช้ไม่ได้ หรือความปลอดภัย',
+                'ตอบไม่เกิน 6 ข้อ เฉพาะปัญหาที่เห็นจริงในโค้ดด้านล่าง ห้ามเดาโค้ดที่ไม่เห็น แต่ละข้อ: [ร้ายแรง/กลาง/เล็ก] ไฟล์ — ยกโค้ดจริง 1 บรรทัดเป็นหลักฐาน — ปัญหา — วิธีแก้สั้นๆ',
+                'ไม่ต้องเสนอเรื่องสไตล์โค้ด · ปิดท้ายด้วยบรรทัด "สรุป: ..."', '', 'บริบท: ' + clean(os.environ.get('BODY'), 900), '',
+                'FILES' + (' (ตัดเหลือ %d ตัวอักษรแรก)' % LIMIT if cut else '') + ':', body[:LIMIT]])
     diff = sh('git', 'diff', '-U2', base + '...' + head, '--', *want) if want else ''
     cut = len(diff) > LIMIT
     out = [RULES, '',
