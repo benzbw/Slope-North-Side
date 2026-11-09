@@ -3,7 +3,10 @@ import os, sys
 p = sys.argv[1]; s = open(p, encoding='utf-8').read()
 BF = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'beatfind.js'), encoding='utf-8').read()
 SNAP = os.environ.get('BEATS_SNAPSHOT')
+_cur = open(p, encoding='utf-8').read()
 if SNAP and os.path.isfile(SNAP): BF = 'window.SNS_BEATS=' + open(SNAP, encoding='utf-8').read().strip() + ';\n' + BF
+elif 'window.SNS_BEATS=' in _cur:  # เก็บคลังบีตที่ฝังไว้เดิม ไม่ให้หายตอนอัปเดต
+    _a = _cur.index('window.SNS_BEATS='); _b = _cur.index(';\n', _a) + 2; BF = _cur[_a:_b] + BF
 BL = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'beatlab.js'), encoding='utf-8').read()
 def R(a, b):
     global s
