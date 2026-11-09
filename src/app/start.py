@@ -568,12 +568,27 @@ def second_opinion(lines, pcm, res, name, cdir, hsh, J):
         J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ฟังเสียงร้องอีกรอบ ครั้งแรกราว 1-3 นาที)", pct=70)
         if name not in MODELS:
             MODELS[name] = WhisperModel(name, device="auto", compute_type="int8", cpu_threads=os.cpu_count() or 4)
-        segs, info = MODELS[name].transcribe(pcm, language="th", word_timestamps=True, beam_size=BEAM, condition_on_previous_text=False,
-                                             temperature=0.0, no_repeat_ngram_size=4, initial_prompt=" ".join(lines)[:600])
-        words = []
-        for sg in segs:
-            words += [(w.word, w.start, w.end) for w in sg.words]
-            J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ถึงวินาทีที่ %d จาก %d)" % (sg.end, info.duration), pct=70 + 28 * min(1, sg.end / max(info.duration, 1)))
+        import time as _t
+        words, box = [], {}
+        def work():
+            try:
+                segs, info = MODELS[name].transcribe(pcm, language="th", word_timestamps=True, beam_size=1, condition_on_previous_text=False,
+                                                     temperature=0.0, no_repeat_ngram_size=4, max_new_tokens=120, hallucination_silence_threshold=2.0,
+                                                     vad_filter=True, vad_parameters={"min_silence_duration_ms": 400})
+                for sg in segs:
+                    if box.get("stop"): break
+                    words.extend((w.word, w.start, w.end) for w in sg.words)
+                    J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ถึงวินาทีที่ %d จาก %d)" % (sg.end, info.duration), pct=70 + 28 * min(1, sg.end / max(info.duration, 1)))
+                box["ok"] = True
+            except Exception as e:
+                box["err"] = str(e)
+        th = threading.Thread(target=work, daemon=True); th.start()
+        lim = max(150, len(pcm) / 16000 * 2.5)          # ไม่เกิน ~2.5 เท่าความยาวเพลง: ช้ากว่านี้ข้ามการตรวจซ้ำ ใช้ผลหลักเลย
+        th.join(lim)
+        if not box.get("ok"):
+            box["stop"] = True
+            print("ตรวจซ้ำช้าเกิน/ไม่สำเร็จ ข้ามไป", box.get("err", ""), flush=True)
+            return {}
         try: json.dump(words, open(wf, "w", encoding="utf-8"), ensure_ascii=False)
         except Exception: pass
     Sw, Ew, ratio, cw = combine(lines, [words], align)
