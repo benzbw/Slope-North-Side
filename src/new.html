@@ -1717,6 +1717,8 @@ function drawStory(c){var W=c.width,H=c.height,x=c.getContext("2d"),k=W/1080,cv=
  x.font="700 "+(26*k)+"px 'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.6)";x.textAlign="center";spaced(x,"STREAM EVERYWHERE",W/2,H-95*k,6*k);
  grain(x,Math.max(W,H),.12)}
 var pkT=0,thT=0;function cvThumbSave(c){clearTimeout(thT);thT=setTimeout(function(){try{var t=document.createElement("canvas");t.width=t.height=240;t.getContext("2d").drawImage(c,0,0,240,240);var u=t.toDataURL("image/jpeg",.8);if(u.length<120000)localStorage.setItem("bwthumb",u)}catch(e){}},900)}
+/* เก็บรูปปกจริงของเพลงนี้ไว้โชว์ที่การ์ดหน้าแรก (ทำครั้งเดียวหลังเปิดเพลง ถ้ายังไม่มี) */
+setTimeout(function(){try{if(localStorage.getItem("bwthumb"))return;var go=function(){try{var c=document.createElement("canvas");c.width=c.height=720;drawCover(c,720);cvThumbSave(c)}catch(e){}};if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){setTimeout(go,1500)});else go()}catch(e){}},4000);
 function cvRender(){var c=$("cvc");drawCover(c,c.width);cvThumbSave(c);try{cvThumbs();var tp=$("cv-tip");if(tp)tp.textContent=CTIP[CV.tpl]||"";clearTimeout(pkT);pkT=setTimeout(function(){try{pkGrid()}catch(e){}},450)}catch(e){}if($("cvs"))drawStory($("cvs"));document.querySelectorAll("#cv-t button").forEach(function(b){b.classList.toggle("on",b.dataset.t==CV.tpl)})}
 async function cvOpen(){$("cov").hidden=false;cvModeUI();$("cv-title").value=CV.title;$("cv-artist").value=CV.artist;$("cv-logo").checked=CV.logo;$("cv-date").value=CV.date||"";$("cv-lyr").checked=CV.lyr!==false;
  try{await document.fonts.load("italic 900 80px Anton");await document.fonts.load("900 80px Anton");await document.fonts.load("700 40px 'Noto Sans Thai'")}catch(e){}

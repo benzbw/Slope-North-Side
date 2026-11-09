@@ -188,8 +188,9 @@ function artFor(cv,p){var W=480,c=cv.getContext("2d"),inf=p.info||{};cv.width=W;
  if(inf.thumb){var im=ART_IMG[p.id];if(!im||im._s!=inf.thumb){im=new Image();im._s=inf.thumb;im.onload=function(){try{c.drawImage(im,0,0,W,W)}catch(e){}};im.src=inf.thumb;ART_IMG[p.id]=im}
   if(im.complete&&im.naturalWidth){c.drawImage(im,0,0,W,W)}return}
  var r=hashN(String(p.id)+"|"+p.name),rnd=function(){r=(Math.imul(r,1664525)+1013904223)>>>0;return r/4294967296};
- var TT=(window.THEMES||[])[inf.theme||0],pal=inf.theme&&TT?[TT.hot,TT.b1,TT.b2]:ART_PAL[hashN("pal:"+(p.name||p.id))%ART_PAL.length],hot=pal[0],b1=pal[1],b2=pal[2];
- var L=hashN("lay:"+(p.name||"")+"#"+p.id)%6;rnd();
+ var TT=(window.THEMES||[])[inf.theme||0],pal=inf.theme&&TT?[TT.hot,TT.b1,TT.b2]:ART_PAL[0],hot=pal[0],b1=pal[1],b2=pal[2];
+ /* ยังไม่มีปกจริง: ใช้หน้าตาเดิม (แดง) ไม่เปลี่ยนปกที่ผู้ใช้คุ้นแล้ว พอเปิดเพลงครั้งถัดไป แอปจะเก็บปกจริงของเพลงนั้นมาแสดงแทน */
+ var L=0;rnd();
  c.fillStyle="#0b0709";c.fillRect(0,0,W,W);
  var rad=function(x,y,r0,r1,a,b){var g=c.createRadialGradient(x,y,r0,x,y,r1);g.addColorStop(0,a);g.addColorStop(1,b);return g};
  if(L==0){c.fillStyle=rad(W*(.2+rnd()*.6),W*(.15+rnd()*.4),10,W*.8,"rgba("+b2+",1)","rgba(6,4,6,1)");c.fillRect(0,0,W,W);
