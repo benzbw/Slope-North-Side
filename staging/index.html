@@ -698,9 +698,10 @@ try{var cr=localStorage.getItem("bwraw");if(cr)RAW=cr;(function(){var r=lyrFix(R
 if(!THEMES[thIdx])thIdx=0;var TH=THEMES[thIdx];
 function scolFor(q){return SAME||SG[q].c=="auto"?null:SG[q].c}
 var LN=[];RAW.split("\n\n").forEach(function(s,gi){var h=false,sg=0,mm;while(mm=s.match(/^(§|@([1-4]))[ \t]*/)){if(mm[1]=="§")h=true;else sg=+mm[2]-1;s=s.slice(mm[0].length)}s.split("\n").forEach(function(l){if(l.trim())LN.push({g:gi,t:l,h:h,s:sg})})});
-var TSZ=.85;try{var tz0=localStorage.getItem("bwtsz");if(tz0)TSZ=+tz0||.85}catch(e){}
+/* ขนาดตัวหนังสือ + บรรทัดต่อจอ: ตั้งครั้งเดียวใช้กับทุกเพลง (เก่าและใหม่) */
+var TSZ=.85;try{var tz0=localStorage.getItem("sns:tsz");if(tz0)TSZ=+tz0||.85}catch(e){}
 /* แบ่งหน้าจอ: แต่ละหน้าแสดงไม่เกิน PAGE บรรทัด (0 = ทั้งท่อน) ไม่รก อ่านทัน */
-var PAGE=2;try{var pg0=localStorage.getItem("bwpage");if(pg0!=null)PAGE=+pg0||0}catch(e){}
+var PAGE=2;try{var pg0=localStorage.getItem("sns:page");if(pg0!=null)PAGE=+pg0||0}catch(e){}
 function ROLL(){return PAGE>=2}
 /* บรรทัดที่อยู่บนจอ: โหมด 2-3 บรรทัดเลื่อนต่อเนื่อง (บรรทัดที่เพิ่งร้องค้างไว้ด้านบนให้อ่านทัน) */
 function pageIdx(gi){if(gi<0||gi==null)return[];if(ROLL()){var lo=gi;while(lo>0&&LN[lo-1].g==LN[gi].g&&gi-lo<PAGE-1)lo--;var r=[];for(var q=lo;q<=gi;q++)r.push(q);return r}var o=[];for(var i=0;i<LN.length;i++)if(LN[i].p==gi)o.push(i);return o}
@@ -803,9 +804,9 @@ var ANIM="mix";try{ANIM=localStorage.getItem("bwanim")||"mix"}catch(e){}
 function setAnim(v){ANIM=v;["mix","soft","pop","type","kara","bounce","fx"].forEach(function(k){document.body.classList.toggle("anim-"+k,k==v)});document.querySelectorAll("#anim button").forEach(function(b){b.classList.toggle("on",b.dataset.a==v)});try{localStorage.setItem("bwanim",v)}catch(e){}}
 document.querySelectorAll("#anim button").forEach(function(b){b.onclick=function(){setAnim(b.dataset.a);toast("เปลี่ยนการขึ้นของตัวหนังสือแล้ว")}});setAnim(ANIM);
 function tszUI(){document.documentElement.style.setProperty("--tsz",TSZ);document.querySelectorAll("#tszsel button").forEach(function(b){b.classList.toggle("on",+b.dataset.z==TSZ)})}
-document.querySelectorAll("#tszsel button").forEach(function(b){b.onclick=function(){TSZ=+b.dataset.z;try{localStorage.setItem("bwtsz",String(TSZ))}catch(e){}tszUI();toast("ปรับขนาดตัวหนังสือแล้ว")}});tszUI();
+document.querySelectorAll("#tszsel button").forEach(function(b){b.onclick=function(){TSZ=+b.dataset.z;try{localStorage.setItem("sns:tsz",String(TSZ))}catch(e){}tszUI();toast("ปรับขนาดตัวหนังสือแล้ว")}});tszUI();
 function pageUI(){document.querySelectorAll("#pagesel button").forEach(function(b){b.classList.toggle("on",+b.dataset.n==PAGE)})}
-document.querySelectorAll("#pagesel button").forEach(function(b){b.onclick=function(){PAGE=+b.dataset.n;try{localStorage.setItem("bwpage",String(PAGE))}catch(e){}paginate();wg=-2;pageUI();toast(PAGE?"แสดงหน้าละ "+PAGE+" บรรทัด":"แสดงทั้งท่อน")}});pageUI();
+document.querySelectorAll("#pagesel button").forEach(function(b){b.onclick=function(){PAGE=+b.dataset.n;try{localStorage.setItem("sns:page",String(PAGE))}catch(e){}paginate();wg=-2;pageUI();toast(PAGE?"แสดงหน้าละ "+PAGE+" บรรทัด":"แสดงทั้งท่อน")}});pageUI();
 var ENDC={on:true,title:"Dangerous",artist:"Bedupbiw ft. Killmonger"};try{var ej=JSON.parse(localStorage.getItem("bwend")||"null");if(ej)ENDC=Object.assign(ENDC,ej)}catch(e){}
 function endSave(){try{localStorage.setItem("bwend",JSON.stringify(ENDC))}catch(e){}endFill()}
 function endFill(){var c=$("endc");c.innerHTML=""}
