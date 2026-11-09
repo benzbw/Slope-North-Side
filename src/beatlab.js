@@ -135,9 +135,9 @@ function vary(R,m,r,lo){var notes=scaleNotes(r,lo,lo+19);return m.map(function(n
 /* ---------- โครงเพลง ---------- */
 function form(r){var target=Math.max(24,Math.round(r.len*r.bpm/240)),slow=r.bpm<100,best=null;
  /* หาโครงที่ยาวใกล้เป้าที่สุด (เพลงช้าใช้ท่อนสั้นลงได้) */
- [4,8].forEach(function(intro){[4,8].forEach(function(hk){[4,8,16].forEach(function(v1){[4,8,16].forEach(function(v2){[0,4,8].forEach(function(br){[0,8,16].forEach(function(v3){[4,8].forEach(function(out){
+ [4,8].forEach(function(intro){[4,8].forEach(function(hk){[4,8,16,24].forEach(function(v1){[4,8,16,24].forEach(function(v2){[0,4,8].forEach(function(br){[0,8,16].forEach(function(v3){[4,8].forEach(function(out){
   var S=[["intro",intro],["hook",hk],["verse",v1],["hook",hk],["verse",v2]];if(br)S.push(["bridge",br]);S.push(["hook",hk]);if(v3){S.push(["verse",v3]);S.push(["hook",hk])}S.push(["outro",out]);
-  var tot=S.reduce(function(a,x){return a+x[1]},0),pen=Math.abs(tot-target)*4+(hk==4?(slow?3:12):0)+(v1==4||v2==4?(slow?4:14):0)+(v3?2:0)+(intro==8?1:0)+(out==8?1:0)+(br==4?2:0)+Math.abs(v1-v2)/8;
+  var tot=S.reduce(function(a,x){return a+x[1]},0),pen=Math.abs(tot-target)*4+(tot<target?(target-tot)*10:0)+(hk==4?(slow?3:12):0)+(v1==4||v2==4?(slow?4:14):0)+(v3?2:0)+(intro==8?1:0)+(out==8?1:0)+(br==4?2:0)+Math.abs(v1-v2)/8+(v1==24?3:0)+(v2==24?3:0);
   if(!best||pen<best.pen)best={S:S,pen:pen}})})})})})})});
  var S=best.S,out=[],t=0;S.forEach(function(x,i){out.push({name:x[0],bars:x[1],start:t,next:S[i+1]?S[i+1][0]:"",last:1});t+=x[1]});return out}
 /* ---------- ตัวเรนเดอร์ ---------- */
