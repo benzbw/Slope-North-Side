@@ -49,7 +49,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           MODEL: gpt-oss:20b
-        run: python3 ci/gpt_call.py .gpt/prompt.txt .gpt/response.md "$MODEL" 2000
+        run: python3 ci/gpt_call.py .gpt/prompt.txt .gpt/response.md "$MODEL" 4000
       - name: Post review comment
         uses: actions/github-script@v7
         env:

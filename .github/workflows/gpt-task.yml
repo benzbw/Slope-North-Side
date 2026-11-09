@@ -51,7 +51,7 @@ jobs:
           m=re.search(r'```(?:diff|patch)?\n(.*?)```',t,re.S)
           open('.gpt/change.patch','w',encoding='utf-8').write((m.group(1) if m else '').rstrip('\n')+'\n')
           PY
-          if git apply --recount --whitespace=fix .gpt/change.patch; then echo "applied=1" >> "$GITHUB_OUTPUT"; else echo "applied=0" >> "$GITHUB_OUTPUT"; fi
+          if [ "$(tr -d '[:space:]' < .gpt/change.patch)" = "" ]; then echo "GPT ไม่ได้ส่ง diff มา" > .gpt/err.txt; echo "applied=0" >> "$GITHUB_OUTPUT"; elif git apply --recount --whitespace=fix .gpt/change.patch; then echo "applied=1" >> "$GITHUB_OUTPUT"; else echo "applied=0" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-node@v4
         if: steps.ap.outputs.applied == '1'
         with:
@@ -89,7 +89,7 @@ jobs:
           N: ${{ github.event.issue.number }}
         run: |
           if [ "${{ steps.pk.outputs.ok }}" != "1" ]; then msg="GPT ยังไม่เริ่มงาน: $(cat .gpt/err.txt 2>/dev/null)";
-          elif [ "${{ steps.ap.outputs.applied }}" != "1" ]; then msg="GPT ตอบแล้วแต่ patch ใช้กับโค้ดไม่ได้ — Claude จะดูคำตอบใน log ของ workflow นี้แล้วตัดสินใจ";
+          elif [ "${{ steps.ap.outputs.applied }}" != "1" ]; then msg="GPT ตอบแล้วแต่ patch ใช้กับโค้ดไม่ได้ $(cat .gpt/err.txt 2>/dev/null) — Claude จะดูคำตอบใน log ของ workflow นี้แล้วตัดสินใจ";
           else msg="GPT ส่งงานแล้ว: เปิด PR บน branch gpt/issue-$N ให้ Claude ตรวจ"; fi
           gh issue comment "$N" --body "$msg"
           gh issue edit "$N" --remove-label gpt-task || true
