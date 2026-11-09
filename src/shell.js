@@ -9,7 +9,7 @@ function esc(t){return String(t==null?"":t).replace(/[&<>"']/g,function(c){retur
 function cp(o){return o==null?o:JSON.parse(JSON.stringify(o))}
 function J(k,d){try{var v=S.raw.get(k);return v?JSON.parse(v):d}catch(e){return d}}
 function JS(k,v){return S.raw.set(k,JSON.stringify(v))}
-function rid(){return (Date.now().toString(36)+Math.random().toString(36).slice(2,6)).toLowerCase()}
+function rid(){return (Date.now().toString(36)+(Math.random().toString(36)+"0000").slice(2,6)).toLowerCase()}
 function now(){return Date.now()}
 function h(html){var d=document.createElement("div");d.innerHTML=html.trim();return d.firstChild}
 function ago(t){if(!t)return"";var s=(now()-t)/1000;if(s<60)return"เมื่อสักครู่";if(s<3600)return Math.floor(s/60)+" นาทีที่แล้ว";if(s<86400)return Math.floor(s/3600)+" ชม.ที่แล้ว";if(s<86400*7)return Math.floor(s/86400)+" วันที่แล้ว";return new Date(t).toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"})}
