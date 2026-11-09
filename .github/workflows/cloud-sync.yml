@@ -66,6 +66,9 @@ jobs:
         run: |
           pip install --quiet torch torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install --quiet demucs soundfile av transformers uroman pythainlp numpy scipy cryptography
+      - name: Place aligner next to server code
+        if: steps.q.outputs.n != '0'
+        run: cp -r code/src/fa code/src/app/fa
       - name: Sync
         if: steps.q.outputs.n != '0'
         env:
