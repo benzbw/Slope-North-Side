@@ -421,6 +421,12 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <button class="cta" id="svl" style="margin-top:12px">บันทึกเนื้อเพลงและนักร้อง</button>
    <button class="cta alt" id="rsl" style="margin-top:8px;min-height:42px;font-size:13px">กลับเป็นเนื้อเดิม</button>
  </section>
+ <section class="card" id="director">
+   <div class="h">✦ AI กำกับภาพทั้งเพลง</div>
+   <p class="mut" style="margin-bottom:10px">AI ฟังเพลง (พลัง จังหวะ ความเร็วแร็พ ความสว่างของเสียง) + อ่านอารมณ์จากเนื้อ แล้วจัดให้ครบในกดเดียว: โทนสี ฟอนต์ ลูกเล่นตัวหนังสือ ฉากหลัง เอฟเฟกต์ตามคำ และภาพเด้งตามกลอง</p>
+   <button class="cta" id="dir-go">✦ ให้ AI กำกับภาพเพลงนี้</button>
+   <div id="dir-out" class="mut" style="margin-top:10px;font-size:13px;line-height:1.7" hidden></div>
+ </section>
  <section class="card" id="studio">
    <div class="h">สตูดิโอสไตล์ <span class="mut" style="font-size:12px;font-weight:500">· Art</span></div>
    <p class="mut" style="margin-bottom:10px">บอกชื่อเพลง แนว และอารมณ์ แล้วให้ AI เลือกสไตล์จาก 60 แบบ (ฟีลศิลปินดังระดับโลก) จัดสี ฟอนต์ การขึ้นของตัวหนังสือ เอฟเฟกต์ และสร้างปกให้เข้ากับเพลง</p>
@@ -825,6 +831,7 @@ function frame(){beat();var pn0=performance.now();
   if(on){var ws=wordsOf(j),ch=e.children,q,st0=[];for(q=0;q<ch.length;q++)st0.push(wordT(j,ws[q]));for(q=0;q<ch.length;q++){var wc=ch[q].className,w0=wc.replace(" on","").replace(" now",""),nx=q+1<ch.length?st0[q+1]:(E&&E[j]!=null?E[j]:lineEnd(j)),w1=t>=st0[q]?w0+" on"+(t<nx?" now":""):w0;if(w1!==wc)ch[q].className=w1}}});
  (function(){var mc=$("mvc");if(MV.on){var w0=innerWidth,h0=innerHeight;if(mc.width!==w0||mc.height!==h0){mc.width=w0;mc.height=h0}if(!drawMV(mc.getContext("2d"),w0,h0,t,k))mc.getContext("2d").clearRect(0,0,w0,h0);mc._on=true}else{var w1=innerWidth,h1=innerHeight,am=ambMode()!="off"&&!LITE;if(am){if(mc.width!==w1||mc.height!==h1){mc.width=w1;mc.height=h1}var cx3=mc.getContext("2d");cx3.clearRect(0,0,w1,h1);drawAmb(cx3,w1,h1,t);mc._on=true}else if(mc._on){mc.getContext("2d").clearRect(0,0,mc.width,mc.height);mc._on=false}}})();
  (function(){var c=$("fxc");if(!c){c=document.createElement("canvas");c.id="fxc";document.body.appendChild(c)}var w=innerWidth,h=innerHeight;if(c.width!==w||c.height!==h){c.width=w;c.height=h}var x=c.getContext("2d");if(c._on)x.clearRect(0,0,w,h);c._on=false;if(lfxDraw(x,w,h,t))c._on=true;if(drawSketch(x,w,h,t))c._on=true;if(ENDC.on&&t>=endStart()){drawEnd(x,w,h,t);c._on=true}if(drawWM(x,w,h,t))c._on=true})();
+ if(PUNCH){var kq=kick(t),tr=kq>.03?"scale("+(1+kq*.05).toFixed(3)+")":"";if(st.style.transform!==tr)st.style.transform=tr}else if(st.style.transform)st.style.transform="";
  var es=ENDC.on&&t>=endStart();if($("endc").classList.contains("show")!==es){$("endc").classList.toggle("show",es);st.style.transition="opacity .6s";st.style.opacity=es?0:""}
  if(revStop&&!a.paused&&a.currentTime>=revStop){a.pause();revStop=0}
  var sk=$("sk");if(!drag)sk.value=a.currentTime;sk.max=dur();sk.style.setProperty("--p",(a.currentTime/dur()*100)+"%");
@@ -1567,7 +1574,7 @@ function drawGroup(x,W,H,t,k,gi){
  var sx=0,sy=0,k2=W/720;
  idx.forEach(function(j){var ag=t-T[j];if(ag>=0&&ag<.24&&(LN[j].h||KW.test(LN[j].t))){var d=1-ag/.24;sx+=Math.sin(ag*90)*9*d*k2;sy+=Math.cos(ag*70)*5*d*k2}});
  x.save();x.translate(W/2+sx,H*.47+sy);
- var gs=1+clamp01((t-T[idx[0]])/8)*.07+pulse*.03;x.scale(gs,gs);
+ var gs=1+clamp01((t-T[idx[0]])/8)*.07+(PUNCH?kick(t)*.06:pulse*.03);x.scale(gs,gs);
  var y0=-total/2;
  if(multi){x.font="700 "+(sz*.4)+"px 'Noto Sans Thai',sans-serif";x.textAlign="center";x.fillStyle=col;x.globalAlpha=.9;x.fillText(SG[sgi].n.split("").join(" "),0,y0+tagH/2);x.globalAlpha=1;y0+=tagH}
  idx.forEach(function(j,q){if(T[j]>t)return;
@@ -1627,6 +1634,42 @@ function drawAmb(x,W,H,t){var m=ambMode();if(m=="off"||LITE)return false;var M=M
  else if(m=="fog"){for(i=0;i<6;i++){var fx2=W*((R()+t*.01)%1.4-.2),fy=H*(.3+R()*.7),fr=M*(.3+R()*.2),fg=x.createRadialGradient(fx2,fy,0,fx2,fy,fr);fg.addColorStop(0,"rgba(190,205,230,.14)");fg.addColorStop(1,"rgba(190,205,230,0)");x.fillStyle=fg;x.fillRect(fx2-fr,fy-fr,fr*2,fr*2)}}
  else if(m=="city"){x.globalCompositeOperation="lighter";for(i=0;i<22;i++){var bx=W*((R()+t*.006*(R()<.5?-1:1))%1.2-.1),by=H*(.15+R()*.75),br=M*(.02+R()*.06),c=["255,170,80","255,80,120","90,170,255","255,230,170"][i%4],bg=x.createRadialGradient(bx,by,0,bx,by,br);bg.addColorStop(0,"rgba("+c+",.32)");bg.addColorStop(1,"rgba("+c+",0)");x.fillStyle=bg;x.fillRect(bx-br,by-br,br*2,br*2)}}
  x.restore();return true}
+
+/* ---------- AI กำกับภาพ: ฟังเพลง + อ่านเนื้อ → เลือกโทน ฟอนต์ ลูกเล่น ฉากหลัง ให้เข้ากับอารมณ์ ---------- */
+var PUNCH=false;try{PUNCH=localStorage.getItem("bwpunch")=="1"}catch(e){}
+var DIRV=0,DIRA=null;
+async function dirAnalyze(){if(DIRA)return DIRA;var buf=await getBuf(),ch=buf.getChannelData(0),sr=buf.sampleRate,hop=Math.round(sr*.05),n=Math.floor(ch.length/hop),db=new Float32Array(n),zc=0,zn=0,i,j;
+ for(i=0;i<n;i++){var e=0,o=i*hop;for(j=0;j<hop;j+=4){var v=ch[o+j];e+=v*v}db[i]=10*Math.log10(e/(hop/4)+1e-10);if(i%4==0){for(j=1;j<hop;j+=2){if((ch[o+j]>=0)!=(ch[o+j-1]>=0))zc++}zn+=hop/2}}
+ var act=[];for(i=0;i<n;i++)if(db[i]>-45)act.push(db[i]);act.sort(function(a,b){return a-b});var med=act.length?act[act.length>>1]:-40,p90=act.length?act[Math.floor(act.length*.9)]:-30,p10=act.length?act[Math.floor(act.length*.1)]:-50;
+ var on=0;for(i=2;i<n;i++)if(db[i]-db[i-2]>4&&db[i]>med-6)on++;var secs=n*.05,orate=on/Math.max(1,secs);
+ var bg=null;try{bg=await beatGrid()}catch(e){}
+ var lyr=0,dur0=0;if(synced&&N>1){LN.forEach(function(l){lyr+=l.t.replace(/\s/g,"").length});dur0=Math.max(5,T[N-1]-T[0]+3)}
+ DIRA=window.__dira={loud:med,dyn:p90-p10,bright:zc/Math.max(1,zn),orate:orate,bpm:bg&&bg.bpm||0,cps:dur0?lyr/dur0:0};return DIRA}
+function dirPlan(A,v){var lm=lyricMoods(),txt=LN.map(function(l){return l.t}).join(" "),
+ c01=function(v){return Math.max(0,Math.min(1,v))},E=c01((A.loud+30)/14)*.35+c01(A.orate/3)*.2+c01((A.bpm||100)/150)*.15+c01(A.cps/12)*.3,
+ ang=(lm["โกรธ"]||0)+(txt.match(/ยิง|ทุบ|ฆ่า|ตีน|ฆ้อน|อันตราย|crazy|rag|kill|gun|โดน|สอย/gi)||[]).length,sad=(lm["เศร้า"]||0)+(lm["เหงา"]||0)+(lm["คิดถึง"]||0),love=lm["รัก"]||0,party=(lm["ปาร์ตี้"]||0)+(lm["หรู"]||0),dream=lm["ฝัน"]||0,dark=(lm["มืด"]||0);
+ var vibe=(E>.55||A.cps>10)&&ang>=sad&&ang>=love?"rage":E>.55&&party>=1?"party":love>sad&&love>=2?"love":sad>=2?"sad":dream>=2?"dream":E>.55?"rage":"sad";
+ var P={rage:{n:"ดุดัน · มืด · แรงทุกจังหวะ",m:["โกรธ","มืด"],g:"hiphop",an:["fx","bounce","pop"],amb:["rage","rage","city"],pu:true},
+  party:{n:"ปาร์ตี้ · สดใส · เด้งตามบีต",m:["ปาร์ตี้","หรู"],g:"pop",an:["bounce","fx","kara"],amb:["city","rage","city"],pu:true},
+  love:{n:"รัก · อบอุ่น · ละมุน",m:["รัก","ฝัน"],g:"rnb",an:["kara","soft","mix"],amb:["city","fog","city"],pu:false},
+  sad:{n:"เศร้า · เหงา · ช้าๆ ลึกๆ",m:["เศร้า","เหงา","มืด"],g:"rnb",an:["soft","kara","mix"],amb:["fog","city","fog"],pu:false},
+  dream:{n:"ฝัน · ลอย · นุ่ม",m:["ฝัน","คิดถึง"],g:"lofi",an:["soft","kara","soft"],amb:["fog","city","fog"],pu:false}}[vibe];
+ var k=v%3;return{E:E,vibe:vibe,P:P,an:P.an[k],amb:P.amb[k],pu:P.pu&&E>.5,k:k,dark:dark}}
+async function aiDirect(){var b=$("dir-go"),out=$("dir-out");b.disabled=true;b.textContent="AI กำลังฟังเพลง…";out.hidden=false;out.textContent="วิเคราะห์เสียงและเนื้อเพลง…";
+ try{var A=await dirAnalyze(),D=dirPlan(A,DIRV),P=D.P;
+  STS.moods=P.m.slice();if(!STS.genre||STS.genre=="any")STS.genre=P.g;stSave();var rk=stRank(),pick=rk[D.k]||rk[0];if(pick)stApply(pick.st,true);
+  setAnim(D.an);AMB=D.amb;try{localStorage.setItem("bwamb",AMB)}catch(e){}if(typeof ambUI=="function")ambUI();
+  LFX_ON=true;try{localStorage.setItem("bwlfx","1");$("lfxchk").checked=true}catch(e){}
+  PUNCH=D.pu;try{localStorage.setItem("bwpunch",PUNCH?"1":"0")}catch(e){}wg=-2;
+  var AN={fx:"เอฟเฟกต์ทุกคำ",bounce:"เด้งทีละคำ",kara:"คาราโอเกะ",soft:"นุ่มไหล",pop:"กระแทก",mix:"ผสม"},AM={rage:"ดุดัน (ควันแดง ประกายไฟ)",city:"เมืองกลางคืน",fog:"หลอน (หมอก)",off:"ไม่ใส่"};
+  out.innerHTML="<b>AI ฟังแล้ว:</b> พลังเพลง "+Math.round(D.E*100)+"%"+(A.bpm?" · "+Math.round(A.bpm)+" BPM":"")+(A.cps?" · ร้องเร็ว "+A.cps.toFixed(1)+" ตัวอักษร/วิ":"")+" · อารมณ์ <b>"+P.n+"</b><br>"+
+   "<b>กำกับให้:</b> สไตล์ <b>"+(pick?pick.st.n:"-")+"</b> · ตัวหนังสือ <b>"+AN[D.an]+"</b> · ฉากหลัง <b>"+AM[D.amb]+"</b> · เอฟเฟกต์ตามคำ เปิด"+(PUNCH?" · <b>ภาพเด้งตามกลอง</b>":"")+
+   "<br><button class=\"cta alt\" id=\"dir-next\" type=\"button\" style=\"margin-top:8px;min-height:40px;font-size:13px\">ลองอีกแบบ ("+(D.k+2>3?1:D.k+2)+"/3)</button>";
+  $("dir-next").onclick=function(){DIRV++;aiDirect()};toast("AI กำกับภาพแล้ว กดเล่นดูได้เลย")}
+ catch(e){out.textContent="วิเคราะห์ไม่สำเร็จ: "+(e&&e.message||e)+" (ต้องมีไฟล์เพลงในโปรเจกต์ก่อน)"}
+ b.disabled=false;b.textContent="✦ ให้ AI กำกับภาพเพลงนี้"}
+$("dir-go").onclick=function(){DIRV=0;aiDirect()};
+setTimeout(function(){try{if(PUNCH)beatGrid()}catch(e){}},3000);
 /* ---------- เอฟเฟกต์ตามเนื้อเพลง: กระจกร้าว รอยกระสุน ควัน ฝน หัวใจเต้น ความมืด (เบาๆ ไม่รก) ---------- */
 var LFX_ON=true;try{LFX_ON=localStorage.getItem("bwlfx")!=="0"}catch(e){}
 var LFXR=[
