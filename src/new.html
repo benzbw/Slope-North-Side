@@ -21,8 +21,8 @@ button,input,textarea,label{font-family:inherit}
 #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:70px 5vw 24vh;transition:padding .35s}
 body.open #stage{padding-bottom:56vh}
 body.rec #stage{padding-bottom:8vh}
-.g{font-family:var(--lff,'Anton'),'Noto Sans Thai',sans-serif;font-weight:var(--lfw,900);font-style:var(--lfs,italic);text-transform:var(--ltt,uppercase);color:var(--tx);font-size:min(6.4vw,4.4vh);line-height:1.3;text-shadow:0 3px 0 rgba(0,0,0,.6),0 0 30px rgba(var(--gl),.45);animation:push 8s linear forwards}
-.g.h{color:var(--hot);font-size:min(7vw,5vh);text-shadow:0 3px 0 #000,0 0 38px rgba(var(--gl),.85)}
+.g{font-family:var(--lff,'Anton'),'Noto Sans Thai',sans-serif;font-weight:var(--lfw,900);font-style:var(--lfs,italic);text-transform:var(--ltt,uppercase);color:var(--tx);font-size:calc(min(6.4vw,4.4vh)*var(--tsz,.85));line-height:1.3;text-shadow:0 3px 0 rgba(0,0,0,.6),0 0 30px rgba(var(--gl),.45);animation:push 8s linear forwards}
+.g.h{color:var(--hot);font-size:calc(min(7vw,5vh)*var(--tsz,.85));text-shadow:0 3px 0 #000,0 0 38px rgba(var(--gl),.85)}
 @keyframes push{from{transform:scale(1)}to{transform:scale(1.07)}}
 .tg{font:700 .4em 'Noto Sans Thai',sans-serif;font-style:normal;letter-spacing:.3em;margin-bottom:.6em;opacity:.9;text-shadow:none}
 .l{opacity:0;margin:.06em 0}
@@ -282,6 +282,8 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
    <div class="chips" id="anim"><button data-a="mix">ผสม<small>ท่อนร้องนุ่ม ฮุคกระแทก (แนะนำ)</small></button><button data-a="soft">นุ่มไหล<small>ทั้งเพลง</small></button><button data-a="pop">กระแทก<small>หนักแน่นทั้งเพลง</small></button><button data-a="type">พิมพ์ทีละคำ<small>เรียบ มินิมอล</small></button><button data-a="kara">คาราโอเกะ<small>คำที่ร้องอยู่สว่างเด้งขึ้น</small></button><button data-a="bounce">เด้งทีละคำ<small>หล่นแล้วเด้งตามจังหวะ</small></button><button data-a="fx">เอฟเฟกต์ทุกคำ<small>แต่ละคำลูกเล่นไม่ซ้ำ แบบคลิปไวรัล</small></button></div>
    <div class="h" style="margin-top:14px">บรรทัดต่อหน้าจอ</div>
    <div class="chips" id="pagesel"><button data-n="1">1 บรรทัด</button><button data-n="2">2 บรรทัด (แนะนำ)</button><button data-n="3">3 บรรทัด</button><button data-n="0">ทั้งท่อน</button></div>
+   <div class="h" style="margin-top:14px">ขนาดตัวหนังสือ</div>
+   <div class="chips" id="tszsel"><button data-z=".7">เล็ก</button><button data-z=".85">กลาง (แนะนำ IG)</button><button data-z="1">ใหญ่</button></div>
    <div class="h" style="margin-top:14px">ช่วงก่อนเพลงขึ้น / ดนตรีล้วน</div>
    <div class="chips" id="skst"><button data-k="auto">อัตโนมัติ<small>เลือกตามอารมณ์เพลง</small></button><button data-k="ink">ลายเส้นหมึก<small>ศิลปิน + สีน้ำ</small></button><button data-k="neon">นีออนเส้นเดียว<small>เรืองแสง</small></button><button data-k="chalk">ชอล์ก<small>ดิบ วินเทจ</small></button><button data-k="fx">เอฟเฟกต์ + ชื่อเพลง<small>ฝุ่นแสง ไม่มีรูป</small></button><button data-k="off">ไม่ใส่<small>โล่ง</small></button></div>
    <input type="checkbox" id="skchk" hidden>
@@ -522,6 +524,7 @@ try{var cr=localStorage.getItem("bwraw");if(cr)RAW=cr;(function(){var r=lyrFix(R
 if(!THEMES[thIdx])thIdx=0;var TH=THEMES[thIdx];
 function scolFor(q){return SAME||SG[q].c=="auto"?null:SG[q].c}
 var LN=[];RAW.split("\n\n").forEach(function(s,gi){var h=false,sg=0,mm;while(mm=s.match(/^(§|@([1-4]))[ \t]*/)){if(mm[1]=="§")h=true;else sg=+mm[2]-1;s=s.slice(mm[0].length)}s.split("\n").forEach(function(l){if(l.trim())LN.push({g:gi,t:l,h:h,s:sg})})});
+var TSZ=.85;try{var tz0=localStorage.getItem("bwtsz");if(tz0)TSZ=+tz0||.85}catch(e){}
 /* แบ่งหน้าจอ: แต่ละหน้าแสดงไม่เกิน PAGE บรรทัด (0 = ทั้งท่อน) ไม่รก อ่านทัน */
 var PAGE=2;try{var pg0=localStorage.getItem("bwpage");if(pg0!=null)PAGE=+pg0||0}catch(e){}
 function ROLL(){return PAGE>=2}
@@ -625,6 +628,8 @@ var PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',PAUSE='<svg 
 var ANIM="mix";try{ANIM=localStorage.getItem("bwanim")||"mix"}catch(e){}
 function setAnim(v){ANIM=v;["mix","soft","pop","type","kara","bounce","fx"].forEach(function(k){document.body.classList.toggle("anim-"+k,k==v)});document.querySelectorAll("#anim button").forEach(function(b){b.classList.toggle("on",b.dataset.a==v)});try{localStorage.setItem("bwanim",v)}catch(e){}}
 document.querySelectorAll("#anim button").forEach(function(b){b.onclick=function(){setAnim(b.dataset.a);toast("เปลี่ยนการขึ้นของตัวหนังสือแล้ว")}});setAnim(ANIM);
+function tszUI(){document.documentElement.style.setProperty("--tsz",TSZ);document.querySelectorAll("#tszsel button").forEach(function(b){b.classList.toggle("on",+b.dataset.z==TSZ)})}
+document.querySelectorAll("#tszsel button").forEach(function(b){b.onclick=function(){TSZ=+b.dataset.z;try{localStorage.setItem("bwtsz",String(TSZ))}catch(e){}tszUI();toast("ปรับขนาดตัวหนังสือแล้ว")}});tszUI();
 function pageUI(){document.querySelectorAll("#pagesel button").forEach(function(b){b.classList.toggle("on",+b.dataset.n==PAGE)})}
 document.querySelectorAll("#pagesel button").forEach(function(b){b.onclick=function(){PAGE=+b.dataset.n;try{localStorage.setItem("bwpage",String(PAGE))}catch(e){}paginate();wg=-2;pageUI();toast(PAGE?"แสดงหน้าละ "+PAGE+" บรรทัด":"แสดงทั้งท่อน")}});pageUI();
 var ENDC={on:true,title:"Dangerous",artist:"Bedupbiw ft. Killmonger"};try{var ej=JSON.parse(localStorage.getItem("bwend")||"null");if(ej)ENDC=Object.assign(ENDC,ej)}catch(e){}
@@ -1380,10 +1385,10 @@ function flushAd(x,W,H){var list=ADQ;ADQ=[];list.slice(-3).forEach(function(a,n)
 function drawGroup(x,W,H,t,k,gi){
  var idx=pageIdx(gi),i;if(!idx.length)return;
  var first=LN[idx[0]],sgi=first.s||0,hook=first.h,multi=LN.some(function(l){return l.s>0});
- var ex=scolFor(sgi),col=ex||(hook?TH.hot:TH.txt),base=Math.min(W*.075,H*.052)*(hook?1.1:1);
+ var ex=scolFor(sgi),col=ex||(hook?TH.hot:TH.txt),base=Math.min(W*.075,H*.052)*(hook?1.1:1)*TSZ;
  x.textAlign="left";x.textBaseline="middle";x.font=lfont(base);
  var maxw=1;idx.forEach(function(j){var mt=mainTxt(j)||LN[j].t;maxw=Math.max(maxw,x.measureText(LF[3]=="uppercase"?mt.toUpperCase():mt).width)});
- var sz=Math.min(base,base*(W*.9)/maxw),lh=sz*1.3,tagH=multi?sz*.9:0,total=idx.length*lh+tagH;
+ var sz=Math.min(base,base*(W*.8)/maxw),lh=sz*1.3,tagH=multi?sz*.9:0,total=idx.length*lh+tagH;
  var sx=0,sy=0,k2=W/720;
  idx.forEach(function(j){var ag=t-T[j];if(ag>=0&&ag<.24&&(LN[j].h||KW.test(LN[j].t))){var d=1-ag/.24;sx+=Math.sin(ag*90)*9*d*k2;sy+=Math.cos(ag*70)*5*d*k2}});
  x.save();x.translate(W/2+sx,H*.47+sy);
