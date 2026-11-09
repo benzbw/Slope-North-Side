@@ -2726,12 +2726,24 @@ function modal(html){var m=h('<div class="sx-modal" role="dialog" aria-modal="tr
 
 function newDialog(){var defA=BRANDED?"Bedupbiw":ST.acct.handle;
  var m=modal('<button class="sx-x" aria-label="ปิด">×</button><h3>เพลงใหม่</h3><p class="sx-note" style="margin:0 0 14px">ใส่แค่ชื่อเพลงก็เริ่มได้ ที่เหลือเติมทีหลังในโปรเจกต์</p>'+
- '<form class="sx-f" id="sx-nf"><label class="sx-lab">ชื่อเพลง *<input class="sx-in" id="sx-nn" required maxlength="60" placeholder="เช่น Dangerous"></label>'+
+ '<form class="sx-f" id="sx-nf"><label class="sx-lab">มีเพลงที่ปล่อยแล้ว? วางลิงก์ YouTube (ดึงเพลง + เนื้อให้เอง)<div class="sx-row2" style="gap:8px"><input class="sx-in" id="sx-nyt" inputmode="url" placeholder="https://youtu.be/…"><button class="sx-btn ghost" type="button" id="sx-nyg" style="flex:0 0 auto;width:auto;padding:0 14px">ดึงเพลง</button></div></label><div class="sx-note" id="sx-nys" style="margin:-6px 0 10px"></div><label class="sx-lab">ชื่อเพลง *<input class="sx-in" id="sx-nn" required maxlength="60" placeholder="เช่น Dangerous"></label>'+
  '<div class="sx-row2"><label class="sx-lab">ศิลปินหลัก<input class="sx-in" id="sx-na" maxlength="40" value="'+esc(defA)+'"></label><label class="sx-lab">feat. (ถ้ามี)<input class="sx-in" id="sx-nft" maxlength="60" placeholder="เช่น Killmonker"></label></div>'+
  '<label class="sx-file" id="sx-nfl"><input type="file" id="sx-nfi" accept="audio/*,video/*,.mp3,.m4a,.wav,.mp4"><span>♪</span><span id="sx-nfn">เลือกไฟล์เพลง (mp3, m4a, wav)</span></label>'+
  '<label class="sx-lab">เนื้อเพลง (วางทั้งเพลงได้ เว้นบรรทัดว่างคั่นท่อน)<textarea class="sx-in" id="sx-nl" placeholder="ท่อนที่ 1&#10;บรรทัดที่สอง&#10;&#10;§ ท่อนฮุค (ใส่ § นำหน้าท่อนฮุค)&#10;&#10;@2 ท่อนคน feat (ใส่ @2 นำหน้า)"></textarea></label>'+
  '<div class="sx-err" id="sx-ne"></div><button class="sx-btn" type="submit" id="sx-ngo">สร้างโปรเจกต์</button></form>');
  var file=null;$("sx-nfi").onchange=function(){file=this.files[0]||null;$("sx-nfn").textContent=file?file.name:"เลือกไฟล์เพลง";if(file&&!$("sx-nn").value)$("sx-nn").value=file.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").slice(0,60)};
+ $("sx-nyg").onclick=async function(){var u=($("sx-nyt").value||"").trim(),st2=$("sx-nys"),bt=this;if(!/youtu\.?be/.test(u)){st2.textContent="ใส่ลิงก์ YouTube ของเพลง";return}
+  bt.disabled=true;st2.textContent="กำลังดึงเพลงจาก YouTube… (ราว 10–40 วิ)";
+  try{var ctl=new AbortController(),tm=setTimeout(function(){ctl.abort()},120000),r=await fetch("/api/ytsong?url="+encodeURIComponent(u),{signal:ctl.signal,cache:"no-store"}).catch(function(){return null});clearTimeout(tm);
+   var d=r&&/json/.test(r.headers.get("content-type")||"")?await r.json():null;
+   if(!d){st2.textContent="ดึงจากลิงก์ได้เฉพาะตอนเปิดแอปบนคอม (หน้าต่างดำ start.bat เปิดอยู่) หรือมือถือที่ต่อผ่าน Wi‑Fi ของคอม";bt.disabled=false;return}
+   if(!d.ok){st2.textContent=d.err||"ดึงไม่สำเร็จ";bt.disabled=false;return}
+   var b=await (await fetch(d.audio)).blob();file=new File([b],(d.title||"song").replace(/[\\/:*?"<>|]+/g,"_")+(d.audio.match(/\.[a-z0-9]+$/i)||[".m4a"])[0],{type:b.type||"audio/mp4"});$("sx-nfn").textContent="♪ "+file.name+" (จาก YouTube)";
+   if(!$("sx-nn").value)$("sx-nn").value=(d.title||"").replace(/\s*[\(\[](official|mv|music video|lyric|audio|visualizer)[^\)\]]*[\)\]]/ig,"").trim().slice(0,60);
+   if(d.lyrics&&d.lyrSrc!="auto"&&!$("sx-nl").value.trim())$("sx-nl").value=d.lyrics;
+   st2.innerHTML="ได้เพลงแล้ว ("+esc(d.title||"")+")"+(d.lyrics&&d.lyrSrc!="auto"?" · เนื้อจาก"+(d.lyrSrc=="desc"?"คำอธิบายคลิป":"ซับไตเติลของคลิป")+" ตรวจอีกรอบก่อนสร้าง":d.lyrics?" · คลิปนี้มีแค่ซับอัตโนมัติของ YouTube ซึ่งฟังแร็พไทยผิดเยอะ เลยไม่ใส่ให้ วางเนื้อจริงด้านล่าง <button type=button class='sx-pill' id='sx-nya'>ใช้ซับอัตโนมัติเป็นร่าง</button>":" · ไม่พบเนื้อในคลิป วางเนื้อเองด้านล่าง")+" · เสร็จแล้วกด สร้างโปรเจกต์ แล้วไปซิงค์";
+   var ya=$("sx-nya");if(ya)ya.onclick=function(){$("sx-nl").value=d.lyrics;ya.remove()}}
+  catch(e){st2.textContent="ดึงไม่สำเร็จ: "+(e&&e.message||e)}bt.disabled=false};
  setTimeout(function(){$("sx-nn").focus()},60);
  $("sx-nf").onsubmit=async function(ev){ev.preventDefault();var name=$("sx-nn").value.trim(),ar=$("sx-na").value.trim()||defA,ft=$("sx-nft").value.trim(),ly=$("sx-nl").value.replace(/\r/g,"").trim();
   if(!name){$("sx-ne").textContent="ใส่ชื่อเพลงก่อน";return}$("sx-ngo").disabled=true;busy("กำลังสร้างโปรเจกต์…");

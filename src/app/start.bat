@@ -47,6 +47,11 @@ if not errorlevel 1 goto mixok
 echo [5/5] Installing mixer (first time only)...
 %PY% -m pip install --quiet --disable-pip-version-check scipy soundfile
 :mixok
+%PY% -c "import yt_dlp" >nul 2>nul
+if not errorlevel 1 goto ytok
+echo [6/6] Installing YouTube song fetcher (first time only)...
+%PY% -m pip install --quiet --disable-pip-version-check -U yt-dlp
+:ytok
 echo.
 echo ==========================================================
 echo  Slope North Side server is starting: http://localhost:8790

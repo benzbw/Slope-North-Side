@@ -568,12 +568,27 @@ def second_opinion(lines, pcm, res, name, cdir, hsh, J):
         J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ฟังเสียงร้องอีกรอบ ครั้งแรกราว 1-3 นาที)", pct=70)
         if name not in MODELS:
             MODELS[name] = WhisperModel(name, device="auto", compute_type="int8", cpu_threads=os.cpu_count() or 4)
-        segs, info = MODELS[name].transcribe(pcm, language="th", word_timestamps=True, beam_size=BEAM, condition_on_previous_text=False,
-                                             temperature=0.0, no_repeat_ngram_size=4, initial_prompt=" ".join(lines)[:600])
-        words = []
-        for sg in segs:
-            words += [(w.word, w.start, w.end) for w in sg.words]
-            J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ถึงวินาทีที่ %d จาก %d)" % (sg.end, info.duration), pct=70 + 28 * min(1, sg.end / max(info.duration, 1)))
+        import time as _t
+        words, box = [], {}
+        def work():
+            try:
+                segs, info = MODELS[name].transcribe(pcm, language="th", word_timestamps=True, beam_size=1, condition_on_previous_text=False,
+                                                     temperature=0.0, no_repeat_ngram_size=4, max_new_tokens=120, hallucination_silence_threshold=2.0,
+                                                     vad_filter=True, vad_parameters={"min_silence_duration_ms": 400})
+                for sg in segs:
+                    if box.get("stop"): break
+                    words.extend((w.word, w.start, w.end) for w in sg.words)
+                    J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ถึงวินาทีที่ %d จาก %d)" % (sg.end, info.duration), pct=70 + 28 * min(1, sg.end / max(info.duration, 1)))
+                box["ok"] = True
+            except Exception as e:
+                box["err"] = str(e)
+        th = threading.Thread(target=work, daemon=True); th.start()
+        lim = max(150, len(pcm) / 16000 * 2.5)          # ไม่เกิน ~2.5 เท่าความยาวเพลง: ช้ากว่านี้ข้ามการตรวจซ้ำ ใช้ผลหลักเลย
+        th.join(lim)
+        if not box.get("ok"):
+            box["stop"] = True
+            print("ตรวจซ้ำช้าเกิน/ไม่สำเร็จ ข้ามไป", box.get("err", ""), flush=True)
+            return {}
         try: json.dump(words, open(wf, "w", encoding="utf-8"), ensure_ascii=False)
         except Exception: pass
     Sw, Ew, ratio, cw = combine(lines, [words], align)
@@ -588,6 +603,75 @@ def second_opinion(lines, pcm, res, name, cdir, hsh, J):
             C[i] = min(C[i], .4); clash.append(i)
     return {"conf": [round(c, 2) for c in C], "second": {"agree": agree, "clash": clash, "n": len(S), "wS": [round(x, 2) if x is not None else None for x in Sw]}}
 
+
+
+# ---------- ดึงเพลงที่ปล่อยแล้วจากลิงก์ YouTube (ไฟล์เสียง + เนื้อเพลงจากคำอธิบาย/ซับไตเติล) — ใช้กับเพลงของตัวเอง ----------
+def _vtt_text(fp):
+    import re
+    out, last = [], ""
+    for ln in open(fp, encoding="utf-8", errors="ignore").read().splitlines():
+        ln = ln.strip()
+        if not ln or ln.startswith(("WEBVTT", "Kind:", "Language:", "NOTE")) or "-->" in ln or re.fullmatch(r"\d+", ln): continue
+        ln = re.sub(r"<[^>]+>", "", ln).replace("&nbsp;", " ").strip()
+        ln = re.sub(r"^\[[^\]]*\]$|^♪+$", "", ln).strip(" ♪")
+        if not ln or ln == last: continue
+        if out and (ln.startswith(out[-1]) and len(ln) > len(out[-1])): out[-1] = ln; last = ln; continue
+        if out and out[-1].endswith(ln): continue
+        out.append(ln); last = ln
+    return "\n".join(out)
+
+
+def _desc_lyrics(desc):
+    import re
+    L = []
+    for ln in (desc or "").replace("\r", "").split("\n"):
+        t = ln.strip()
+        if re.search(r"https?://|www\.|@\w+\.|#\w|©|℗|all rights|follow|subscribe|instagram|facebook|tiktok|spotify|apple music|youtube|ติดต่อ|โทร|line\s*:|ig\s*:|fb\s*:", t, re.I): L.append(""); continue
+        if re.match(r"^(prod|mix|master|beat|music|lyrics?|video|director|edit|shot|cover|artwork|credit|record|vocal)\w*\s*(by|:|-)", t, re.I): L.append(""); continue
+        L.append(t)
+    txt = "\n".join(L)
+    blocks = [b.strip() for b in re.split(r"\n\s*\n", txt) if b.strip()]
+    good = [b for b in blocks if len(b.split("\n")) >= 2 and sum(len(x) <= 70 for x in b.split("\n")) >= .8 * len(b.split("\n"))]
+    n = sum(len(b.split("\n")) for b in good)
+    return "\n\n".join(good) if n >= 8 else ""
+
+
+def yt_song(url):
+    try:
+        import yt_dlp
+    except Exception:
+        return {"ok": False, "err": "ยังไม่ได้ติดตั้งตัวดึง YouTube ปิดหน้าต่างดำแล้วดับเบิลคลิก start.bat ใหม่"}
+    import glob
+    d = os.path.join(os.getcwd(), "mixes", "yt"); os.makedirs(d, exist_ok=True)
+    opts = {"quiet": True, "no_warnings": True, "noplaylist": True, "socket_timeout": 20, "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio",
+            "outtmpl": os.path.join(d, "%(id)s.%(ext)s"), "writesubtitles": True, "writeautomaticsub": True,
+            "subtitleslangs": ["th", "th-TH", "th-orig", "en"], "subtitlesformat": "vtt", "overwrites": True}
+    try:
+        with yt_dlp.YoutubeDL(opts) as y:
+            info = y.extract_info(url, download=True) or {}
+    except Exception as e:
+        msg = str(e)
+        if "subtitle" in msg.lower():
+            opts.update(writesubtitles=False, writeautomaticsub=False)
+            with yt_dlp.YoutubeDL(opts) as y: info = y.extract_info(url, download=True) or {}
+        else:
+            return {"ok": False, "err": "ดึงจาก YouTube ไม่สำเร็จ: " + msg[:200]}
+    vid = info.get("id") or ""
+    aud = [f for f in glob.glob(os.path.join(d, vid + ".*")) if not f.endswith(".vtt") and not f.endswith(".part")]
+    if not aud: return {"ok": False, "err": "ดาวน์โหลดเสียงไม่สำเร็จ"}
+    lyr, src = _desc_lyrics(info.get("description")), "desc"
+    if not lyr:
+        manual = set((info.get("subtitles") or {}).keys())
+        subs = sorted(glob.glob(os.path.join(d, vid + ".*.vtt")), key=lambda f: (0 if any(("." + k + ".") in f for k in manual) else 1, 0 if ".th" in f else 1))
+        for f in subs:
+            t = _vtt_text(f)
+            if len(t.split("\n")) >= 6:
+                lyr, src = t, ("subs" if any(("." + k + ".") in f for k in manual) else "auto"); break
+    title = info.get("track") or info.get("title") or ""
+    artist = info.get("artist") or info.get("creator") or info.get("uploader") or ""
+    return {"ok": True, "id": vid, "title": title[:80], "artist": artist[:60], "dur": info.get("duration"),
+            "audio": "/mixes/yt/" + os.path.basename(aud[0]), "lyrics": lyr, "lyrSrc": src if lyr else "",
+            "thumb": info.get("thumbnail") or ""}
 
 # ---------- ค้นบีตจาก YouTube (yt-dlp) แล้วคัดฟรี/เสียเงิน ----------
 import re as _re
@@ -710,7 +794,7 @@ class H(http.server.SimpleHTTPRequestHandler):
             pth = self.path.split("?")[0]
             if pth.endswith("/") and pth != "/": return self.send_error(403)
             if (pth.startswith("/api/mixhist") or pth.startswith("/api/beats") or pth.startswith("/api/oembed") or pth.startswith("/api/job")) and not self._auth(): return
-        if self.path.startswith("/api/ping"): return self._json({"ok": True, "auth": bool(KEY) or not self._local(), "lan": not self._local(), "model": DEFAULT_MODEL, "v": 24, "beats": True, "trends": True, "mv": True, "report": True, "oembed": True, "queue": len(_Q), "mix": True, "img": __import__("importlib.util").util.find_spec("diffusers") is not None, "sep": __import__("importlib.util").util.find_spec("demucs") is not None})
+        if self.path.startswith("/api/ping"): return self._json({"ok": True, "auth": bool(KEY) or not self._local(), "lan": not self._local(), "model": DEFAULT_MODEL, "v": 24, "beats": True, "ytsong": True, "trends": True, "mv": True, "report": True, "oembed": True, "queue": len(_Q), "mix": True, "img": __import__("importlib.util").util.find_spec("diffusers") is not None, "sep": __import__("importlib.util").util.find_spec("demucs") is not None})
         if self.path.startswith("/api/trends"):
             try: return self._json(trends("force=1" in self.path))
             except Exception as e: return self._json({"ok": False, "err": [str(e)[:160]]}, 502)
@@ -738,6 +822,14 @@ class H(http.server.SimpleHTTPRequestHandler):
                 return self._json({"ok": True, "src": src, "title": d.get("title", ""), "author": d.get("author_name", ""), "thumb": d.get("thumbnail_url", "")})
             except Exception as e:
                 return self._json({"ok": False, "err": "อ่านลิงก์ไม่ได้: " + str(e)[:120]}, 502)
+        if self.path.startswith("/api/ytsong"):
+            if not self._local() and not self._auth(): return
+            import urllib.parse
+            u = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("url", [""])[0].strip()
+            host = urllib.parse.urlparse(u).hostname or ""
+            if not host.endswith(("youtube.com", "youtu.be")): return self._json({"ok": False, "err": "ใส่ลิงก์ YouTube"}, 400)
+            try: return self._json(yt_song(u))
+            except Exception as e: traceback.print_exc(); return self._json({"ok": False, "err": str(e)[:200]}, 500)
         if self.path.startswith("/api/beats"):
             import urllib.parse
             qs = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
