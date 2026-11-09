@@ -586,6 +586,7 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
     <p class="mut" id="vendnote" style="font-size:12px;margin:6px 0 0"></p>
    </div>
    <div class="chips" id="vf"><button data-f="916" class="on">แนวตั้ง<small>9:16 · TikTok</small></button><button data-f="169">แนวนอน<small>16:9 · YouTube</small></button><button data-f="11">จัตุรัส<small>1:1</small></button></div>
+   <div class="mut" style="font-size:12.5px;margin:8px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap">เนื้อในวิดีโอที่ส่งออก: <span id="vlag">ชดเชยอัตโนมัติ</span> <button class="lnk" type="button" id="vlag-m">ช้าไป (เลื่อนเร็วขึ้น)</button> <button class="lnk" type="button" id="vlag-p">เร็วไป (เลื่อนช้าลง)</button></div>
    <div class="chips" id="vq"><button data-q="720">HD 720p<small>ไฟล์เล็ก · เครื่องช้า</small></button><button data-q="1080">Full HD 1080p<small>แนะนำ · คมชัด</small></button><button data-q="1080s">1080p 60fps<small>ลื่นสุด · เครื่องแรง</small></button></div>
    <label class="tgl"><input type="checkbox" id="wm-on" checked><span>ลายน้ำแบรนด์ตลอดคลิป (โลโก้ SNS + SLOPE NORTH SIDE มุมจอ มีแสงวิ่งผ่านทุก 18 วิ)</span></label>
    <div class="chips" id="wm-pos"><button data-p="auto">อัตโนมัติ<small>หลบปุ่ม TikTok</small></button><button data-p="tl">บนซ้าย</button><button data-p="tr">บนขวา</button><button data-p="bl">ล่างซ้าย</button><button data-p="br">ล่างขวา</button></div>
@@ -1851,6 +1852,13 @@ function snsFixMp4(u8){try{var dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLe
  var box=new Uint8Array(20),bd=new DataView(box.buffer);bd.setUint32(0,20);box.set([109,101,104,100],4);bd.setUint32(8,0x01000000);bd.setBigUint64(12,BigInt(maxMv));
  var ins=mvex+8,out=new Uint8Array(L+20);out.set(u8.subarray(0,ins),0);out.set(box,ins);out.set(u8.subarray(ins),ins+20);var od=new DataView(out.buffer);
  od.setUint32(moov,dv.getUint32(moov)+20);od.setUint32(mvex,dv.getUint32(mvex)+20);return out}catch(e){return u8}}
+
+/* ชดเชยดีเลย์ตอนบันทึกวิดีโอ: เสียงที่ส่งเข้าไฟล์ออกก่อนเสียงที่หูได้ยิน (ลำโพง/หูฟังบลูทูธมีดีเลย์) เนื้อเลยดูช้าในไฟล์ → วาดภาพล่วงหน้าเท่าดีเลย์ของเครื่อง */
+var VLAGU=0;try{VLAGU=+(localStorage.getItem("sns:vlag")||0)||0}catch(e){}
+function vlagAuto(){try{initAudio()}catch(e){}var o=0;try{o=(ac&&(ac.outputLatency||0))+(ac&&(ac.baseLatency||0))}catch(e){}return Math.max(0,Math.min(.6,o||0))}
+function vlag(){return vlagAuto()+VLAGU}
+function vlagUI(){var e=$("vlag");if(e)e.textContent="ชดเชย "+vlag().toFixed(2)+" วิ (เครื่องนี้ "+vlagAuto().toFixed(2)+(VLAGU?(VLAGU>0?" +":" ")+VLAGU.toFixed(2)+" ที่ปรับเอง":"")+")"}
+["vlag-m","vlag-p"].forEach(function(id,k){var b=$(id);if(b)b.onclick=function(){VLAGU=Math.round((VLAGU+(k?-.05:.05))*100)/100;try{localStorage.setItem("sns:vlag",String(VLAGU))}catch(e){}vlagUI()}});setTimeout(vlagUI,1500);
 async function startVideo(){
  if(typeof MediaRecorder==="undefined"||!HTMLCanvasElement.prototype.captureStream){toast("เบราว์เซอร์นี้ยังบันทึกวิดีโอในแอปไม่ได้ ใช้ Chrome หรือ Safari รุ่นใหม่ หรือกดอัดหน้าจอเอง");return}
  var _sz=expSize(vfmt),W=_sz[0],H=_sz[1],QQ=QUAL[PRO.q]||QUAL["1080"],wl=null;
@@ -1862,7 +1870,7 @@ async function startVideo(){
  var cvs=document.createElement("canvas");cvs.width=W;cvs.height=H;
  $("vov").hidden=false;$("vbox").innerHTML="";$("vbox").appendChild(cvs);$("vpb").hidden=false;$("vcancel").hidden=false;$("vact").innerHTML="";
  var mime=pickMime(),opts={videoBitsPerSecond:QQ.br,audioBitsPerSecond:256000};if(mime)opts.mimeType=mime;
- if(MV.on){$("vst").textContent="กำลังเตรียมจังหวะตัดภาพ...";try{await beatGrid()}catch(e){}}wmLogo();var stream=cvs.captureStream(QQ.fps);rdest.stream.getAudioTracks().forEach(function(tr){stream.addTrack(tr)});
+ if(MV.on){$("vst").textContent="กำลังเตรียมจังหวะตัดภาพ...";try{await beatGrid()}catch(e){}}wmLogo();var LAG=vlag();vlagUI();var stream=cvs.captureStream(QQ.fps);rdest.stream.getAudioTracks().forEach(function(tr){stream.addTrack(tr)});
  var mr,chunks=[],cancelled=false;
  try{mr=new MediaRecorder(stream,opts)}catch(e){try{mr=new MediaRecorder(stream)}catch(e2){$("vov").hidden=true;toast("เริ่มตัวบันทึกไม่ได้ในเบราว์เซอร์นี้");return}}
  mr.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
@@ -1876,7 +1884,7 @@ async function startVideo(){
    if(tailT0){var el=(performance.now()-tailT0)/1000;drawFrame(cvs,W,H,tailTm);shade(CL.mode=="stop"?el/CL.tail:Math.pow(el/CL.tail,1.6));if(el>=CL.tail){fin();return}
     $("vst").textContent="กำลังบันทึกหางเสียง… อย่าปิดหน้านี้";requestAnimationFrame(loop);return}
    if(CL&&now>=CL.e){if(CL.tail){tailT0=performance.now();tailTm=tm();a.pause();if(EF.dry&&ac){EF.dry.gain.setTargetAtTime(0,ac.currentTime,.02);if(CL.mode=="stop"){EF.send.gain.setValueAtTime(.9,ac.currentTime);EF.send.gain.setTargetAtTime(0,ac.currentTime+.05,.05);EF.fb.gain.value=.3}}requestAnimationFrame(loop);return}fin();return}
-   drawFrame(cvs,W,H,tm());
+   drawFrame(cvs,W,H,tm()+LAG);
    if(CL){var fi=clamp01((now-CL.s)/.35),fo2=CL.mode=="fade"?clamp01((CL.e-now)/1.4):CL.mode=="loop"?clamp01((CL.e-now)/.5):1,fa=Math.min(fi,fo2);shade(1-fa);
     if(mIn&&ac){mIn.gain.setTargetAtTime(Math.max(0,CL.mode=="loop"?Math.min(clamp01((now-CL.s)/.5),fo2):fa),ac.currentTime,.03)}
     if(EF.hp&&ac&&!efOn&&CL.mode=="echo"&&now>=CL.te){efOn=true;var t=ac.currentTime;EF.hp.frequency.setTargetAtTime(650,t,.12);EF.lp.frequency.setTargetAtTime(6500,t,.2);EF.send.gain.setTargetAtTime(.95,t,.08);EF.fb.gain.value=.55}}
