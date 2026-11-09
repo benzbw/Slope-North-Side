@@ -25,12 +25,12 @@ let fails = 0; const check = (n, ok, d) => { console.log((ok ? 'PASS ' : 'FAIL '
   await p.click('text=③ สมุดเนื้อเพลง'); await p.waitForTimeout(500);
   const nb = await p.$('#sw-nn'); if (nb) { await nb.click(); await p.waitForTimeout(500) }
   // 2. อ่านรายการคำจาก `#sw-slang .sw-chips [data-w]` ที่ไม่ได้อยู่ใน `#sw-slai`
-  const firstSet = await p.$$eval('#sw-slang .sw-chips [data-w]', els => els.map(e => e.dataset.w));
+  const firstSet = await p.$$eval('#sw-slang .sw-chips [data-w]', els => els.filter(e => !e.closest('#sw-slai')).map(e => e.dataset.w));
   // 3. คลิกปุ่ม `#sw-slre` แล้วรอ 300ms อ่านรายการอีกครั้ง
   await p.click('#sw-slre'); await p.waitForTimeout(300);
-  const secondSet = await p.$$eval('#sw-slang .sw-chips [data-w]', els => els.map(e => e.dataset.w));
+  const secondSet = await p.$$eval('#sw-slang .sw-chips [data-w]', els => els.filter(e => !e.closest('#sw-slai')).map(e => e.dataset.w));
   // 4. ตรวจสอบว่าชุดคำชุดที่สองไม่ซ้ำกับชุดแรกเลย
-  const ok = secondSet.every(v => !firstSet.includes(v));
+  const ok = firstSet.length > 0 && secondSet.length > 0 && secondSet.every(v => !firstSet.includes(v));  // Claude: กันผ่านปลอมเมื่อหาคำไม่เจอ
   check(lab + ': สุ่มคำสแลงได้คำใหม่', ok, `first=${firstSet.length} second=${secondSet.length}`);
   // ------------------------------------------------------------
   await p.screenshot({ path: path.join(SHOTS, 'write-' + lab + '.png') });
