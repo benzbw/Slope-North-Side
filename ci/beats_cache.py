@@ -18,10 +18,10 @@ TRENDS = {
  "rage":  ["Rage", "ซินธ์แตก หนัก เร็ว 150+ BPM", ["rage type beat " + Y, "ken carson rage type beat"]],
  "afro":  ["Afro × trap / Afro drill", "จังหวะแอฟริกันบนกลอง trap/drill", ["afro drill type beat " + Y, "afrobeat trap type beat " + Y]],
  "rnbdrill":["R&B × drill / Vocal chop", "เสียงร้องตัดเป็นเมโลดี้บนกลอง drill", ["r&b drill type beat " + Y, "vocal chop type beat " + Y]],
- "phonk": ["Phonk ใหม่", "Brazilian / house phonk", ["brazilian phonk beat " + Y, "house phonk beat " + Y]],
- "thai":  ["แดนซ์ / รีมิกซ์ไทย", "บีตแดนซ์และรีมิกซ์สายไทย", ["thai remix rap beat", "thai dance beat tiktok " + Y, "แดนซ์ไทย บีท " + Y]],
+ "phonk": ["Phonk ใหม่", "Brazilian / house / drift phonk", ["brazilian phonk " + Y, "funk phonk " + Y, "drift phonk " + Y, "house phonk " + Y]],
+ "thai":  ["แดนซ์ / รีมิกซ์ไทย", "บีตแร็พไทยและบีตแดนซ์สายไทย", ["บีทแร็พไทย " + Y, "thai type beat " + Y, "บีทแดนซ์ " + Y, "thai rap beat free"]],
 }
-def search(q, n=14):
+def search(q, n=14, pat=r"beat|instrumental|prod"):
     try:
         r = subprocess.run(["yt-dlp", "ytsearch%d:%s" % (n, q), "--flat-playlist", "-J", "--no-warnings"], capture_output=True, text=True, timeout=90)
         j = json.loads(r.stdout or "{}")
@@ -30,7 +30,7 @@ def search(q, n=14):
     out = []
     for e in j.get("entries") or []:
         t = e.get("title") or ""; d = e.get("duration") or 0
-        if not e.get("id") or not re.search(r"beat|instrumental|prod", t, re.I): continue
+        if not e.get("id") or not re.search(pat, t, re.I): continue
         if d and (d < 60 or d > 600): continue
         out.append({"id": e["id"], "t": t[:120], "ch": (e.get("channel") or e.get("uploader") or "")[:60], "d": int(d or 0), "v": int(e.get("view_count") or 0),
                     "free": bool(re.search(r"free\s*(for\s*profit|download|beat)|\bfree\b", t, re.I))})
@@ -45,7 +45,7 @@ res["trends"] = {}
 for k, (name, desc, qs) in TRENDS.items():
     seen, L = set(), []
     for q in qs:
-        for x in search(q, 10):
+        for x in search(q, 10, r"phonk|funk|beat|prod" if k == "phonk" else r"บีท|บีต|beat|remix|รีมิกซ์|แดนซ์|dance|prod|instrumental" if k == "thai" else r"beat|instrumental|prod"):
             if x["id"] not in seen: seen.add(x["id"]); L.append(x)
     L.sort(key=lambda x: -x["v"]); res["trends"][k] = {"n": name, "d": desc, "list": L[:30]}; print("trend", k, len(L))
 ok = sum(len(v) for v in res["artists"].values()) + sum(len(v) for v in res["genres"].values())
