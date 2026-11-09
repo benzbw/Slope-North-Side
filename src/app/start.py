@@ -508,6 +508,11 @@ def _run(jid, body):
                            "von": [o for o, _ in on], "vs": vs, "ve": ve, "syl": syllables(pcm, t0=vs, t1=ve), "fast": True}
                     k = int(body.get("nsing") or 1)
                     if k >= 2: res["vseg"] = voice_segments(pcm, min(k, 4), t0=vs, t1=ve)
+                    # ตรวจซ้ำด้วย AI ตัวที่ 2 (Whisper ฟังเสียงร้อง): บรรทัดที่ 2 ตัวเห็นตรงกัน = มั่นใจจริง · ไม่ตรง = ให้ผู้ใช้เช็ก
+                    try:
+                        res.update(second_opinion(lines, pcm, res, name, cdir, hsh, J))
+                    except Exception:
+                        traceback.print_exc()
                     J.update(status="done", pct=100, result=res)
                     return
                 J.update(msg="จับเวลาแบบรู้เนื้อได้ไม่ดีพอ ให้ AI ฟังเพิ่ม", pct=10)
@@ -551,6 +556,37 @@ def _run(jid, body):
     except Exception as e:
         traceback.print_exc()
         J.update(status="error", err=str(e)[:300] or e.__class__.__name__)
+
+
+def second_opinion(lines, pcm, res, name, cdir, hsh, J):
+    """ฟังเสียงร้องด้วย Whisper แล้วเทียบเวลาต้นบรรทัดกับผลจับเวลาทีละคำ (FA)"""
+    from faster_whisper import WhisperModel
+    wf = os.path.join(cdir, "%s-vox-%s.json" % (hsh, name))   # ไม่ขึ้นต้น hsh_ (กันไปปนกับไฟล์ผลฟังเดิม)
+    if os.path.exists(wf):
+        words = [tuple(w) for w in json.load(open(wf, encoding="utf-8"))]
+    else:
+        J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ฟังเสียงร้องอีกรอบ ครั้งแรกราว 1-3 นาที)", pct=70)
+        if name not in MODELS:
+            MODELS[name] = WhisperModel(name, device="auto", compute_type="int8", cpu_threads=os.cpu_count() or 4)
+        segs, info = MODELS[name].transcribe(pcm, language="th", word_timestamps=True, beam_size=BEAM, condition_on_previous_text=False,
+                                             temperature=0.0, no_repeat_ngram_size=4, initial_prompt=" ".join(lines)[:600])
+        words = []
+        for sg in segs:
+            words += [(w.word, w.start, w.end) for w in sg.words]
+            J.update(msg="ตรวจซ้ำด้วย AI ตัวที่ 2 (ถึงวินาทีที่ %d จาก %d)" % (sg.end, info.duration), pct=70 + 28 * min(1, sg.end / max(info.duration, 1)))
+        try: json.dump(words, open(wf, "w", encoding="utf-8"), ensure_ascii=False)
+        except Exception: pass
+    Sw, Ew, ratio, cw = combine(lines, [words], align)
+    S, C = res["S"], list(res["conf"])
+    agree = 0; clash = []
+    for i in range(len(S)):
+        if i >= len(Sw) or Sw[i] is None: continue
+        d = abs(S[i] - Sw[i])
+        if cw[i] >= .55 and d <= .45:
+            C[i] = max(C[i], .97); agree += 1
+        elif cw[i] >= .7 and d > .9:
+            C[i] = min(C[i], .4); clash.append(i)
+    return {"conf": [round(c, 2) for c in C], "second": {"agree": agree, "clash": clash, "n": len(S), "wS": [round(x, 2) if x is not None else None for x in Sw]}}
 
 
 # ---------- ค้นบีตจาก YouTube (yt-dlp) แล้วคัดฟรี/เสียเงิน ----------
