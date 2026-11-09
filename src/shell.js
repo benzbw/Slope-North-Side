@@ -127,7 +127,7 @@ async function loginView(mode,existing){
   '<button class="sx-btn" id="sx-lgo" type="submit">'+(mode=="login"?"เข้าสู่ระบบ":"สร้างบัญชีและเข้าใช้")+'</button>'+
   '<div class="sx-note">'+(mode=="login"?'เข้าแล้วระบบจะจำไว้ จนกว่าจะกด "ออกจากระบบ"':'รหัสถูกเก็บแบบเข้ารหัส ไม่มีใครเห็นรหัสจริง รวมถึงทีมงาน')+'</div>'+
   (ST.mode=="local"&&!brandSetup?'<div class="sx-note">'+(mode=="login"?'ยังไม่มีบัญชี? <button type="button" class="sx-link" id="sx-sw">สมัครบัญชีใหม่</button>':'มีบัญชีแล้ว? <button type="button" class="sx-link" id="sx-sw">เข้าสู่ระบบ</button>')+'</div>':'')+
-  (ST.mode=="local"?'<div class="sx-note" style="margin-top:4px">โหมดเครื่องนี้: บัญชีและโปรเจกต์เก็บในเครื่องนี้</div>':'')+
+  (ST.mode=="local"?'<div class="sx-note" style="margin-top:4px">โหมดเครื่องนี้: บัญชีและโปรเจกต์เก็บในเบราว์เซอร์นี้ แยกจากในมือถือ / claude.ai ใช้ครั้งแรกให้สมัครใหม่ (ใช้ ID เดิมได้)</div>':'')+
   '</form></div></div>');
  var sw=$("sx-sw");if(sw)sw.onclick=function(){loginView(mode=="login"?"signup":"login")};
  setTimeout(function(){var f=$(preId?"sx-pw":"sx-id");if(f)f.focus()},50);
@@ -137,7 +137,7 @@ async function loginView(mode,existing){
   if(mode=="login"){
    var a=ST.mode=="cloud"?existing:await findLocal(id);
    if(!a||a.handle.toLowerCase()!=id.toLowerCase()){if(ST.mode=="cloud"){er.textContent="ID ไม่ตรงกับบัญชีนี้";btn.disabled=false;return}
-    S.raw.set("sns:lastid",id);loginView("signup");setTimeout(function(){var f=$("sx-id"),p1=$("sx-pw"),p2=$("sx-pw2"),e2=$("sx-le");if(f)f.value=id;if(p1)p1.value=pw;if(e2)e2.textContent="ยังไม่มีบัญชีนี้ในเครื่องนี้ พิมพ์รหัสอีกครั้งในช่องยืนยัน แล้วกดสร้างบัญชี";if(p2)p2.focus()},80);return}
+    S.raw.set("sns:lastid",id);loginView("signup");setTimeout(function(){var f=$("sx-id"),p1=$("sx-pw"),p2=$("sx-pw2"),e2=$("sx-le");if(f)f.value=id;if(p1)p1.value=pw;if(e2)e2.textContent="บัญชีบนคอมนี้แยกจากบัญชีในมือถือ / claude.ai ยังไม่เคยสร้างที่นี่ ใช้ ID เดิมได้ พิมพ์รหัสอีกครั้งในช่องยืนยัน แล้วกด สร้างบัญชีและเข้าใช้";if(p2)p2.focus()},80);return}
    var hh=await hashPw(pw,a.salt);if(hh!==a.hash){er.textContent="รหัสผ่านไม่ถูกต้อง";btn.disabled=false;Store.log("login_fail",{id:id});return}
    ST.acct=a;sessOn(a.handle);S.raw.set("sns:lastid",a.handle);afterLogin();return}
   if(pw.length<4){er.textContent="รหัสผ่านอย่างน้อย 4 ตัว";btn.disabled=false;return}
@@ -188,8 +188,9 @@ function artFor(cv,p){var W=480,c=cv.getContext("2d"),inf=p.info||{};cv.width=W;
  if(inf.thumb){var im=ART_IMG[p.id];if(!im||im._s!=inf.thumb){im=new Image();im._s=inf.thumb;im.onload=function(){try{c.drawImage(im,0,0,W,W)}catch(e){}};im.src=inf.thumb;ART_IMG[p.id]=im}
   if(im.complete&&im.naturalWidth){c.drawImage(im,0,0,W,W)}return}
  var r=hashN(String(p.id)+"|"+p.name),rnd=function(){r=(Math.imul(r,1664525)+1013904223)>>>0;return r/4294967296};
- var TT=(window.THEMES||[])[inf.theme||0],pal=inf.theme&&TT?[TT.hot,TT.b1,TT.b2]:ART_PAL[hashN("pal:"+(p.name||p.id))%ART_PAL.length],hot=pal[0],b1=pal[1],b2=pal[2];
- var L=hashN("lay:"+(p.name||"")+"#"+p.id)%6;rnd();
+ var TT=(window.THEMES||[])[inf.theme||0],pal=inf.theme&&TT?[TT.hot,TT.b1,TT.b2]:ART_PAL[0],hot=pal[0],b1=pal[1],b2=pal[2];
+ /* ยังไม่มีปกจริง: ใช้หน้าตาเดิม (แดง) ไม่เปลี่ยนปกที่ผู้ใช้คุ้นแล้ว พอเปิดเพลงครั้งถัดไป แอปจะเก็บปกจริงของเพลงนั้นมาแสดงแทน */
+ var L=0;rnd();
  c.fillStyle="#0b0709";c.fillRect(0,0,W,W);
  var rad=function(x,y,r0,r1,a,b){var g=c.createRadialGradient(x,y,r0,x,y,r1);g.addColorStop(0,a);g.addColorStop(1,b);return g};
  if(L==0){c.fillStyle=rad(W*(.2+rnd()*.6),W*(.15+rnd()*.4),10,W*.8,"rgba("+b2+",1)","rgba(6,4,6,1)");c.fillRect(0,0,W,W);
@@ -214,6 +215,29 @@ function artFor(cv,p){var W=480,c=cv.getContext("2d"),inf=p.info||{};cv.width=W;
  c.font="600 13px Montserrat, 'Noto Sans Thai', sans-serif";c.fillStyle="rgba(255,255,255,.78)";var ar=(p.artist||"")+(p.feat?" ft. "+p.feat:"");c.fillText(ar.toUpperCase().split("").join(" "),30,W-24);
  c.fillStyle=hot;c.fillRect(30,30,26,4);c.font="700 10px Montserrat, sans-serif";c.fillStyle="rgba(255,255,255,.65)";c.fillText("SLOPE NORTH SIDE",64,35)}
 
+
+/* ---------- ย้ายโปรเจกต์ข้ามเครื่อง: ส่งออกเป็นไฟล์ (เนื้อ ซิงค์ สไตล์ ปก + ไฟล์เพลง) แล้วนำเข้าอีกเครื่อง ---------- */
+function blobToData(b){return new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(){res(String(fr.result))};fr.onerror=rej;fr.readAsDataURL(b)})}
+async function exportProject(p){busy("กำลังเตรียมไฟล์…");try{var meta=await Store.meta(p.id)||{},st=stateOf(p.id),au=null;
+  try{var la=await Store.loadAudio(p.id,meta);if(la&&la.url){var bl=await (await fetch(la.url)).blob();au={name:la.name||(meta.audio&&meta.audio.name)||"song",data:await blobToData(bl)}}}catch(e){}
+  var m2=Object.assign({},meta);delete m2.audio;
+  var out={sns:"project",v:1,at:now(),meta:m2,state:st,audio:au},js=JSON.stringify(out),fn=String(p.name||"song").replace(/[\\/:*?"<>|]+/g,"_")+".snsproj.json";
+  var bl2=new Blob([js],{type:"application/json"}),done=false;
+  try{var f=new File([bl2],fn,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){busy();await navigator.share({files:[f],title:p.name});done=true}}catch(e){if(e&&e.name=="AbortError"){busy();return}}
+  if(!done){var a=document.createElement("a");a.href=URL.createObjectURL(bl2);a.download=fn;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000)}
+  busy();toastS(au?"ส่งออกแล้ว ("+Math.round(js.length/1048576)+" MB) ส่งไฟล์ไปอีกเครื่อง แล้วกด นำเข้าโปรเจกต์":"ส่งออกแล้ว (ไม่มีไฟล์เพลงในเครื่องนี้ ต้องใส่เพลงใหม่ที่ปลายทาง)")}
+ catch(e){busy();toastS("ส่งออกไม่สำเร็จ: "+(e&&e.message||e))}}
+function importProject(){var inp=document.createElement("input");inp.type="file";inp.accept=".json,application/json";
+ inp.onchange=async function(){var f=inp.files&&inp.files[0];if(!f)return;busy("กำลังนำเข้า…");
+  try{var d=JSON.parse(await f.text());if(!d||d.sns!="project"||!d.meta||!d.state)throw new Error("ไม่ใช่ไฟล์โปรเจกต์ของแอปนี้");
+   var meta=Object.assign({},d.meta),id=String(meta.id||rid()).toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,40)||rid();meta.id=id;
+   var old=await Store.meta(id);if(old){var pre="p:"+id+":";S.raw.keys().forEach(function(k){if(k&&k.indexOf(pre)==0)S.raw.rm(k)})}
+   if(d.state.bw3&&!d.state.bw3s57l)d.state.bw3s57l=d.state.bw3;else if(d.state.bw3s57l&&!d.state.bw3)d.state.bw3=d.state.bw3s57l;
+   await Store.create(meta,d.state);
+   if(d.audio&&d.audio.data){var bl=await (await fetch(d.audio.data)).blob();await Store.saveAudio(id,new File([bl],d.audio.name||"song",{type:bl.type||"audio/mpeg"}))}
+   busy();toastS((old?"อัปเดต":"นำเข้า")+" \""+(meta.name||"เพลง")+"\" แล้ว");await home()}
+  catch(e){busy();toastS("นำเข้าไม่สำเร็จ: "+(e&&e.message||e))}};
+ inp.click()}
 /* ---------- หน้าแรก ---------- */
 var STEPS=[["เช็กเทรนด์ & วางแนว","ดูชาร์ตไทย/โลก Top 10 ทั้งทุกแนวและฮิปฮอป แนวที่กำลังมา และประเมินโอกาสแมสตามสไตล์ศิลปิน","ทุกเครื่อง"],["สร้างโปรเจกต์","ตั้งชื่อเพลง ใส่ไฟล์เพลงและเนื้อเพลง แยกท่อนร้อง/ฮุค และคนร้อง","ทุกเครื่อง"],["มิกซ์เสียงก่อน","ขั้น 1 › เสียง: ใส่เสียงร้อง+บีตแยกไฟล์ ให้มิกซ์ จูนนิดๆ หาคีย์ เทียบกับเพลงที่ชอบ แล้วใช้เป็นเพลงของโปรเจกต์","ทุกเครื่อง"],
  ["ซิงค์เนื้อกับเสียง","AI จับจังหวะคำร้องทีละคำ แล้วปรับเองได้ทีละบรรทัด","แม่นสุดบนคอม"],
@@ -231,7 +255,7 @@ async function home(){if(S.crashed){toastS("เปิดโปรเจกต์
  '<div class="sx-hello"><div style="min-width:0"><div class="sx-eyebrow">'+(BRANDED?"บัญชีหลักของแบรนด์":"สตูดิโอของคุณ")+'</div>'+
   '<h1 class="sx-h1">โปรเจกต์เพลง</h1><p class="sx-sub">แต่ละเพลงเก็บเป็นโปรเจกต์ของตัวเอง กดเข้าไปถึงจะแก้ไขได้ '+(ST.mode=="cloud"?"บันทึกในบัญชีอัตโนมัติ เปิดจากมือถือหรือคอมก็เห็นงานเดียวกัน":"บันทึกในเครื่องนี้อัตโนมัติ")+'</p>'+
   '<div class="sx-stats" id="sx-stats"></div></div>'+
-  '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="sx-btn" id="sx-new">+ เพลงใหม่</button></div></div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="sx-btn" id="sx-new">+ เพลงใหม่</button><button class="sx-pill" id="sx-imp" title="เปิดไฟล์โปรเจกต์ที่ส่งออกจากเครื่องอื่น">นำเข้าโปรเจกต์</button></div></div>'+
  '<section class="sx-sec"><div class="sx-sech"><h2>เครื่องมือ</h2><span>ใช้ได้ทันที ไม่ต้องเข้าโปรเจกต์</span></div><div class="sx-tools">'+
   '<a class="sx-tool" id="sx-wtop" target="_blank" rel="noopener"><i>✎</i><b>แต่งเพลง & หาบีต</b><small>แรงบันดาลใจตามอารมณ์ · บีต · สมุดเนื้อ · คำฮิต/สแลง</small></a>'+
   '<button class="sx-tool" type="button" onclick="window.SNSExplore&&SNSExplore.open()"><i>◎</i><b>ค้นหาแนวเพลง</b><small>เพลง/ศิลปินนี้แนวอะไร เล่าอะไร เพลงคล้าย · % คนฟัง</small></button>'+
@@ -245,7 +269,7 @@ async function home(){if(S.crashed){toastS("เปิดโปรเจกต์
  '<section class="sx-sec"><div class="sx-sech"><h2>ขั้นตอนทำเพลง 1 เพลง</h2><span>เรียงตามลำดับในแอป</span></div><div class="sx-steps">'+
   STEPS.map(function(s){return'<div class="sx-step"><b>'+s[0]+'</b><p>'+s[1]+'</p><em>'+s[2]+'</em></div>'}).join("")+'</div></section>'+
  '<div class="sx-foot"><span>© Slope North Side</span><span>'+(ST.mode=="cloud"?"ซิงค์กับบัญชี claude.ai":"โหมดเครื่องนี้ · ฟีเจอร์ AI ใช้ได้เมื่อเปิดเซิร์ฟเวอร์บนคอม")+'</span></div>');
- $("sx-new").onclick=newDialog;if($("sx-new2"))$("sx-new2").onclick=newDialog;$("sx-guide").onclick=guide;$("sx-help").onclick=function(){bot.open()};
+ $("sx-new").onclick=newDialog;$("sx-imp").onclick=importProject;if($("sx-new2"))$("sx-new2").onclick=newDialog;$("sx-guide").onclick=guide;$("sx-help").onclick=function(){bot.open()};
  $("sx-me").onclick=function(ev){menuAt(ev.currentTarget,[["ออกจากระบบ",logout]].concat(BRANDED?[["ดูปัญหาที่แจ้งเข้ามา",function(){bot.open();bot.say("ai","รายการแจ้งปัญหาและข้อผิดพลาดทั้งหมดถูกเก็บไว้ในระบบ Claude จะเข้ามาตรวจและแก้ให้ตามรอบตรวจอัตโนมัติ หรือสั่งในแชทว่า \"ตรวจปัญหาที่แจ้งเข้ามา\" ได้เลย")}]]:[]),true)};
  if(!BRANDED){var dg=$("sx-demo");var dp={id:"demo",name:"Dangerous",artist:"Bedupbiw",feat:"Killmonker",info:{theme:0,synced:true}};dg.appendChild(card(dp,true))}
  renderGrid();lanCard();writeCard();
@@ -265,7 +289,7 @@ function card(p,demo){var inf=p.info||{},el=h('<div class="sx-card" tabindex="0"
  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){try{artFor(cv,p)}catch(e){}});
  el.onclick=function(ev){if(ev.target.closest(".sx-more,.sx-menu"))return;openProject(p.id)};el.onkeydown=function(e){if(e.key=="Enter")openProject(p.id)};
  if(!demo){var mb=h('<button class="sx-more" aria-label="ตัวเลือก">⋯</button>');el.querySelector(".sx-art").appendChild(mb);
-  mb.onclick=function(ev){ev.stopPropagation();menuAt(mb,[["เปิด",function(){openProject(p.id)}],["เปลี่ยนชื่อ",function(){renameDialog(p)}],["ซ่อมโปรเจกต์ (ล้างการซิงค์)",function(){repairDialog(p)}],["ลบโปรเจกต์",function(){delDialog(p)},"del"]])}}
+  mb.onclick=function(ev){ev.stopPropagation();menuAt(mb,[["เปิด",function(){openProject(p.id)}],["เปลี่ยนชื่อ",function(){renameDialog(p)}],["ส่งออกไปเครื่องอื่น (ไฟล์)",function(){exportProject(p)}],["ซ่อมโปรเจกต์ (ล้างการซิงค์)",function(){repairDialog(p)}],["ลบโปรเจกต์",function(){delDialog(p)},"del"]])}}
  return el}
 function menuAt(anchor,items,top){closeMenus();var m=h('<div class="sx-menu" role="menu"></div>');items.forEach(function(it){var b=h('<button role="menuitem"></button>');b.textContent=it[0];if(it[2])b.className=it[2];b.onclick=function(ev){ev.stopPropagation();closeMenus();it[1]()};m.appendChild(b)});
  if(top){m.style.position="fixed";var r=anchor.getBoundingClientRect();m.style.top=(r.bottom+6)+"px";m.style.right=Math.max(12,innerWidth-r.right)+"px";document.body.appendChild(m);m.style.zIndex=90}else anchor.parentNode.appendChild(m);
