@@ -108,10 +108,13 @@ def vocal_onsets(x, sr=16000, mindur=.18, depth=9):
     e=np.sqrt((x[:n*fr].reshape(n,fr)**2).mean(1));db=20*np.log10(e+1e-7)
     db=np.convolve(db,np.ones(3)/3,'same')
     floor=np.percentile(db,5)
-    on=db>floor+15
+    thr=min(floor+15,np.percentile(db,50)-4)                  # แร็พแน่นๆ ทั้งเพลง (ช่วงดัง-เบาแคบ) ก็ยังหาเจอ
+    on=db>thr
     run=np.convolve(on.astype(float),np.ones(15),'same')>=14   # มีเสียงต่อเนื่อง >=0.3 วิ
     v=np.where(run)[0]
-    start,end=(v[0]*.02-.15,v[-1]*.02+.15) if len(v) else (0,0)
+    start,end=(v[0]*.02-.15,v[-1]*.02+.15) if len(v) else (0,n*.02)
+    if end-start<min(5.0,n*.02*.5): start,end=0.0,n*.02         # หาช่วงร้องไม่ได้จริง: ใช้ทั้งเพลง ดีกว่าบีบเนื้อทั้งหมดไว้ใน 1 วิ
+    start=max(0.0,start)
     W=40;ons=[];i=W
     while i<n-W:
         loc=np.percentile(db[i-W:i+W],80)
@@ -496,7 +499,8 @@ def _run(jid, body):
                 on, vs, ve = vocal_onsets(pcm)
                 fo = run_fa(lines, pcm, vs, ve, cdir, hsh, J)
                 ok = [q for q in (fo or []) if q.get("S") is not None]
-                if fo and len(ok) >= .8 * len(lines) and sum(q["conf"] for q in ok) / len(ok) > -4.5:
+                spread = (max(q["S"] for q in ok) - min(q["S"] for q in ok)) if ok else 0
+                if fo and len(ok) >= .8 * len(lines) and sum(q["conf"] for q in ok) / len(ok) > -4.5 and spread >= .4 * max(1.0, ve - vs) and spread >= min(10.0, .3 * len(pcm) / 16000):
                     S = [q["S"] if q.get("S") is not None else 0 for q in fo]
                     for i in range(1, len(S)): S[i] = max(S[i], S[i - 1] + .2)
                     res = {"S": S, "E": [q["E"] if q.get("E") is not None else S[i] + 2 for i, q in enumerate(fo)],
