@@ -1,0 +1,36 @@
+# ทดสอบอัตโนมัติทุก PR: ประกอบแอปจาก src/ แล้วเปิดดูบนมือถือ + คอม (ฟรีบน GitHub Actions สำหรับ repo Public)
+name: CI · build + smoke test
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm i --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Build from src/
+        run: bash ci/build.sh out
+      - name: Smoke test (mobile + desktop)
+        run: node tests/smoke.cjs out/web out/shots
+      - name: Songwriting page test (write.html)
+        run: node tests/write_smoke.cjs out/web out/shots
+      - name: Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: out/shots

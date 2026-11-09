@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# ประกอบแอปจาก src/ อย่างเดียว (ไม่ใช้ไฟล์เพลงจริง) — ใช้ใน GitHub Actions และทดสอบในเครื่อง
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+OUT="${1:-$ROOT/out}"
+W="$(mktemp -d)"
+cp "$ROOT"/src/*.html "$ROOT"/src/*.js "$ROOT"/src/*.css "$W"/  # ทุกไฟล์ต้นฉบับ (ไฟล์ใหม่ไม่ต้องมาแก้รายชื่อ)
+: > "$W/audio.b64"
+mkdir -p "$W/app"
+cp "$ROOT/src/app/sw.js" "$ROOT/src/app/manifest.json" "$W/app/"
+cp "$ROOT/icon-192.png" "$ROOT/icon-512.png" "$W/app/"
+rm -rf "$OUT"; mkdir -p "$OUT"
+export SNS_W="$W" SNS_APP="$W/app"; SNS_W="$W" SNS_APP="$W/app" SNS_FIX=off FUSED="$ROOT/src/data/fused_fa5.json" SWV=ci python3 "$ROOT/src/app/build.py" "$OUT/build" >/dev/null
+python3 "$ROOT/src/app/build_web.py" "$OUT/build" "$OUT/web" ci
+echo "build ok -> $OUT/web"
