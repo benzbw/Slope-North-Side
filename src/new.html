@@ -279,6 +279,8 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
    <label class="tgl"><input type="checkbox" id="same"><span>ใช้สีเดียวกันทุกคน (ปิดไว้ = แต่ละคนสีต่างกันอัตโนมัติ)</span></label>
    <div class="h" style="margin-top:14px">การขึ้นของตัวหนังสือ</div>
    <div class="chips" id="anim"><button data-a="mix">ผสม<small>ท่อนร้องนุ่ม ฮุคกระแทก (แนะนำ)</small></button><button data-a="soft">นุ่มไหล<small>ทั้งเพลง</small></button><button data-a="pop">กระแทก<small>หนักแน่นทั้งเพลง</small></button><button data-a="type">พิมพ์ทีละคำ<small>เรียบ มินิมอล</small></button><button data-a="kara">คาราโอเกะ<small>คำที่ร้องอยู่สว่างเด้งขึ้น</small></button><button data-a="bounce">เด้งทีละคำ<small>หล่นแล้วเด้งตามจังหวะ</small></button><button data-a="fx">เอฟเฟกต์ทุกคำ<small>แต่ละคำลูกเล่นไม่ซ้ำ แบบคลิปไวรัล</small></button></div>
+   <div class="h" style="margin-top:14px">บรรทัดต่อหน้าจอ</div>
+   <div class="chips" id="pagesel"><button data-n="1">1 บรรทัด</button><button data-n="2">2 บรรทัด (แนะนำ)</button><button data-n="3">3 บรรทัด</button><button data-n="0">ทั้งท่อน</button></div>
    <div class="h" style="margin-top:14px">ช่วงก่อนเพลงขึ้น / ดนตรีล้วน</div>
    <div class="chips" id="skst"><button data-k="auto">อัตโนมัติ<small>เลือกตามอารมณ์เพลง</small></button><button data-k="ink">ลายเส้นหมึก<small>ศิลปิน + สีน้ำ</small></button><button data-k="neon">นีออนเส้นเดียว<small>เรืองแสง</small></button><button data-k="chalk">ชอล์ก<small>ดิบ วินเทจ</small></button><button data-k="fx">เอฟเฟกต์ + ชื่อเพลง<small>ฝุ่นแสง ไม่มีรูป</small></button><button data-k="off">ไม่ใส่<small>โล่ง</small></button></div>
    <input type="checkbox" id="skchk" hidden>
@@ -517,6 +519,9 @@ try{var cr=localStorage.getItem("bwraw");if(cr)RAW=cr;(function(){var r=lyrFix(R
 if(!THEMES[thIdx])thIdx=0;var TH=THEMES[thIdx];
 function scolFor(q){return SAME||SG[q].c=="auto"?null:SG[q].c}
 var LN=[];RAW.split("\n\n").forEach(function(s,gi){var h=false,sg=0,mm;while(mm=s.match(/^(§|@([1-4]))[ \t]*/)){if(mm[1]=="§")h=true;else sg=+mm[2]-1;s=s.slice(mm[0].length)}s.split("\n").forEach(function(l){if(l.trim())LN.push({g:gi,t:l,h:h,s:sg})})});
+/* แบ่งหน้าจอ: แต่ละหน้าแสดงไม่เกิน PAGE บรรทัด (0 = ทั้งท่อน) ไม่รก อ่านทัน */
+var PAGE=2;try{var pg0=localStorage.getItem("bwpage");if(pg0!=null)PAGE=+pg0||0}catch(e){}
+function paginate(){var pid=-1,pg=-1,cnt=0;LN.forEach(function(l){if(l.g!==pg||(PAGE>0&&cnt>=PAGE)){pid++;cnt=0;pg=l.g}l.p=pid;cnt++})}paginate();
 var N=LN.length,EST=[],sum=0,acc=0;LN.forEach(function(l){sum+=l.t.length+6});LN.forEach(function(l){EST.push(18.5+150.5*acc/sum);acc+=l.t.length+6});
 var T=EST.slice(),E=null,off=0,synced=false,wg=-2,els=[],rowsEl=[],lastK=-2,recording=false,civ=0,drag=false,pst=null,lastChip="",MODEL="Xenova/whisper-small",openT=null;
 var VSEG=null,SYL=null,UT=null,WTC={},CONF=null,VER=[],revStop=0,rvI=-1;
@@ -601,14 +606,16 @@ function wordTimes(i){var en0=lineEnd(i),key=T[i]+"|"+en0;if(WTC[i]&&WTC[i].k==k
  for(k=1;k<n;k++)v[k]=Math.max(v[k],v[k-1]+.06);
  WTC[i]={k:key,v:v};return v}
 function wordT(i,p){if((SYL&&SYL.length)||(UT&&UT[i])){var ws=wordsOf(i),q=ws.indexOf(p);if(q>=0)return wordTimes(i)[q]}var en=Math.max(T[i]+.3,lineEnd(i)-.35),cap=LN[i].t.replace(/\s/g,"").length*.16+.5;en=Math.min(en,T[i]+cap);return T[i]+(en-T[i])*p.f}
-function build(gi){wg=gi;st.innerHTML="";els=[];if(gi<0)return;var first=LN.find(function(l){return l.g==gi}),d=document.createElement("div");d.className="g"+(first.h?" h":"");
+function build(gi){wg=gi;st.innerHTML="";els=[];if(gi<0)return;var first=LN.find(function(l){return l.p==gi}),d=document.createElement("div");d.className="g"+(first.h?" h":"");
  var sgi=first.s||0,ex=scolFor(sgi);if(ex){d.style.color=ex;d.style.textShadow="0 3px 0 #000,0 0 32px "+ex+"99"}
  if(LN.some(function(l){return l.s>0})){var tg=document.createElement("div");tg.className="tg";tg.textContent=SG[sgi].n;tg.style.color=ex||(first.h?TH.hot:TH.txt);d.appendChild(tg)}
- LN.forEach(function(l,i){if(l.g!=gi)return;var e=document.createElement("div");e.className="l";e.dataset.i=i;wordsOf(i).forEach(function(p,q){var sp=document.createElement("span");sp.className="w"+(p.kw?" k":"")+" a"+((i+q)%3==0?1:(i+q)%5==0?2:0);sp.textContent=p.tx;e.appendChild(sp)});els.push(e);d.appendChild(e)});st.appendChild(d)}
+ LN.forEach(function(l,i){if(l.p!=gi)return;var e=document.createElement("div");e.className="l";e.dataset.i=i;wordsOf(i).forEach(function(p,q){var sp=document.createElement("span");sp.className="w"+(p.kw?" k":"")+" a"+((i+q)%3==0?1:(i+q)%5==0?2:0);sp.textContent=p.tx;e.appendChild(sp)});els.push(e);d.appendChild(e)});st.appendChild(d)}
 var PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',PAUSE='<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
 var ANIM="mix";try{ANIM=localStorage.getItem("bwanim")||"mix"}catch(e){}
 function setAnim(v){ANIM=v;["mix","soft","pop","type","kara","bounce","fx"].forEach(function(k){document.body.classList.toggle("anim-"+k,k==v)});document.querySelectorAll("#anim button").forEach(function(b){b.classList.toggle("on",b.dataset.a==v)});try{localStorage.setItem("bwanim",v)}catch(e){}}
 document.querySelectorAll("#anim button").forEach(function(b){b.onclick=function(){setAnim(b.dataset.a);toast("เปลี่ยนการขึ้นของตัวหนังสือแล้ว")}});setAnim(ANIM);
+function pageUI(){document.querySelectorAll("#pagesel button").forEach(function(b){b.classList.toggle("on",+b.dataset.n==PAGE)})}
+document.querySelectorAll("#pagesel button").forEach(function(b){b.onclick=function(){PAGE=+b.dataset.n;try{localStorage.setItem("bwpage",String(PAGE))}catch(e){}paginate();wg=-2;pageUI();toast(PAGE?"แสดงหน้าละ "+PAGE+" บรรทัด":"แสดงทั้งท่อน")}});pageUI();
 var ENDC={on:true,title:"Dangerous",artist:"Bedupbiw ft. Killmonger"};try{var ej=JSON.parse(localStorage.getItem("bwend")||"null");if(ej)ENDC=Object.assign(ENDC,ej)}catch(e){}
 function endSave(){try{localStorage.setItem("bwend",JSON.stringify(ENDC))}catch(e){}endFill()}
 function endFill(){var c=$("endc");c.innerHTML=""}
@@ -621,7 +628,7 @@ function setLite(v,sv2){LITE=v;document.body.classList.toggle("lite",v);$("litec
 function frame(){beat();var pn0=performance.now();
  if(!autoDone&&fT){var dt=pn0-fT;if(dt<250){fSum+=dt;fN++;if(fN>=90){autoDone=true;if(fSum/fN>32){setLite(true,false);toast("เครื่องค่อนข้างช้า เปิดโหมดประหยัดให้อัตโนมัติ (ปิดได้ที่แท็บธีม)")}}}}fT=pn0;
  var t=tm(),k=-1,i,gi=-1;for(i=0;i<N;i++)if(T[i]<=t)k=i;
- var nx=k+1;if(nx<N&&T[nx]-t<.12)gi=LN[nx].g;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+1.6))gi=LN[k].g;
+ var nx=k+1;if(nx<N&&T[nx]-t<.12)gi=LN[nx].p;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+1.6))gi=LN[k].p;
  if(gi!==wg)build(gi);
  els.forEach(function(e){var j=+e.dataset.i,on=T[j]<=t,c="l"+(on?" on v"+(j%4)+(j<k?" past":""):"");if(e.className!==c){var was=e.className.indexOf(" on")>-1;e.className=c;if(on&&!was&&!a.paused&&Math.abs(t-T[j])<.8)fx(j)}
   if(on){var ws=wordsOf(j),ch=e.children,q,st0=[];for(q=0;q<ch.length;q++)st0.push(wordT(j,ws[q]));for(q=0;q<ch.length;q++){var wc=ch[q].className,w0=wc.replace(" on","").replace(" now",""),nx=q+1<ch.length?st0[q+1]:(E&&E[j]!=null?E[j]:lineEnd(j)),w1=t>=st0[q]?w0+" on"+(t<nx?" now":""):w0;if(w1!==wc)ch[q].className=w1}}});
@@ -838,7 +845,7 @@ async function ensureSyl(){if(SYL&&SYL.length)return;try{SYL=await mixSyl();WTC=
  if(synced&&T&&T.length==N){var S2=snapStarts(T,CONF,SYL);for(var i=0;i<N;i++)if(!VER[i])T[i]=S2[i];save();if(rowsEl.length)buildList()}else save()}catch(e){}}
 /* ผลจับเวลาแบบรู้เนื้อ (forced alignment) แม่นกว่าทุกวิธี: ใช้เป็นเวลาหลักทั้งบรรทัดและทีละคำ */
 function faApply(res){var F=res.fa;if(!F||F.length!=N)return res;var S=res.S.slice(),E2=(res.E||[]).slice(),C=(res.conf||[]).slice(),U=[],i;
- for(i=0;i<N;i++){var q=F[i];if(q&&q.S!=null){S[i]=q.S;C[i]=Math.round(Math.max(.3,Math.min(.98,(q.conf+6)/5))*100)/100;U[i]=q.units}else U[i]=null}
+ for(i=0;i<N;i++){var q=F[i];if(q&&q.S!=null){S[i]=q.S;C[i]=res.second&&res.conf&&res.conf[i]!=null?res.conf[i]:Math.round(Math.max(.3,Math.min(.98,(q.conf+6)/5))*100)/100;U[i]=q.units}else U[i]=null}
  for(i=1;i<N;i++)S[i]=Math.max(S[i],S[i-1]+.2);
  for(i=0;i<N;i++){var fe=F[i]&&F[i].E!=null?F[i].E+.25:S[i]+3;E2[i]=Math.round((i<N-1?Math.min(fe,S[i+1]-.05):fe+.25)*100)/100}
  res.S=S;res.E=E2;res.conf=C;UT=U;WTC={};return res}
@@ -851,7 +858,7 @@ async function autoSync(quick){
   if(res&&res.conf&&quick!==true){info("ปรับเวลาให้เข้ากับจังหวะเสียงจริง...",98);res=await fuseSync(res);if(res.fa)res=faApply(res)}
   if(!res){info("ถอดเสียงแล้วแต่จับคู่กับเนื้อไม่ได้ ลองรัน start.py (แม่นกว่า) หรือเช็กเนื้อเพลงว่าตรงกับเสียง",0);btn.disabled=false;return}
   T=res.S;E=res.E;CONF=res.conf||null;VER=[];synced=true;save();if(rowsEl.length)buildList();seek(0);
-  info("เสร็จแล้ว",100);toast(quick===true?"ซิงค์แบบประมาณเสร็จ ต้องตรวจทีละบรรทัดต่อ":"ซิงค์เสร็จแล้ว ตรวจผลได้เลย");syncView();
+  var sec2=res.second;info(sec2?"เสร็จแล้ว · AI 2 ตัวฟังแล้วเห็นตรงกัน "+sec2.agree+" จาก "+sec2.n+" บรรทัด"+(sec2.clash.length?" · ไม่ตรงกัน "+sec2.clash.length+" บรรทัด (ขึ้นสีเหลืองให้เช็ก)":""):"เสร็จแล้ว",100);toast(quick===true?"ซิงค์แบบประมาณเสร็จ ต้องตรวจทีละบรรทัดต่อ":"ซิงค์เสร็จแล้ว ตรวจผลได้เลย");syncView();
  }catch(e){info("ไม่สำเร็จ: "+(e&&e.message?e.message:e),0);$("quick").hidden=false}
  btn.disabled=false}
 /* ---------- ซิงค์บนคลาวด์ฟรี (เครื่องฟรีของ GitHub): แม่นแบบบนคอม ไม่ต้องเปิดคอม ----------
@@ -1360,7 +1367,7 @@ function flushAd(x,W,H){var list=ADQ;ADQ=[];list.slice(-3).forEach(function(a,n)
  x.globalAlpha=al*.95;x.lineWidth=Math.max(1,fs*.07);x.strokeStyle="rgba("+TH.gl+",.95)";x.shadowColor="rgba("+TH.gl+",.9)";x.shadowBlur=fs*.6;x.strokeText(a.tx,0,0);
  x.shadowBlur=0;x.globalAlpha=al*.5;x.fillStyle="#fff";x.fillText(a.tx,0,0);x.restore()})}
 function drawGroup(x,W,H,t,k,gi){
- var idx=[],i;for(i=0;i<N;i++)if(LN[i].g==gi)idx.push(i);
+ var idx=[],i;for(i=0;i<N;i++)if(LN[i].p==gi)idx.push(i);
  var first=LN[idx[0]],sgi=first.s||0,hook=first.h,multi=LN.some(function(l){return l.s>0});
  var ex=scolFor(sgi),col=ex||(hook?TH.hot:TH.txt),base=Math.min(W*.075,H*.052)*(hook?1.1:1);
  x.textAlign="left";x.textBaseline="middle";x.font=lfont(base);
@@ -1495,7 +1502,7 @@ function drawSketch(x,W,H,t){if(!SKETCH_ON||SKSTY=="off"||(MV.on&&Object.keys(MV
 function drawFrame(c,W,H,t){
  var x=c.getContext("2d"),k=-1,i,gi=-1,ts=a.currentTime;
  for(i=0;i<N;i++)if(T[i]<=t)k=i;
- var nx=k+1;if(nx<N&&T[nx]-t<.12)gi=LN[nx].g;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+1.6))gi=LN[k].g;
+ var nx=k+1;if(nx<N&&T[nx]-t<.12)gi=LN[nx].p;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+1.6))gi=LN[k].p;
  x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.globalCompositeOperation="source-over";x.shadowBlur=0;
  x.fillStyle="#050305";x.fillRect(0,0,W,H);
  var M=Math.max(W,H),dx=Math.sin(ts/5)*.06,dy=Math.cos(ts/6)*.05;
