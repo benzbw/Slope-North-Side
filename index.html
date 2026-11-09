@@ -34,7 +34,7 @@ window.addEventListener("unhandledrejection",function(ev){var r=ev.reason;lg("pr
 })();
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;500;600&family=Playfair+Display:ital,wght@1,600;1,700&family=Noto+Sans+Thai:wght@400;500;700;900&display=swap" rel="stylesheet">
-<style>
+<style>.lnk{background:none;border:0;color:var(--hot,#ff3347);text-decoration:underline;font:inherit;cursor:pointer;padding:0}
 :root{--bg:#050305;--ink:#f3ece6;--mut:#9a98a6;--red:#ff3347;--red2:#c4132a;--glass:rgba(18,18,24,.8);--line:rgba(255,255,255,.1);--card:rgba(255,255,255,.07);--tx:#f3ece6;--hot:#ff3347;--gl:196,19,42;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -453,6 +453,7 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
     <p class="mut">กดครั้งเดียว AI ฟังเสียงร้องแล้วจับเวลาทุกบรรทัดให้ เสร็จแล้วตรวจผลได้ในหน้านี้ทันที</p>
     <div style="height:12px"></div>
     <button class="cta" id="auto">ซิงค์อัตโนมัติ</button>
+    <div id="cloudbox" class="mut" style="margin-top:12px;font-size:13px" hidden></div>
     <input class="inp" id="akey" type="password" placeholder="รหัสผ่านของเซิร์ฟเวอร์ AI" hidden style="width:100%;margin-top:10px" autocomplete="off">
     <label class="mut" style="display:block;margin:10px 0 0">เนื้อเริ่มร้องที่วินาทีที่ <input class="inp" id="vstart" type="number" min="0" max="120" step="0.5" value="18.5" style="width:90px;min-height:36px;flex:none"> (ใช้กับซิงค์แบบประมาณ)</label>
     <button class="cta alt" id="quick" hidden style="margin-top:8px">ซิงค์แบบประมาณ (ไม่ใช้เน็ต แล้วตรวจเอง)</button>
@@ -990,15 +991,84 @@ async function fuseSync(res){try{var buf=await getBuf(),ons=res.von&&res.von.len
 async function autoSync(quick){
  var btn=$("auto");btn.disabled=true;$("quick").hidden=true;a.pause();
  try{
-  var res=quick===true?await quickSync():LOCAL?await localSync():await browserSync();
+  var res=quick===true?await quickSync():LOCAL?await localSync():cloudOn()?await cloudSync():await browserSync();
   if(res&&res.conf&&quick!==true){info("ปรับเวลาให้เข้ากับจังหวะเสียงจริง...",98);res=await fuseSync(res);if(res.fa)res=faApply(res)}
   if(!res){info("ถอดเสียงแล้วแต่จับคู่กับเนื้อไม่ได้ ลองรัน start.py (แม่นกว่า) หรือเช็กเนื้อเพลงว่าตรงกับเสียง",0);btn.disabled=false;return}
   T=res.S;E=res.E;CONF=res.conf||null;VER=[];synced=true;save();if(rowsEl.length)buildList();seek(0);
   info("เสร็จแล้ว",100);toast(quick===true?"ซิงค์แบบประมาณเสร็จ ต้องตรวจทีละบรรทัดต่อ":"ซิงค์เสร็จแล้ว ตรวจผลได้เลย");syncView();
  }catch(e){info("ไม่สำเร็จ: "+(e&&e.message?e.message:e),0);$("quick").hidden=false}
  btn.disabled=false}
-$("auto").onclick=function(){autoSync()};$("quick").onclick=function(){autoSync(true)};
-try{fetch("/api/ping").then(function(r){return r.json()}).then(function(j){if(j&&j.ok){LOCAL=true;if(j.auth){$("akey").hidden=false;$("akey").value=KEY0}info("เชื่อมต่อเซิร์ฟเวอร์ AI แล้ว"+(j.model?" (โมเดล "+j.model+")":"")+" แม่นกว่าโหมดในเบราว์เซอร์",0)}}).catch(function(){})}catch(e){}
+/* ---------- ซิงค์บนคลาวด์ฟรี (เครื่องฟรีของ GitHub): แม่นแบบบนคอม ไม่ต้องเปิดคอม ----------
+   เพลง+เนื้อถูกเข้ารหัสในเครื่องนี้ก่อนส่ง (RSA-OAEP + AES-GCM) คนอื่นเปิดไม่ได้ ผลกลับมาเข้ารหัสด้วยกุญแจของงานนี้ */
+var CS_REPO="benzbw/Slope-North-Side",CS_API="https://api.github.com/repos/"+CS_REPO;
+function csTok(){try{return localStorage.getItem("sns:ghpat")||""}catch(e){return""}}
+function csHost(){return !/claude\.ai|claudeusercontent/.test(location.hostname)&&location.protocol=="https:"||/^(localhost|127\.0\.0\.1)$/.test(location.hostname)}
+function cloudOn(){return !!csTok()&&csHost()}
+function gh(path,opt){opt=opt||{};var h=Object.assign({"Accept":"application/vnd.github+json","Authorization":"Bearer "+csTok()},opt.headers||{});return fetch(CS_API+path,Object.assign({},opt,{headers:h,cache:"no-store"}))}
+function csB64(u8){var s="",CH=0x8000;for(var i=0;i<u8.length;i+=CH)s+=String.fromCharCode.apply(null,u8.subarray(i,i+CH));return btoa(s)}
+function csSleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+async function csAudio(){var bl=await (await fetch(a.src)).blob(),t=bl.type||"";
+ if(/^audio\//.test(t)&&bl.size<=14e6)return{mime:t,bytes:new Uint8Array(await bl.arrayBuffer())};
+ info("ย่อไฟล์เพลงก่อนส่ง (ไฟล์วิดีโอ/ไฟล์ใหญ่)…",4,true);
+ var ctx=new (window.AudioContext||window.webkitAudioContext)(),buf=await ctx.decodeAudioData(await bl.arrayBuffer());try{ctx.close()}catch(e){}
+ var sr=22050,len=Math.ceil(buf.duration*sr),oc=new OfflineAudioContext(1,len,sr),src=oc.createBufferSource();src.buffer=buf;src.connect(oc.destination);src.start();
+ var x=(await oc.startRendering()).getChannelData(0),n=x.length,dv=new DataView(new ArrayBuffer(44+n*2));
+ function ws(o,s){for(var i=0;i<s.length;i++)dv.setUint8(o+i,s.charCodeAt(i))}
+ ws(0,"RIFF");dv.setUint32(4,36+n*2,true);ws(8,"WAVE");ws(12,"fmt ");dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);ws(36,"data");dv.setUint32(40,n*2,true);
+ for(var i=0;i<n;i++){var v=x[i]>1?1:x[i]<-1?-1:x[i];dv.setInt16(44+i*2,v<0?v*32768:v*32767,true)}
+ return{mime:"audio/wav",bytes:new Uint8Array(dv.buffer)}}
+async function csSeal(meta,audio){var pr=await gh("/contents/key/pub.b64?ref=sync-jobs",{headers:{"Accept":"application/vnd.github.raw"}});
+ if(!pr.ok)throw new Error(pr.status==401||pr.status==403?"รหัส GitHub ใช้ไม่ได้ (หมดอายุหรือสิทธิ์ไม่พอ) ตั้งค่าใหม่ด้านล่าง":"ระบบคลาวด์ยังไม่พร้อม ("+pr.status+")");
+ var spki=Uint8Array.from(atob((await pr.text()).trim()),function(c){return c.charCodeAt(0)});
+ var pub=await crypto.subtle.importKey("spki",spki,{name:"RSA-OAEP",hash:"SHA-256"},false,["encrypt"]);
+ var key=await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]),raw=new Uint8Array(await crypto.subtle.exportKey("raw",key));
+ var wk=new Uint8Array(await crypto.subtle.encrypt({name:"RSA-OAEP"},pub,raw));
+ var mj=new TextEncoder().encode(JSON.stringify(meta)),pt=new Uint8Array(4+mj.length+audio.length);new DataView(pt.buffer).setUint32(0,mj.length);pt.set(mj,4);pt.set(audio,4+mj.length);
+ var iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,pt));
+ var out=new Uint8Array(18+wk.length+ct.length);out.set([83,78,83,49]);new DataView(out.buffer).setUint16(4,wk.length);out.set(wk,6);out.set(iv,6+wk.length);out.set(ct,18+wk.length);
+ return{bytes:out,raw:raw}}
+async function csPut(path,bytes){var r=await gh("/git/blobs",{method:"POST",body:JSON.stringify({content:csB64(bytes),encoding:"base64"})});
+ if(!r.ok)throw new Error(r.status==401||r.status==403||r.status==404?"รหัส GitHub ไม่มีสิทธิ์เขียน (ต้องเลือก Contents: Read and write)":"ส่งเพลงไม่สำเร็จ ("+r.status+")");
+ var sha=(await r.json()).sha;
+ for(var t=0;t<6;t++){var ref=await (await gh("/git/ref/heads/sync-jobs")).json(),c=ref.object.sha,cm=await (await gh("/git/commits/"+c)).json();
+  var tr=await (await gh("/git/trees",{method:"POST",body:JSON.stringify({base_tree:cm.tree.sha,tree:[{path:path,mode:"100644",type:"blob",sha:sha}]})})).json();
+  var nc=await (await gh("/git/commits",{method:"POST",body:JSON.stringify({message:"sync job",tree:tr.sha,parents:[c]})})).json();
+  var up=await gh("/git/refs/heads/sync-jobs",{method:"PATCH",body:JSON.stringify({sha:nc.sha,force:false})});if(up.ok)return;await csSleep(1500+t*1000)}
+ throw new Error("ส่งงานไม่สำเร็จ ลองกดใหม่")}
+function csFmt(s){return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+async function csWait(j){var key=await crypto.subtle.importKey("raw",Uint8Array.from(atob(j.k),function(c){return c.charCodeAt(0)}),{name:"AES-GCM"},false,["decrypt"]);
+ for(;;){var el=Math.round((Date.now()-j.t)/1000);
+  info("☁ เครื่องฟรีของ GitHub กำลังแยกเสียงร้องและจับเวลาทีละคำ · ผ่านไป "+csFmt(el)+" (ปกติ 6–15 นาที ปิดแอปไว้แล้วกลับมาได้)",Math.min(95,8+el/900*87),false);
+  var r=await gh("/contents/results/"+j.id+".bin?ref=sync-jobs",{headers:{"Accept":"application/vnd.github.raw"}});
+  if(r.ok){var u=new Uint8Array(await r.arrayBuffer());if(u[0]!=83||u[2]!=82)throw new Error("ผลจากคลาวด์เสียหาย ลองใหม่");
+   var o=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:u.slice(4,16)},key,u.slice(16))));
+   try{localStorage.removeItem("bwcloudjob")}catch(e){}
+   if(!o.ok)throw new Error("คลาวด์ทำไม่สำเร็จ: "+(o.err||""));return o.result}
+  if(el>3600){try{localStorage.removeItem("bwcloudjob")}catch(e){}throw new Error("นานเกิน 1 ชั่วโมง ลองกดซิงค์ใหม่")}
+  await csSleep(15000)}}
+async function cloudSync(){var lines=LN.map(function(l){return l.t}),sig=lines.join("\n").length+":"+N,j=null;
+ try{j=JSON.parse(localStorage.getItem("bwcloudjob")||"null")}catch(e){}
+ if(j&&j.sig==sig&&Date.now()-j.t<3600e3)return await csWait(j);
+ info("เตรียมเพลงเพื่อส่งขึ้นคลาวด์…",3,true);var au=await csAudio();
+ info("เข้ารหัสเพลงในเครื่องนี้…",5,true);var s=await csSeal({lines:lines,nsing:nSing(),mime:au.mime},au.bytes);
+ var id=(Date.now().toString(36)+Math.random().toString(36).slice(2,8)).replace(/[^a-z0-9]/g,"");
+ info("ส่งเพลงขึ้นคลาวด์ ("+Math.round(s.bytes.length/1048576*10)/10+" MB)…",6,true);await csPut("jobs/"+id+".bin",s.bytes);
+ j={id:id,k:csB64(s.raw),t:Date.now(),sig:sig};try{localStorage.setItem("bwcloudjob",JSON.stringify(j))}catch(e){}
+ return await csWait(j)}
+function csUI(){var b=$("cloudbox");if(!b)return;if(!csHost()||LOCAL){b.hidden=true;return}b.hidden=false;
+ if(csTok()){b.innerHTML='☁ <b>ซิงค์บนคลาวด์ฟรี พร้อมแล้ว</b> · กดปุ่มด้านบน แอปจะส่งเพลง (เข้ารหัสแล้ว) ให้เครื่องฟรีของ GitHub จับเวลาทีละคำ แม่นแบบบนคอม ราว 6–15 นาที · <button class="lnk" id="cs-off" type="button">ลบรหัสออกจากเครื่องนี้</button>';
+  $("cs-off").onclick=function(){try{localStorage.removeItem("sns:ghpat")}catch(e){}csUI();toast("ลบรหัสแล้ว")};return}
+ b.innerHTML='<div style="border:1px solid var(--line,#333);border-radius:12px;padding:12px"><b>อยากให้แม่น (80%+) แบบไม่ต้องเปิดคอม?</b><br>ตั้งค่า "ซิงค์บนคลาวด์ฟรี" ครั้งเดียว ใช้เครื่องฟรีของ GitHub · <button class="lnk" id="cs-how" type="button">ตั้งค่า (2 นาที)</button><div id="cs-steps" hidden style="margin-top:10px;line-height:1.7">'+
+  '1. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">เปิดหน้าสร้างรหัส GitHub</a> (ล็อกอิน GitHub ของคุณ)<br>2. Token name: <b>sns-sync</b> · Expiration: <b>1 year</b><br>3. Repository access: <b>Only select repositories</b> → เลือก <b>Slope-North-Side</b><br>4. Permissions → Repository permissions → <b>Contents</b>: <b>Read and write</b><br>5. กด Generate token แล้วคัดลอกรหัส มาวางช่องนี้<br>'+
+  '<input class="inp" id="cs-tok" type="password" autocomplete="off" placeholder="วางรหัส github_pat_…" style="width:100%;margin-top:6px"><button class="cta" id="cs-save" type="button" style="margin-top:8px">บันทึกและตรวจรหัส</button><div class="mut" style="font-size:12px;margin-top:6px">รหัสเก็บในเครื่องนี้เท่านั้น ไม่ส่งไปที่อื่นนอกจาก GitHub · อย่าส่งรหัสนี้ในแชทหรือให้ใคร</div></div></div>';
+ $("cs-how").onclick=function(){var s=$("cs-steps");s.hidden=!s.hidden};
+ $("cs-save").onclick=async function(){var v=($("cs-tok").value||"").trim(),bt=$("cs-save");if(!/^(github_pat_|ghp_)[A-Za-z0-9_]{20,}$/.test(v)){toast("รหัสไม่ถูกรูปแบบ ต้องขึ้นต้น github_pat_");return}
+  bt.disabled=true;bt.textContent="กำลังตรวจ…";try{var r=await fetch("https://api.github.com/repos/"+CS_REPO,{headers:{"Authorization":"Bearer "+v,"Accept":"application/vnd.github+json"},cache:"no-store"}),j=r.ok?await r.json():null;
+   if(!j||!j.permissions||!j.permissions.push){toast(r.status==401?"รหัสไม่ถูกต้อง":"รหัสนี้ยังไม่มีสิทธิ์เขียน (Contents: Read and write)");bt.disabled=false;bt.textContent="บันทึกและตรวจรหัส";return}
+   localStorage.setItem("sns:ghpat",v);toast("ตั้งค่าเสร็จ กดซิงค์อัตโนมัติได้เลย");csUI()}catch(e){toast("ตรวจรหัสไม่สำเร็จ เช็กเน็ตแล้วลองใหม่");bt.disabled=false;bt.textContent="บันทึกและตรวจรหัส"}}}
+$("auto").onclick=function(){autoSync()};
+setTimeout(function(){try{csUI();var pj=JSON.parse(localStorage.getItem("bwcloudjob")||"null");if(pj&&cloudOn()&&Date.now()-pj.t<3600e3&&!LOCAL)autoSync()}catch(e){}},1200);$("quick").onclick=function(){autoSync(true)};
+try{fetch("/api/ping").then(function(r){return r.json()}).then(function(j){if(j&&j.ok){LOCAL=true;try{csUI()}catch(e){}if(j.auth){$("akey").hidden=false;$("akey").value=KEY0}info("เชื่อมต่อเซิร์ฟเวอร์ AI แล้ว"+(j.model?" (โมเดล "+j.model+")":"")+" แม่นกว่าโหมดในเบราว์เซอร์",0)}}).catch(function(){})}catch(e){}
 /* ---------- singers ---------- */
 var sgl=$("sgl"),sgInputs=[];SG.forEach(function(g,i){var r=document.createElement("div");r.className="row";
  var c=document.createElement("input");c.type="color";c.value=g.c=="auto"?TH.txt:g.c;sgInputs.push(c);c.style.cssText="width:44px;height:42px;border:0;background:none;padding:0";
