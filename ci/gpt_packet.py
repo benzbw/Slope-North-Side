@@ -64,12 +64,14 @@ def task():
         t = open(p, encoding='utf-8', errors='replace').read()
         total += len(t)
         parts.append('=== FILE: %s ===\n%s' % (p, t))
+    open('.gpt/files.txt', 'w').write('\n'.join(paths))
     if total > LIMIT:
         sys.stderr.write('ไฟล์รวม %d ตัวอักษร เกินที่รุ่นฟรีรับได้ (%d) แบ่งงานให้เล็กลง หรือระบุไฟล์ที่เล็กกว่า\n' % (total, LIMIT)); sys.exit(4)
     out = [RULES, '',
            'งาน (จาก Issue): ' + clean(os.environ.get('TITLE'), 200), clean(body, 2000), '',
-           'ตอบเป็น unified diff เท่านั้น ใน code block ```diff ... ``` ใช้ path แบบ a/<path> b/<path> แก้เฉพาะไฟล์ที่ให้มา เปลี่ยนให้น้อยที่สุด',
-           'หลัง code block เขียนเหตุผลสั้นๆ ไม่เกิน 5 บรรทัด และสิ่งที่ Claude ควรทดสอบ', ''] + parts
+           'ตอบด้วย "ไฟล์ที่แก้แล้วทั้งไฟล์" ไฟล์ละ 1 code block บรรทัดแรกในบล็อกต้องเป็นคอมเมนต์บอก path เช่น // FILE: tests/write_smoke.cjs',
+           'ใส่โค้ดเดิมที่ไม่ได้แก้ครบทุกบรรทัด ห้ามย่อ ห้ามเขียน ... แทนโค้ด แก้เฉพาะที่งานขอ',
+           'หลัง code block เขียนเหตุผลสั้นๆ ไม่เกิน 5 บรรทัด', ''] + parts
     return '\n'.join(out)
 
 if __name__ == '__main__':

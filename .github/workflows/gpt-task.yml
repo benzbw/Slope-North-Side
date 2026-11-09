@@ -40,18 +40,16 @@ jobs:
         if: steps.pk.outputs.ok == '1'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: python3 ci/gpt_call.py .gpt/prompt.txt .gpt/response.md gpt-oss:20b 3000
+        run: |
+          python3 ci/gpt_call.py .gpt/prompt.txt .gpt/response.md gpt-oss:20b 6000
+          echo '----- GPT response -----'; cat .gpt/response.md || true
       - name: Apply patch
         if: steps.pk.outputs.ok == '1'
         id: ap
         run: |
-          python3 - <<'PY'
-          import re
-          t=open('.gpt/response.md',encoding='utf-8').read()
-          m=re.search(r'```(?:diff|patch)?\n(.*?)```',t,re.S)
-          open('.gpt/change.patch','w',encoding='utf-8').write((m.group(1) if m else '').rstrip('\n')+'\n')
-          PY
-          if [ "$(tr -d '[:space:]' < .gpt/change.patch)" = "" ]; then echo "GPT ไม่ได้ส่ง diff มา" > .gpt/err.txt; echo "applied=0" >> "$GITHUB_OUTPUT"; elif git apply --recount --whitespace=fix .gpt/change.patch; then echo "applied=1" >> "$GITHUB_OUTPUT"; else echo "applied=0" >> "$GITHUB_OUTPUT"; fi
+          python3 ci/gpt_apply.py .gpt/response.md .gpt/files.txt > .gpt/apply.txt 2>&1 && ok=1 || ok=0
+          cat .gpt/apply.txt
+          if [ "$ok" = 1 ] && ! git diff --quiet; then echo "applied=1" >> "$GITHUB_OUTPUT"; git diff --stat; else cp .gpt/apply.txt .gpt/err.txt; echo "applied=0" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-node@v4
         if: steps.ap.outputs.applied == '1'
         with:
@@ -62,7 +60,7 @@ jobs:
         run: |
           npm init -y >/dev/null && npm i --no-save playwright@1.49.1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
           rm -f package.json package-lock.json; rm -rf node_modules/.package-lock.json
-          if bash ci/build.sh /tmp/out && node tests/smoke.cjs /tmp/out/web /tmp/out/shots > .gpt/test.txt 2>&1; then echo "pass=1" >> "$GITHUB_OUTPUT"; else echo "pass=0" >> "$GITHUB_OUTPUT"; fi
+          if bash ci/build.sh /tmp/out && node tests/smoke.cjs /tmp/out/web /tmp/out/shots > .gpt/test.txt 2>&1 && node tests/write_smoke.cjs /tmp/out/web /tmp/out/shots >> .gpt/test.txt 2>&1; then echo "pass=1" >> "$GITHUB_OUTPUT"; else echo "pass=0" >> "$GITHUB_OUTPUT"; fi
           cat .gpt/test.txt || true
       - name: Open PR for Claude
         if: steps.ap.outputs.applied == '1'
