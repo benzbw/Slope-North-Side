@@ -99,7 +99,11 @@ def viterbi(lp, toks, blank):
 _MODEL = {}
 def align(lines, x, vs, ve, ef, name="MahmoudAshraf/mms-300m-1130-forced-aligner", rom_kind=None):
     """จับเวลาเนื้อแบบบังคับ คืน [{S,E,conf,units:[[offset,คำ,เริ่ม,จบ],...]}] ต่อบรรทัด"""
-    a = max(0.0, vs - 1.0); b = min(len(x) / 16000, ve + 1.0)
+    dur = len(x) / 16000
+    if ve - vs < min(5.0, dur * .5):          # หาช่วงร้องพลาด (เช่น แร็พแน่นทั้งเพลง) อย่าบีบเนื้อทั้งเพลงไว้ในไม่กี่วิ: ใช้ทั้งเพลง
+        log("ช่วงร้องที่หาได้สั้นผิดปกติ", vs, ve, "ใช้ทั้งเพลงแทน"); vs, ve = 1.0, dur - 1.0
+        ef = ef.replace(".npz", "_full.npz")
+    a = max(0.0, vs - 1.0); b = min(dur, ve + 1.0)
     if os.path.exists(ef):
         z = np.load(ef, allow_pickle=True); lp = z["lp"]; voc = dict(z["voc"].item()); log("ใช้ผลฟังเสียงที่เก็บไว้", ef)
     else:
