@@ -20,6 +20,19 @@ let fails = 0; const check = (n, ok, d) => { console.log((ok ? 'PASS ' : 'FAIL '
   await p.click('text=② หาบีต'); await p.waitForTimeout(500);
   if (await p.isVisible('#bl')) { await p.selectOption('#bl-l', '110'); await p.click('#bl-go'); await p.waitForFunction(() => document.querySelector('#bl-out audio'), null, { timeout: 120000 }).catch(() => {});
    check(lab + ': AI ทำบีต', !!(await p.$('#bl-out audio')), (await p.textContent('#bl-out b').catch(() => '')).slice(0, 60)) }
+  // --- เพิ่มทดสอบปุ่ม ↻ สุ่มใหม่ ของคำสแลงใน write_smoke ---
+  // 1. คลิกแท็บ ③ สมุดเนื้อเพลง ถ้ามีปุ่ม #sw-nn ให้คลิกเพื่อเปิดเพลงใหม่
+  await p.click('text=③ สมุดเนื้อเพลง'); await p.waitForTimeout(500);
+  const nb = await p.$('#sw-nn'); if (nb) { await nb.click(); await p.waitForTimeout(500) }
+  // 2. อ่านรายการคำจาก `#sw-slang .sw-chips [data-w]` ที่ไม่ได้อยู่ใน `#sw-slai`
+  const firstSet = await p.$$eval('#sw-slang .sw-chips [data-w]', els => els.filter(e => !e.closest('#sw-slai')).map(e => e.dataset.w));
+  // 3. คลิกปุ่ม `#sw-slre` แล้วรอ 300ms อ่านรายการอีกครั้ง
+  await p.click('#sw-slre'); await p.waitForTimeout(300);
+  const secondSet = await p.$$eval('#sw-slang .sw-chips [data-w]', els => els.filter(e => !e.closest('#sw-slai')).map(e => e.dataset.w));
+  // 4. ตรวจสอบว่าชุดคำชุดที่สองไม่ซ้ำกับชุดแรกเลย
+  const ok = firstSet.length > 0 && secondSet.length > 0 && secondSet.every(v => !firstSet.includes(v));  // Claude: กันผ่านปลอมเมื่อหาคำไม่เจอ
+  check(lab + ': สุ่มคำสแลงได้คำใหม่', ok, `first=${firstSet.length} second=${secondSet.length}`);
+  // ------------------------------------------------------------
   await p.screenshot({ path: path.join(SHOTS, 'write-' + lab + '.png') });
   check(lab + ': ไม่มี error ในหน้า', errs.length == 0, errs.slice(0, 3).join(' | ')); await ctx.close() }
  await b.close(); srv.close(); console.log(fails ? 'FAILED ' + fails : 'ALL PASS'); process.exit(fails ? 1 : 0) })();
