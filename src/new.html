@@ -521,6 +521,8 @@ var N=LN.length,EST=[],sum=0,acc=0;LN.forEach(function(l){sum+=l.t.length+6});LN
 var T=EST.slice(),E=null,off=0,synced=false,wg=-2,els=[],rowsEl=[],lastK=-2,recording=false,civ=0,drag=false,pst=null,lastChip="",MODEL="Xenova/whisper-small",openT=null;
 var VSEG=null,SYL=null,UT=null,WTC={},CONF=null,VER=[],revStop=0,rvI=-1;
 try{var sv=JSON.parse(localStorage.getItem("bw3"));if(sv&&sv.T&&sv.T.length==N){T=sv.T;E=sv.E||null;synced=!!sv.s;off=sv.o||0;CONF=sv.C||null;VER=sv.V||[];VSEG=sv.Q||null;SYL=sv.Y||null;UT=sv.U||null}}catch(e){}
+/* ผลซิงค์อาจถูกเก็บไว้ในชื่ออื่น (ย้ายโปรเจกต์ระหว่างเว็บ GitHub / คอม / claude.ai): ลองทุกชื่อก่อนจะใช้เวลาประมาณ */
+if(!synced)["bw"+"3","bw3s57l"].some(function(kk){try{var sv2=JSON.parse(localStorage.getItem(kk)||"null");if(sv2&&sv2.s&&sv2.T&&sv2.T.length==N){T=sv2.T;E=sv2.E||null;synced=true;off=sv2.o||0;CONF=sv2.C||null;VER=sv2.V||[];VSEG=sv2.Q||null;SYL=sv2.Y||null;UT=sv2.U||null;return true}}catch(e){}return false});
 fixT();
 function fixT(){for(var i=1;i<N;i++)if(!(T[i]>=T[i-1]+.05))T[i]=Math.round((T[i-1]+.05)*100)/100}
 function save(){fixT();try{localStorage.setItem("bw3",JSON.stringify({T:T,E:E,s:synced,o:off,C:CONF,V:VER,Q:VSEG,Y:SYL,U:UT}))}catch(e){}}

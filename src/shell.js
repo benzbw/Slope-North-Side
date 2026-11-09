@@ -232,6 +232,7 @@ function importProject(){var inp=document.createElement("input");inp.type="file"
   try{var d=JSON.parse(await f.text());if(!d||d.sns!="project"||!d.meta||!d.state)throw new Error("ไม่ใช่ไฟล์โปรเจกต์ของแอปนี้");
    var meta=Object.assign({},d.meta),id=String(meta.id||rid()).toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,40)||rid();meta.id=id;
    var old=await Store.meta(id);if(old){var pre="p:"+id+":";S.raw.keys().forEach(function(k){if(k&&k.indexOf(pre)==0)S.raw.rm(k)})}
+   if(d.state.bw3&&!d.state.bw3s57l)d.state.bw3s57l=d.state.bw3;else if(d.state.bw3s57l&&!d.state.bw3)d.state.bw3=d.state.bw3s57l;
    await Store.create(meta,d.state);
    if(d.audio&&d.audio.data){var bl=await (await fetch(d.audio.data)).blob();await Store.saveAudio(id,new File([bl],d.audio.name||"song",{type:bl.type||"audio/mpeg"}))}
    busy();toastS((old?"อัปเดต":"นำเข้า")+" \""+(meta.name||"เพลง")+"\" แล้ว");await home()}
