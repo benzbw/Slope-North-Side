@@ -162,6 +162,24 @@ body.pg1 #dock,body.pg1 #top,body.pg1 #stage{display:none}
 .ln.flag .tx{color:#ffc46b}
 .g .l.on,.g .l.on.v1,.g .l.on.v2,.g .l.on.v3,.g.h .l.on{animation:none;opacity:1}
 .w{display:inline-block;white-space:pre;opacity:0}
+/* ลูกเล่นทีละคำ: คาราโอเกะ / เด้งทีละคำ / เอฟเฟกต์ทุกคำ (.now = คำที่กำลังร้อง) */
+body.anim-kara .l .w{opacity:.32;animation:none!important;transition:opacity .08s,color .1s,transform .12s,text-shadow .12s}
+body.anim-kara .l .w.on{opacity:1}
+body.anim-kara .l .w.now{color:#fff;transform:translateY(-.06em) scale(1.12);text-shadow:0 0 18px var(--hot),0 0 2px #000}
+body.anim-bounce .l .w.on{animation:wbounce .46s cubic-bezier(.34,1.56,.64,1) forwards}
+body.anim-bounce .l .w.now,body.anim-fx .l .w.now{text-shadow:0 0 18px var(--hot),0 0 2px #000;filter:brightness(1.25)}
+@keyframes wbounce{0%{opacity:0;transform:translateY(-.8em) scale(.4) rotate(-9deg)}55%{opacity:1}100%{opacity:1;transform:none}}
+body.anim-fx .l .w.on{animation:fxz .36s cubic-bezier(.2,.9,.3,1) forwards}
+body.anim-fx .l .w.on:nth-child(5n+2){animation-name:fxl}body.anim-fx .l .w.on:nth-child(5n+3){animation-name:fxf}
+body.anim-fx .l .w.on:nth-child(5n+4){animation-name:fxr}body.anim-fx .l .w.on:nth-child(5n){animation-name:fxg}
+body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:fxs .42s linear forwards}
+@keyframes fxz{0%{opacity:0;transform:scale(2.3);filter:blur(6px)}100%{opacity:1;transform:none;filter:none}}
+@keyframes fxl{0%{opacity:0;transform:translateX(-1.4em)}100%{opacity:1;transform:none}}
+@keyframes fxr{0%{opacity:0;transform:translateX(1.4em)}100%{opacity:1;transform:none}}
+@keyframes fxf{0%{opacity:0;transform:perspective(300px) rotateX(90deg)}100%{opacity:1;transform:none}}
+@keyframes fxg{0%{opacity:0;transform:translate(.15em,-.05em);text-shadow:-.12em 0 #0ff,.12em 0 #f03c}30%{opacity:1;transform:translate(-.12em,.04em)}60%{transform:translate(.08em,0);text-shadow:-.06em 0 #0ff,.06em 0 #f03c}100%{opacity:1;transform:none;text-shadow:none}}
+@keyframes fxs{0%{opacity:0;transform:scale(1.8)}25%{opacity:1;transform:scale(1) translateX(-.08em)}40%{transform:translateX(.08em) rotate(2deg)}55%{transform:translateX(-.06em) rotate(-2deg)}70%{transform:translateX(.04em)}100%{opacity:1;transform:none}}
+
 .w.on{animation:wpop .42s cubic-bezier(.2,.9,.3,1) forwards}
 .w.on.a1{animation-name:wsl}.w.on.a2{animation-name:wbl}
 .g.h .w.on{animation:wgl .38s linear forwards}
@@ -260,7 +278,7 @@ body.pg1 #dock,body.pg1 #top,body.pg1 #stage{display:none}
    <p class="mut" style="margin-bottom:12px">เลือกโทนสีให้เข้ากับอารมณ์เพลง มีผลกับพื้นหลัง ตัวอักษร เอฟเฟกต์ และวิดีโอที่บันทึก</p>
    <label class="tgl"><input type="checkbox" id="same"><span>ใช้สีเดียวกันทุกคน (ปิดไว้ = แต่ละคนสีต่างกันอัตโนมัติ)</span></label>
    <div class="h" style="margin-top:14px">การขึ้นของตัวหนังสือ</div>
-   <div class="chips" id="anim"><button data-a="mix">ผสม<small>ท่อนร้องนุ่ม ฮุคกระแทก (แนะนำ)</small></button><button data-a="soft">นุ่มไหล<small>ทั้งเพลง</small></button><button data-a="pop">กระแทก<small>หนักแน่นทั้งเพลง</small></button><button data-a="type">พิมพ์ทีละคำ<small>เรียบ มินิมอล</small></button></div>
+   <div class="chips" id="anim"><button data-a="mix">ผสม<small>ท่อนร้องนุ่ม ฮุคกระแทก (แนะนำ)</small></button><button data-a="soft">นุ่มไหล<small>ทั้งเพลง</small></button><button data-a="pop">กระแทก<small>หนักแน่นทั้งเพลง</small></button><button data-a="type">พิมพ์ทีละคำ<small>เรียบ มินิมอล</small></button><button data-a="kara">คาราโอเกะ<small>คำที่ร้องอยู่สว่างเด้งขึ้น</small></button><button data-a="bounce">เด้งทีละคำ<small>หล่นแล้วเด้งตามจังหวะ</small></button><button data-a="fx">เอฟเฟกต์ทุกคำ<small>แต่ละคำลูกเล่นไม่ซ้ำ แบบคลิปไวรัล</small></button></div>
    <div class="h" style="margin-top:14px">ช่วงก่อนเพลงขึ้น / ดนตรีล้วน</div>
    <div class="chips" id="skst"><button data-k="auto">อัตโนมัติ<small>เลือกตามอารมณ์เพลง</small></button><button data-k="ink">ลายเส้นหมึก<small>ศิลปิน + สีน้ำ</small></button><button data-k="neon">นีออนเส้นเดียว<small>เรืองแสง</small></button><button data-k="chalk">ชอล์ก<small>ดิบ วินเทจ</small></button><button data-k="fx">เอฟเฟกต์ + ชื่อเพลง<small>ฝุ่นแสง ไม่มีรูป</small></button><button data-k="off">ไม่ใส่<small>โล่ง</small></button></div>
    <input type="checkbox" id="skchk" hidden>
@@ -484,8 +502,18 @@ var LYRFIX=[
 ];
 function lyrFix(t){var ch=[];LYRFIX.forEach(function(r){t=t.replace(r[0],function(m){var a=Array.prototype.slice.call(arguments,1,-2),out=r[1].replace(/\$(\d)/g,function(_,k){return a[+k-1]||""});
   if(out!==m){var A=m.trim(),B=out.trim();if(/[ก-๙]/.test(A)&&B.replace(/ /g,"")==A.replace(/ /g,"")){A="ไทยติดอังกฤษ";B="เว้นวรรค"}if(!ch.some(function(c){return c[0]==A&&c[1]==B}))ch.push([A,B])}return out})});return{t:t,ch:ch}}
+/* จัดโครงเนื้อให้ AI ซิงค์ถูก: ลบหัวท่อน (V. 1 ชื่อ, (Hook), Verse 2 …) ที่ไม่ได้ร้อง และขยาย x2 ให้เป็นบรรทัดจริงตามที่ร้องซ้ำ */
+var LBL=/^\s*[\(\[\{]?\s*(?:v(?:erse)?\s*\.?\s*\d+|verse|hook|chorus|pre[- ]?(?:hook|chorus)|bridge|intro|outro|refrain|ท่อน\s*\S*|ฮุค|ฮุก|คอรัส|อินโทร|เอาท์โทร|เอ้าท์โทร)(?![a-z])[^\n]*$/i;
+function lyrStruct(raw){var ch=[],secs=String(raw||"").replace(/\r/g,"").split(/\n\s*\n/);
+ var out=secs.map(function(sec){var L=sec.split("\n"),hook=false,pre="";var m0=L[0].match(/^((?:§|@[1-4])[ \t]*)+/);if(m0){pre=m0[0];L[0]=L[0].slice(pre.length)}
+  while(L.length>1&&L[0].trim().length<=34&&LBL.test(L[0])&&!/[ก-๙]{6,}/.test(L[0].replace(/ท่อน|ฮุค|ฮุก|คอรัส|อินโทร|เอาท์โทร|เอ้าท์โทร/g,""))){if(/hook|chorus|ฮุค|ฮุก|คอรัส|refrain/i.test(L[0]))hook=true;ch.push(["หัวท่อน \""+L[0].trim()+"\"","ลบออก (ไม่ได้ร้อง)"]);L.shift()}
+  var last=L.length-1,mx=last>=0&&L[last].match(/\s*[\(\[]?\s*[x×]\s*([2-4])\s*[\)\]]?\s*$/i);
+  if(mx&&L[last].replace(mx[0],"").trim()){var k=+mx[1];L[last]=L[last].replace(mx[0],"");var body=L.filter(function(l){return l.trim()});
+   if(hook||/§/.test(pre)){var r=[];for(var i=0;i<k;i++)r=r.concat(body);L=r}else{for(var j=1;j<k;j++)L.push(L[last])}ch.push(["x"+k,"ขยายเป็นบรรทัดที่ร้องซ้ำจริง"])}
+  if(hook&&pre.indexOf("§")<0)pre="§"+pre;return pre+L.join("\n")});
+ return{t:out.join("\n\n"),ch:ch}}
 var FIXED=[];
-try{var cr=localStorage.getItem("bwraw");if(cr)RAW=cr;(function(){var r=lyrFix(RAW);if(r.ch.length){RAW=r.t;FIXED=r.ch;try{localStorage.setItem("bwraw",RAW)}catch(e){}}})();var cs=JSON.parse(localStorage.getItem("bwsing")||"null");if(cs&&cs.length==4)SG=cs;if(SG[0].c=="#f3ece6")SG[0].c="auto";SAME=localStorage.getItem("bwsame")=="1";thIdx=+(localStorage.getItem("bwtheme")||0)||0}catch(e){}
+try{var cr=localStorage.getItem("bwraw");if(cr)RAW=cr;(function(){var r=lyrFix(RAW);if(r.ch.length){RAW=r.t;FIXED=r.ch;try{localStorage.setItem("bwraw",RAW)}catch(e){}}})();(function(){var r=lyrStruct(RAW);if(!r.ch.length)return;try{var sv=JSON.parse(localStorage.getItem(["bw","3"].join(""))||"null"),n0=RAW.split("\n").filter(function(l){return l.trim()&&!/^\s*$/.test(l)}).length;if(sv&&sv.s&&sv.V&&sv.V.length)return}catch(e){}RAW=r.t;FIXED=FIXED.concat(r.ch);try{localStorage.setItem("bwraw",RAW);localStorage.removeItem("bwsec")}catch(e){}})();var cs=JSON.parse(localStorage.getItem("bwsing")||"null");if(cs&&cs.length==4)SG=cs;if(SG[0].c=="#f3ece6")SG[0].c="auto";SAME=localStorage.getItem("bwsame")=="1";thIdx=+(localStorage.getItem("bwtheme")||0)||0}catch(e){}
 if(!THEMES[thIdx])thIdx=0;var TH=THEMES[thIdx];
 function scolFor(q){return SAME||SG[q].c=="auto"?null:SG[q].c}
 var LN=[];RAW.split("\n\n").forEach(function(s,gi){var h=false,sg=0,mm;while(mm=s.match(/^(§|@([1-4]))[ \t]*/)){if(mm[1]=="§")h=true;else sg=+mm[2]-1;s=s.slice(mm[0].length)}s.split("\n").forEach(function(l){if(l.trim())LN.push({g:gi,t:l,h:h,s:sg})})});
@@ -577,7 +605,7 @@ function build(gi){wg=gi;st.innerHTML="";els=[];if(gi<0)return;var first=LN.find
  LN.forEach(function(l,i){if(l.g!=gi)return;var e=document.createElement("div");e.className="l";e.dataset.i=i;wordsOf(i).forEach(function(p,q){var sp=document.createElement("span");sp.className="w"+(p.kw?" k":"")+" a"+((i+q)%3==0?1:(i+q)%5==0?2:0);sp.textContent=p.tx;e.appendChild(sp)});els.push(e);d.appendChild(e)});st.appendChild(d)}
 var PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',PAUSE='<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
 var ANIM="mix";try{ANIM=localStorage.getItem("bwanim")||"mix"}catch(e){}
-function setAnim(v){ANIM=v;["mix","soft","pop","type"].forEach(function(k){document.body.classList.toggle("anim-"+k,k==v)});document.querySelectorAll("#anim button").forEach(function(b){b.classList.toggle("on",b.dataset.a==v)});try{localStorage.setItem("bwanim",v)}catch(e){}}
+function setAnim(v){ANIM=v;["mix","soft","pop","type","kara","bounce","fx"].forEach(function(k){document.body.classList.toggle("anim-"+k,k==v)});document.querySelectorAll("#anim button").forEach(function(b){b.classList.toggle("on",b.dataset.a==v)});try{localStorage.setItem("bwanim",v)}catch(e){}}
 document.querySelectorAll("#anim button").forEach(function(b){b.onclick=function(){setAnim(b.dataset.a);toast("เปลี่ยนการขึ้นของตัวหนังสือแล้ว")}});setAnim(ANIM);
 var ENDC={on:true,title:"Dangerous",artist:"Bedupbiw ft. Killmonger"};try{var ej=JSON.parse(localStorage.getItem("bwend")||"null");if(ej)ENDC=Object.assign(ENDC,ej)}catch(e){}
 function endSave(){try{localStorage.setItem("bwend",JSON.stringify(ENDC))}catch(e){}endFill()}
@@ -594,7 +622,7 @@ function frame(){beat();var pn0=performance.now();
  var nx=k+1;if(nx<N&&T[nx]-t<.12)gi=LN[nx].g;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+1.6))gi=LN[k].g;
  if(gi!==wg)build(gi);
  els.forEach(function(e){var j=+e.dataset.i,on=T[j]<=t,c="l"+(on?" on v"+(j%4)+(j<k?" past":""):"");if(e.className!==c){var was=e.className.indexOf(" on")>-1;e.className=c;if(on&&!was&&!a.paused&&Math.abs(t-T[j])<.8)fx(j)}
-  if(on){var ws=wordsOf(j),ch=e.children,q;for(q=0;q<ch.length;q++){var wc=ch[q].className,w0=wc.replace(" on",""),w1=t>=wordT(j,ws[q])?w0+" on":w0;if(w1!==wc)ch[q].className=w1}}});
+  if(on){var ws=wordsOf(j),ch=e.children,q,st0=[];for(q=0;q<ch.length;q++)st0.push(wordT(j,ws[q]));for(q=0;q<ch.length;q++){var wc=ch[q].className,w0=wc.replace(" on","").replace(" now",""),nx=q+1<ch.length?st0[q+1]:(E&&E[j]!=null?E[j]:lineEnd(j)),w1=t>=st0[q]?w0+" on"+(t<nx?" now":""):w0;if(w1!==wc)ch[q].className=w1}}});
  (function(){var mc=$("mvc");if(MV.on){var w0=innerWidth,h0=innerHeight;if(mc.width!==w0||mc.height!==h0){mc.width=w0;mc.height=h0}if(!drawMV(mc.getContext("2d"),w0,h0,t,k))mc.getContext("2d").clearRect(0,0,w0,h0);mc._on=true}else if(mc._on){mc.getContext("2d").clearRect(0,0,mc.width,mc.height);mc._on=false}})();
  (function(){var c=$("fxc");if(!c){c=document.createElement("canvas");c.id="fxc";document.body.appendChild(c)}var w=innerWidth,h=innerHeight;if(c.width!==w||c.height!==h){c.width=w;c.height=h}var x=c.getContext("2d");if(c._on)x.clearRect(0,0,w,h);c._on=false;if(lfxDraw(x,w,h,t))c._on=true;if(drawSketch(x,w,h,t))c._on=true;if(ENDC.on&&t>=endStart()){drawEnd(x,w,h,t);c._on=true}if(drawWM(x,w,h,t))c._on=true})();
  var es=ENDC.on&&t>=endStart();if($("endc").classList.contains("show")!==es){$("endc").classList.toggle("show",es);st.style.transition="opacity .6s";st.style.opacity=es?0:""}
@@ -1298,18 +1326,28 @@ function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
  ws.forEach(function(p,q){if(p.ad){var tx=p.tx.replace(/[()（）]/g,"");if(cur0&&cur0.q==q-1){cur0.tx+=tx;cur0.q=q}else{cur0={p:p,q:q,tx:tx};ads.push(cur0)}return}
   var s2=LF[3]=="uppercase"?p.tx.toUpperCase():p.tx;if(!tot)s2=s2.replace(/^\s+/,"");pos[p.o]=tot;tot+=x.measureText(s2).width});
  drawAd(x,ads,sz,col,j,t,tot);
- ws.forEach(function(p){if(p.ad)return;var wa=t-wordT(j,p);if(wa<0)return;
+ var WSt=ws.map(function(p){return p.ad?null:wordT(j,p)}),lnEnd=(E&&E[j]!=null?E[j]:(j+1<N?T[j+1]:T[j]+3));
+ function wEnd(q){for(var k=q+1;k<WSt.length;k++)if(WSt[k]!=null)return WSt[k];return lnEnd}
+ var kar=ANIM=="kara",pw=ANIM=="kara"||ANIM=="bounce"||ANIM=="fx";
+ ws.forEach(function(p,qi){if(p.ad)return;var wa=t-WSt[qi];if(wa<0&&!kar)return;
   var cur=-tot/2+pos[p.o],tx2=LF[3]=="uppercase"?p.tx.toUpperCase():p.tx,
-   pp=clamp01(wa/.4),e=1-Math.pow(1-pp,3),al=clamp01(wa/.1),sc=1+(p.kw?.9:.6)*(1-e),dy=-sz*.12*(1-e),jx=0,gb=0;
-  if(ANIM=="soft"||(ANIM=="mix"&&!hook)){pp=clamp01(wa/.6);e=1-Math.pow(1-pp,3);al=clamp01(wa/.33);al=al*al*(3-2*al);sc=1+(hook?.07:.025)*(1-e);dy=sz*.3*(1-e);gb=(1-e)*sz*.9}
+   pp=clamp01(wa/.4),e=1-Math.pow(1-pp,3),al=clamp01(wa/.1),sc=1+(p.kw?.9:.6)*(1-e),dy=-sz*.12*(1-e),jx=0,gb=0,rot=0,fill=null,act=wa>=0&&t<wEnd(qi);
+  if(kar){/* คาราโอเกะ: ทั้งบรรทัดขึ้นจางๆ คำที่กำลังร้องสว่าง ใหญ่ขึ้น เรืองแสง */al=wa<0?.3:1;sc=1;dy=0;if(act){var k1=clamp01(wa/.12);sc=1+.12*k1;dy=-sz*.06*k1;gb=sz*.5;fill="#fff"}else if(wa<0)fill=null}
+  else if(ANIM=="bounce"){/* เด้งทีละคำ: หล่นลงมาแล้วเด้ง */pp=clamp01(wa/.45);var c1=1.70158,c3=c1+1,eb=1+c3*Math.pow(pp-1,3)+c1*Math.pow(pp-1,2);al=clamp01(wa/.08);sc=.4+.6*eb;dy=-sz*.7*(1-eb);rot=(rnd(p.o+j*13)-.5)*.5*(1-pp);if(act){sc*=1.08;gb=sz*.35}}
+  else if(ANIM=="fx"){/* เอฟเฟกต์ทุกคำ: แต่ละคำลูกเล่นไม่ซ้ำกัน คำเด่นสั่นสีจัด */var ty=Math.floor(rnd(p.o*7+j*31)*5);pp=clamp01(wa/.35);e=1-Math.pow(1-pp,3);al=clamp01(wa/.08);
+   if(ty==0){sc=1+1.3*(1-e);gb=(1-e)*sz*1.2}else if(ty==1){jx=(rnd(p.o+j)<.5?-1:1)*sz*1.6*(1-e);sc=1}else if(ty==2){sc=Math.max(.02,e);rot=(rnd(p.o+5)-.5)*.6*(1-e)}else if(ty==3){sc=1;if(wa<.25)jx=(rnd(Math.floor(wa*60)+p.o)-.5)*sz*.5}else{dy=-sz*.9*(1-e);sc=1}
+   if(p.kw||hook){if(wa<.3)jx+=(rnd(Math.floor(wa*50)+p.o*3)-.5)*sz*.35*(1-wa/.3);fill=p.kw?TH.hot:null}
+   if(act){sc*=1.06;gb=Math.max(gb,sz*.4)}}
+  else if(ANIM=="soft"||(ANIM=="mix"&&!hook)){pp=clamp01(wa/.6);e=1-Math.pow(1-pp,3);al=clamp01(wa/.33);al=al*al*(3-2*al);sc=1+(hook?.07:.025)*(1-e);dy=sz*.3*(1-e);gb=(1-e)*sz*.9}
   else if(ANIM=="type"){al=clamp01(wa/.14);sc=1;dy=0}
   else if(hook&&wa<.38){jx=(rnd(Math.floor(wa*40)+p.o)-.5)*sz*.4*(1-pp)}
   var cw=x.measureText(tx2).width;
-  x.save();x.globalAlpha*=al;x.translate(cur+cw/2+jx,dy);x.scale(sc,sc);x.translate(-cw/2,0);
+  x.save();x.globalAlpha*=al;x.translate(cur+cw/2+jx,dy);if(rot)x.rotate(rot);x.scale(sc,sc);x.translate(-cw/2,0);
   x.shadowBlur=0;x.shadowColor="transparent";x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);
   if(chroma){x.fillStyle="rgba(0,255,255,.7)";x.fillText(tx2,-sz*.1,0);x.fillStyle="rgba(255,0,60,.8)";x.fillText(tx2,sz*.1,0)}
   x.shadowColor=p.kw?"rgba("+TH.gl+",.95)":(sgi>0?col:(hook?"rgba("+TH.gl+",.85)":"rgba("+TH.gl+",.6)"));x.shadowBlur=sz*(p.kw?.55:.6)+gb;
-  x.fillStyle=p.kw?"#fff":col;x.fillText(tx2,0,0);x.shadowBlur=0;x.shadowColor="transparent";x.restore()})}
+  if(pw&&act){x.shadowColor="rgba("+TH.gl+",1)";x.shadowBlur=sz*.6+gb}
+  x.fillStyle=fill||(p.kw?"#fff":col);x.fillText(tx2,0,0);x.shadowBlur=0;x.shadowColor="transparent";x.restore()})}
 /* แอดลิบ: เก็บไว้ก่อน แล้ววาดทีหลังนอกบล็อกเนื้อ (มุมขวาล่าง ตัวโปร่งเรืองแสง) ไม่ทับเนื้อหลัก */
 var ADQ=[];
 function drawAd(x,ads,sz,col,j,t,tot){ads.forEach(function(a,n){var tx=a.tx.trim().toUpperCase();if(!tx)return;var wa=t-wordT(j,a.p);if(wa<0||wa>2.4)return;ADQ.push({tx:tx,wa:wa,sz:sz,only:!tot,k:j*7+n})})}
