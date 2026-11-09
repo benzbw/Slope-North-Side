@@ -4,7 +4,7 @@ import json, subprocess, sys, time, re
 ART = ["The Weeknd","Drake","Kendrick Lamar","Travis Scott","Juice WRLD","Central Cee","Mac Miller","Frank Ocean","Lil Peep","XXXTENTACION","SZA",
        "Tyler, The Creator","Don Toliver","Brent Faiyaz","PARTYNEXTDOOR","Joji","Lil Uzi Vert","J. Cole","Kanye West","Billie Eilish","Lana Del Rey",
        "Bryson Tiller","Headie One","Kordhell","Eminem","Pop Smoke","Future","Gunna","Lil Baby","21 Savage","Playboi Carti","Post Malone","Daniel Caesar",
-       "6LACK","Giveon","Rod Wave","Polo G","NBA YoungBoy","Dave","Digga D","SPRITE","MILLI","YOUNGOHM","F.HERO","Three Man Down"]
+       "6LACK","Giveon","Rod Wave","Polo G","NBA YoungBoy","Dave","Digga D","SPRITE","MILLI","YOUNGOHM","F.HERO","Three Man Down","Metro Boomin","Ken Carson","Yeat","Destroy Lonely","Lil Tecca","Lil Wayne","Nas","Tyla","Burna Boy","Tems","Summer Walker","Chris Brown","Partynextdoor","Lil Durk","Kodak Black","Doja Cat","Jack Harlow","Baby Keem","Daniel Caesar","Joji"]
 GEN = {"rnb":"dark rnb type beat","drill":"uk drill type beat","trap":"melodic trap type beat","lofi":"lofi hip hop type beat","rap":"boom bap type beat",
        "thai":"thai rnb type beat","emo":"emo rap guitar type beat","phonk":"phonk type beat","pop":"pop rnb type beat"}
 def search(q, n=14):
@@ -23,6 +23,7 @@ def search(q, n=14):
     return out
 res = {"updated": time.strftime("%Y-%m-%d"), "artists": {}, "genres": {}}
 for a in ART:
+    if a.lower() in res["artists"]: continue
     res["artists"][a.lower()] = search(a + " type beat"); print(a, len(res["artists"][a.lower()]))
 for k, q in GEN.items():
     res["genres"][k] = search(q, 18); print(k, len(res["genres"][k]))
