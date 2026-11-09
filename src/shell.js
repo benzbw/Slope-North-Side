@@ -127,7 +127,7 @@ async function loginView(mode,existing){
   '<button class="sx-btn" id="sx-lgo" type="submit">'+(mode=="login"?"เข้าสู่ระบบ":"สร้างบัญชีและเข้าใช้")+'</button>'+
   '<div class="sx-note">'+(mode=="login"?'เข้าแล้วระบบจะจำไว้ จนกว่าจะกด "ออกจากระบบ"':'รหัสถูกเก็บแบบเข้ารหัส ไม่มีใครเห็นรหัสจริง รวมถึงทีมงาน')+'</div>'+
   (ST.mode=="local"&&!brandSetup?'<div class="sx-note">'+(mode=="login"?'ยังไม่มีบัญชี? <button type="button" class="sx-link" id="sx-sw">สมัครบัญชีใหม่</button>':'มีบัญชีแล้ว? <button type="button" class="sx-link" id="sx-sw">เข้าสู่ระบบ</button>')+'</div>':'')+
-  (ST.mode=="local"?'<div class="sx-note" style="margin-top:4px">โหมดเครื่องนี้: บัญชีและโปรเจกต์เก็บในเครื่องนี้</div>':'')+
+  (ST.mode=="local"?'<div class="sx-note" style="margin-top:4px">โหมดเครื่องนี้: บัญชีและโปรเจกต์เก็บในเบราว์เซอร์นี้ แยกจากในมือถือ / claude.ai ใช้ครั้งแรกให้สมัครใหม่ (ใช้ ID เดิมได้)</div>':'')+
   '</form></div></div>');
  var sw=$("sx-sw");if(sw)sw.onclick=function(){loginView(mode=="login"?"signup":"login")};
  setTimeout(function(){var f=$(preId?"sx-pw":"sx-id");if(f)f.focus()},50);
@@ -137,7 +137,7 @@ async function loginView(mode,existing){
   if(mode=="login"){
    var a=ST.mode=="cloud"?existing:await findLocal(id);
    if(!a||a.handle.toLowerCase()!=id.toLowerCase()){if(ST.mode=="cloud"){er.textContent="ID ไม่ตรงกับบัญชีนี้";btn.disabled=false;return}
-    S.raw.set("sns:lastid",id);loginView("signup");setTimeout(function(){var f=$("sx-id"),p1=$("sx-pw"),p2=$("sx-pw2"),e2=$("sx-le");if(f)f.value=id;if(p1)p1.value=pw;if(e2)e2.textContent="ยังไม่มีบัญชีนี้ในเครื่องนี้ พิมพ์รหัสอีกครั้งในช่องยืนยัน แล้วกดสร้างบัญชี";if(p2)p2.focus()},80);return}
+    S.raw.set("sns:lastid",id);loginView("signup");setTimeout(function(){var f=$("sx-id"),p1=$("sx-pw"),p2=$("sx-pw2"),e2=$("sx-le");if(f)f.value=id;if(p1)p1.value=pw;if(e2)e2.textContent="บัญชีบนคอมนี้แยกจากบัญชีในมือถือ / claude.ai ยังไม่เคยสร้างที่นี่ ใช้ ID เดิมได้ พิมพ์รหัสอีกครั้งในช่องยืนยัน แล้วกด สร้างบัญชีและเข้าใช้";if(p2)p2.focus()},80);return}
    var hh=await hashPw(pw,a.salt);if(hh!==a.hash){er.textContent="รหัสผ่านไม่ถูกต้อง";btn.disabled=false;Store.log("login_fail",{id:id});return}
    ST.acct=a;sessOn(a.handle);S.raw.set("sns:lastid",a.handle);afterLogin();return}
   if(pw.length<4){er.textContent="รหัสผ่านอย่างน้อย 4 ตัว";btn.disabled=false;return}
