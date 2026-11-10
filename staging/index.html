@@ -632,6 +632,9 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
  <div class="row"><input class="inp" id="cv-artist" maxlength="40" placeholder="ชื่อศิลปิน"></div>
  <label class="tgl"><input type="checkbox" id="cv-logo" checked><span>ใส่โลโก้</span></label>
  <label class="cta alt" style="min-height:44px;font-size:14px">ใส่รูปของคุณ (ไม่ใส่ก็ได้)<input type="file" id="cv-photo" accept="image/*"></label>
+ <div id="cv-lookbox" hidden><div class="h" style="margin-top:12px;font-size:14px">แต่งรูปแนวกล้องจริง <span class="mut" style="font-size:12px;font-weight:500">· แฟลช ฟิล์ม แนวปกแรปเปอร์ · ทำในเครื่อง ฟรี หน้าไม่เปลี่ยน</span></div>
+ <div class="chips" id="cv-look"></div>
+ <button class="cta alt" id="cv-lookdl" style="min-height:42px;font-size:13px;margin-top:6px">ดาวน์โหลดรูปที่แต่งแล้ว (เต็มความละเอียด · ลง IG ได้)</button></div>
  <button class="cta" id="cv-dl" style="margin-top:10px">ดาวน์โหลดปก 3000×3000 (.jpg)</button>
  <div class="h" style="margin-top:18px">ภาพสตอรี่โปรโมต 1080×1920</div>
  <div class="row"><input class="inp" id="cv-date" maxlength="30" placeholder="ข้อความใหญ่ เช่น OUT NOW หรือ 12.12"></div>
@@ -2152,7 +2155,45 @@ $("cv-st").onclick=function(){var b=this;b.disabled=true;toast("กำลัง�
   clearInterval(tm2);b.disabled=false};
  document.querySelectorAll("#cv-mode button").forEach(function(b){b.onclick=function(){CV.mode=b.dataset.m;var a=curAlbum();CV.title=CV.mode=="album"?(a?a.name:"ALBUM"):(STS.title||ENDC.title||CV.title);$("cv-title").value=CV.title;CV.ai=null;cvModeUI();cvRender()}});
  $("cv-shuf").onclick=function(){CV.ai=null;CV.seed=Math.floor(Math.random()*99999);CV.tpl="studio";cvRender()};
-$("cv-photo").onchange=function(){var f=this.files[0];if(!f)return;var im=new Image();im.onload=function(){CV.photo=im;if(!/^ph_/.test(CV.tpl)){CV.tpl="ph_cine";try{cvSave()}catch(e){}toast("ใช้แบบ \"รูปคุณ\" ให้แล้ว หน้าและชุดไม่ถูกวาดใหม่")}cvRender()};im.src=URL.createObjectURL(f)};
+/* ---------- แต่งรูปแนวกล้องจริง: แฟลช · ฟิล์ม · กล้องทิ้ง · ขาวดำเกรน · แดงเรจ · CCD Y2K · ฟิชอาย · VHS (ทำในเครื่อง ฟรี ไม่เปลี่ยนหน้า) ---------- */
+var PLOOKS=[["none","รูปเดิม",""],["flash","แฟลชตรง","สว่างกลางหน้า เงาแข็ง แบบปาปารัซซี่"],["disp","กล้องใช้แล้วทิ้ง","แฟลช อมเขียวเหลือง แสงรั่ว วันที่สีส้ม"],["portra","ฟิล์ม Portra","อุ่น ผิวสวย ดำซีดนิดๆ แสงเรือง"],["fuji","ฟิล์ม Fuji","เย็น เงาเขียวฟ้า ซีดๆ"],["bw","ขาวดำเกรนหนัก","คอนทราสต์จัด แบบปกแรปอเมริกา"],["red","แดงเรจ","โมโนแดง ดุ ถ่ายเอกสาร"],["ccd","กล้องดิจิตอล Y2K","แฟลช สีจัด ขอบสีเพี้ยน วันที่ดิจิตอล"],["fish","ฟิชอาย 90s","เลนส์ตาปลา ขอบดำวงกลม แบบ MV ยุค 90"],["vhs","VHS","เส้นสแกน สีเหลื่อม PLAY ▶"]];
+function plRnd(s){return function(){s=(s*16807)%2147483647;return(s-1)/2147483646}}
+function plStamp(){var d=new Date();return "'"+String(d.getFullYear()).slice(2)+" "+(d.getMonth()+1)+" "+d.getDate()}
+function photoLook(src,look,maxS){var w=src.naturalWidth||src.width,h=src.naturalHeight||src.height,k=Math.min(1,(maxS||2400)/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
+ var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.drawImage(src,0,0,w,h);if(!look||look=="none")return c;
+ var M=Math.max(w,h),R=plRnd(12345),cl=function(v){return v<0?0:v>255?255:v};
+ if(look=="fish"){var o=x.getImageData(0,0,w,h),n=x.createImageData(w,h),od=o.data,nd=n.data,cx=w/2,cy=h/2,rr=Math.min(w,h)/2;
+  for(var y=0;y<h;y++)for(var xx=0;xx<w;xx++){var dx=(xx-cx)/rr,dy=(y-cy)/rr,d=Math.sqrt(dx*dx+dy*dy),q=(y*w+xx)*4;if(d>1){nd[q+3]=255;continue}
+   var f=d<1e-6?1:Math.asin(Math.min(1,d))/(Math.PI/2)/d*1.0,sx=Math.round(cx+dx*f*rr*.92),sy=Math.round(cy+dy*f*rr*.92);if(sx<0||sy<0||sx>=w||sy>=h){nd[q+3]=255;continue}
+   var p=(sy*w+sx)*4;nd[q]=od[p];nd[q+1]=od[p+1];nd[q+2]=od[p+2];nd[q+3]=255}x.putImageData(n,0,0)}
+ var im=x.getImageData(0,0,w,h),D=im.data,i,r,g,b,L,cx2=w/2,cy2=h*.42;
+ for(i=0;i<D.length;i+=4){r=D[i];g=D[i+1];b=D[i+2];var px=(i>>2)%w,py=(i>>2)/w|0,dd=Math.hypot((px-cx2)/w,(py-cy2)/h);L=.299*r+.587*g+.114*b;
+  if(look=="flash"||look=="disp"||look=="ccd"){var fl=Math.max(0,1-dd*1.9)*(look=="disp"?55:70);r+=fl;g+=fl;b+=fl*(look=="ccd"?1.15:.95);
+   r=(r-128)*1.28+128;g=(g-128)*1.28+128;b=(b-128)*1.25+128;var fall=Math.min(1,Math.max(0,(dd-.35)*1.6));r*=1-fall*.75;g*=1-fall*.75;b*=1-fall*.72;
+   if(look=="disp"){r=r*.96+10;g=g*1.02+8;b=b*.85}if(look=="ccd"){L=.299*r+.587*g+.114*b;r=L+(r-L)*1.35-6;g=L+(g-L)*1.35;b=L+(b-L)*1.35+14}}
+  else if(look=="portra"){r=r*1.04+10;g=g*1.0+4;b=b*.9;r=24+r*.88;g=20+g*.88;b=22+b*.86;var hl=Math.max(0,L-200)/55;r+=hl*20}
+  else if(look=="fuji"){var sh=Math.max(0,1-L/120);r=r*.94-sh*6;g=g*1.0+sh*10;b=b*1.02+sh*14;r=18+r*.9;g=20+g*.9;b=22+b*.9;var hi=Math.max(0,L-170)/85;r+=hi*8;b+=hi*6}
+  else if(look=="bw"){L=(L-128)*1.45+132;L=L<30?L*.6:L;r=g=b=L;var v2=Math.min(1,Math.max(0,(dd-.3)*1.5));r=g=b=L*(1-v2*.6)}
+  else if(look=="red"){L=cl((L-128)*1.6+128);L=255*Math.pow(L/255,1.15);r=L*1.05+18;g=L*.16;b=L*.18}
+  else if(look=="fish"){r=(r-128)*1.12+128+6;g=(g-128)*1.12+128;b=(b-128)*1.12+128+4}
+  else if(look=="vhs"){r=(r-128)*.92+130+6;g=(g-128)*.9+128;b=(b-128)*.95+132;if((py&3)==0){r*=.82;g*=.82;b*=.82}}
+  var gr=(look=="bw"||look=="red"?42:look=="disp"?30:look=="vhs"?18:look=="ccd"?14:22)*(R()-.5);D[i]=cl(r+gr);D[i+1]=cl(g+gr);D[i+2]=cl(b+gr)}
+ x.putImageData(im,0,0);
+ if(look=="ccd"||look=="vhs"){var sh2=Math.max(1,Math.round(M*(look=="vhs"?.005:.0025)));function tint(col){var t=document.createElement("canvas");t.width=w;t.height=h;var q=t.getContext("2d");q.drawImage(c,0,0);q.globalCompositeOperation="multiply";q.fillStyle=col;q.fillRect(0,0,w,h);q.globalCompositeOperation="destination-in";q.drawImage(c,0,0);return t}
+  var tr=tint("#f00"),tc=tint("#0ff");x.clearRect(0,0,w,h);x.drawImage(tc,-sh2,0);x.globalCompositeOperation="lighter";x.drawImage(tr,sh2,0);x.globalCompositeOperation="source-over"}
+ if(look=="portra"||look=="disp"){x.globalCompositeOperation="screen";var lk=x.createRadialGradient(look=="disp"?w*.98:w*.05,h*.1,0,look=="disp"?w*.98:w*.05,h*.1,M*.55);lk.addColorStop(0,look=="disp"?"rgba(255,120,30,.55)":"rgba(255,90,40,.18)");lk.addColorStop(1,"rgba(255,90,40,0)");x.fillStyle=lk;x.fillRect(0,0,w,h);x.globalCompositeOperation="source-over"}
+ if(look=="fish"){x.save();x.globalCompositeOperation="destination-in";x.beginPath();x.arc(w/2,h/2,Math.min(w,h)/2,0,7);x.fill();x.restore();x.globalCompositeOperation="destination-over";x.fillStyle="#000";x.fillRect(0,0,w,h);x.globalCompositeOperation="source-over"}
+ if(look=="disp"||look=="ccd"){var fs=Math.round(M*.035);x.font=(look=="ccd"?"600 ":"700 ")+fs+"px 'Courier New',monospace";x.textAlign="right";x.fillStyle=look=="ccd"?"rgba(255,255,255,.9)":"rgba(255,140,40,.92)";x.shadowColor=look=="ccd"?"rgba(0,0,0,.6)":"rgba(255,90,0,.8)";x.shadowBlur=fs*.3;
+  var d=new Date();x.fillText(look=="ccd"?(d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)):plStamp(),w-M*.04,h-M*.04);x.shadowBlur=0}
+ if(look=="vhs"){var fs2=Math.round(M*.04);x.font="700 "+fs2+"px 'Courier New',monospace";x.fillStyle="rgba(255,255,255,.88)";x.textAlign="left";x.fillText("PLAY ▶",M*.05,M*.08);x.textAlign="right";x.fillText("SP 0:00:"+("0"+(new Date().getSeconds())).slice(-2),w-M*.05,h-M*.05);
+  for(var s2=0;s2<3;s2++){var yy=R()*h;x.drawImage(c,0,yy,w,M*.01,(R()-.5)*M*.03,yy,w,M*.01)}}
+ return c}
+
+
+function cvLookApply(){var raw=CV.photoRaw;if(!raw)return;try{CV.photo=CV.look&&CV.look!="none"?photoLook(raw,CV.look,2400):raw}catch(e){CV.photo=raw}cvRender()}
+function cvLookUI(){var b=$("cv-look");if(!b)return;$("cv-lookbox").hidden=!CV.photoRaw;b.innerHTML="";PLOOKS.forEach(function(L){var x=document.createElement("button");x.type="button";x.className=(CV.look||"none")==L[0]?"on":"";x.innerHTML=L[1]+(L[2]?"<small>"+L[2]+"</small>":"");x.onclick=function(){CV.look=L[0];try{cvSave()}catch(e){}cvLookUI();toast("กำลังแต่งรูป…");setTimeout(cvLookApply,30)};b.appendChild(x)})}
+$("cv-lookdl").onclick=function(){if(!CV.photoRaw)return;var c=photoLook(CV.photoRaw,CV.look||"none",4096);c.toBlob(function(bl){var u=URL.createObjectURL(bl),a2=document.createElement("a");a2.href=u;a2.download=(CV.title||"photo").replace(/[\\/:*?"<>|]+/g,"_")+"-"+(CV.look||"photo")+".jpg";document.body.appendChild(a2);a2.click();setTimeout(function(){URL.revokeObjectURL(u);a2.remove()},3000)},"image/jpeg",.93)};
+$("cv-photo").onchange=function(){var f=this.files[0];if(!f)return;var im=new Image();im.onload=function(){CV.photoRaw=im;CV.photo=CV.look&&CV.look!="none"?photoLook(im,CV.look,2400):im;cvLookUI();if(!/^ph_/.test(CV.tpl)){CV.tpl="ph_cine";try{cvSave()}catch(e){}toast("ใช้แบบ \"รูปคุณ\" ให้แล้ว หน้าและชุดไม่ถูกวาดใหม่")}cvRender()};im.src=URL.createObjectURL(f)};
 $("cv-dl").onclick=function(){var b=this;b.disabled=true;toast("กำลังสร้างไฟล์ 3000×3000...");setTimeout(function(){var c=document.createElement("canvas");c.width=c.height=3000;drawCover(c,3000);
  c.toBlob(function(bl){b.disabled=false;if(!bl){toast("สร้างไฟล์ไม่ได้");return}var u=URL.createObjectURL(bl),l=document.createElement("a");l.href=u;l.download="cover-"+(CV.title||"song").replace(/[^\w฀-๿-]+/g,"-")+"-3000.jpg";document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},5000);toast("ดาวน์โหลดปกแล้ว")},"image/jpeg",.93)},50)};
 
