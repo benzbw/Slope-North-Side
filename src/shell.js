@@ -98,8 +98,20 @@ function isBrand(handle){return ST.mode=="cloud"?ST.owner:String(handle||"").toL
 async function getAcct(){if(ST.mode=="cloud"){var s=await ST.db.doc("data/users/"+ST.uid+"/account").get();return s.exists?cp(s.data()):null}
  var A=J("sns:accts",{}),sess=S.raw.get("sns:sess");return sess&&A[sess]?A[sess]:null}
 async function findLocal(handle){var A=J("sns:accts",{});return A[String(handle).toLowerCase()]||null}
-async function saveAcct(a){if(ST.mode=="cloud"){await ST.db.doc("data/users/"+ST.uid+"/account").set(a)}else{var A=J("sns:accts",{});A[a.handle.toLowerCase()]=a;JS("sns:accts",A)}}
-function sessOn(handle){S.raw.set("sns:sess",ST.mode=="cloud"?ST.uid:String(handle).toLowerCase())}
+/* บัญชีในเครื่อง: เก็บ 2 ที่ (localStorage + IndexedDB) ถ้าพื้นที่เต็มจะเคลียร์ประวัติปกเก่าให้ก่อน ไม่ให้บัญชีหายเงียบๆ */
+function freeSpace(){var ks=S.raw.keys().filter(function(k){return /^p:[^:]+:bwcvhist$/.test(k)}).map(function(k){return[k,(S.raw.get(k)||"").length]}).sort(function(a,b){return b[1]-a[1]}),freed=0;
+ ks.forEach(function(e){try{var L=JSON.parse(S.raw.get(e[0])||"[]");if(L.length>2){S.raw.set(e[0],JSON.stringify(L.slice(0,2)));freed++}else if(e[1]>300000){S.raw.rm(e[0]);freed++}}catch(x){S.raw.rm(e[0]);freed++}});return freed}
+function JSsafe(k,v){if(JS(k,v))return true;freeSpace();return JS(k,v)}
+function setSafe(k,v){if(S.raw.set(k,v))return true;freeSpace();return S.raw.set(k,v)}
+async function saveAcct(a){if(ST.mode=="cloud"){await ST.db.doc("data/users/"+ST.uid+"/account").set(a)}else{var A=J("sns:accts",{});A[a.handle.toLowerCase()]=a;var ok=JSsafe("sns:accts",A);try{await IDB.put("__accts",A)}catch(e){if(!ok)throw new Error("พื้นที่เก็บข้อมูลในเครื่องเต็ม ลบโปรเจกต์ที่ไม่ใช้ออกก่อน")}}}
+function sessOn(handle){var v=ST.mode=="cloud"?ST.uid:String(handle).toLowerCase();setSafe("sns:sess",v);try{IDB.put("__sess",v).catch(function(){})}catch(e){}try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
+/* กู้บัญชีจากสำรองใน IndexedDB ถ้า localStorage โดนล้าง/เต็ม */
+async function restoreAccts(){try{var B=await IDB.get("__accts");if(B&&typeof B=="object"){var A=J("sns:accts",{}),ch=false;Object.keys(B).forEach(function(k){if(!A[k]){A[k]=B[k];ch=true}});if(ch)JSsafe("sns:accts",A)}
+ if(!S.raw.get("sns:sess")){var se=await IDB.get("__sess");if(se&&(J("sns:accts",{})[se]))setSafe("sns:sess",se)}}catch(e){}}
+/* เปิดผ่านแอปแชต (LINE / IG / FB / TikTok) = เบราว์เซอร์ในแอป ข้อมูลมักหายเมื่อปิด */
+var UA=navigator.userAgent||"",INAPP=/\bLine\//i.test(UA)?"LINE":/Instagram/i.test(UA)?"Instagram":/FBAN|FBAV|FB_IAB|FBIOS|Messenger/i.test(UA)?"Facebook / Messenger":/TikTok|musical_ly|BytedanceWebview/i.test(UA)?"TikTok":"",IOS=/iPhone|iPad|iPod/i.test(UA),STANDALONE=(window.navigator.standalone===true)||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches);
+function inAppNote(){if(!INAPP)return "";var an=/Android/i.test(UA),u=location.host+location.pathname+location.search;
+ return '<div class="sx-err" style="background:rgba(255,190,60,.12);border:1px solid rgba(255,190,60,.4);color:#ffd27a;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:13px;line-height:1.5">กำลังเปิดในแอป '+esc(INAPP)+' ซึ่งมักลบข้อมูลเมื่อปิด ทำให้บัญชีหาย ต้องสมัครใหม่ทุกครั้ง<br><b>เปิดใน '+(IOS?"Safari":"Chrome")+' แทน</b>: '+(an?'<a href="intent://'+esc(u)+'#Intent;scheme=https;package=com.android.chrome;end" style="color:#fff;text-decoration:underline">กดที่นี่เพื่อเปิดใน Chrome</a>':'กดปุ่ม ••• หรือ ⋯ มุมจอ แล้วเลือก “เปิดในเบราว์เซอร์ / Open in Safari”')+'</div>'}
 function sessOk(acct){var s=S.raw.get("sns:sess");if(!s||!acct)return false;return ST.mode=="cloud"?s==ST.uid:s==acct.handle.toLowerCase()}
 function logout(){S.raw.rm("sns:sess");S.raw.rm("sns:openp");if(ST.mode=="cloud")S.raw.set("sns:out:"+ST.uid,"1");location.hash="";location.reload()}
 
@@ -119,7 +131,7 @@ async function loginView(mode,existing){
   '<div class="sx-word">Slope <span>North</span> Side</div>'+
   '<p>สตูดิโอทำวิดีโอเนื้อเพลง ปก มิกซ์ และปล่อยเพลง ในที่เดียว</p>'+
   (brandSetup?'<div class="sx-tag" style="margin-bottom:14px">บัญชีหลักของแบรนด์</div>':'')+
-  '<form class="sx-f" id="sx-lf" autocomplete="on"><b style="font-size:17px">'+title+'</b>'+
+  inAppNote()+'<form class="sx-f" id="sx-lf" autocomplete="on"><b style="font-size:17px">'+title+'</b>'+
   '<label class="sx-lab">ID<input class="sx-in" id="sx-id" name="username" autocomplete="username" value="'+esc(preId)+'" '+(cloudHas?'readonly':'')+' required minlength="3" maxlength="32"></label>'+
   '<label class="sx-lab">รหัสผ่าน<input class="sx-in" id="sx-pw" name="password" type="password" autocomplete="'+(mode=="login"?"current-password":"new-password")+'" required minlength="4"></label>'+
   (mode!="login"?'<label class="sx-lab">ยืนยันรหัสผ่าน<input class="sx-in" id="sx-pw2" type="password" autocomplete="new-password" required minlength="4"></label>':'')+
@@ -137,7 +149,7 @@ async function loginView(mode,existing){
   if(mode=="login"){
    var a=ST.mode=="cloud"?existing:await findLocal(id);
    if(!a||a.handle.toLowerCase()!=id.toLowerCase()){if(ST.mode=="cloud"){er.textContent="ID ไม่ตรงกับบัญชีนี้";btn.disabled=false;return}
-    S.raw.set("sns:lastid",id);loginView("signup");setTimeout(function(){var f=$("sx-id"),p1=$("sx-pw"),p2=$("sx-pw2"),e2=$("sx-le");if(f)f.value=id;if(p1)p1.value=pw;if(e2)e2.textContent="บัญชีบนคอมนี้แยกจากบัญชีในมือถือ / claude.ai ยังไม่เคยสร้างที่นี่ ใช้ ID เดิมได้ พิมพ์รหัสอีกครั้งในช่องยืนยัน แล้วกด สร้างบัญชีและเข้าใช้";if(p2)p2.focus()},80);return}
+    S.raw.set("sns:lastid",id);loginView("signup");setTimeout(function(){var f=$("sx-id"),p1=$("sx-pw"),p2=$("sx-pw2"),e2=$("sx-le");if(f)f.value=id;if(p1)p1.value=pw;if(e2)e2.textContent="ไม่พบ ID นี้ในเบราว์เซอร์นี้ บัญชีเก็บแยกตามเครื่องและเบราว์เซอร์ (มือถือ / คอม / Chrome / Safari / แอปบนหน้าจอหลัก / LINE นับเป็นคนละที่)"+(STANDALONE&&IOS?" · แอปที่ติดตั้งบนหน้าจอหลักของ iPhone แยกจาก Safari":"")+" ถ้าเคยสมัครที่อื่น ให้กลับไปเปิดที่เดิม หรือใช้ ID เดิมสร้างที่นี่ได้เลย: พิมพ์รหัสอีกครั้งในช่องยืนยัน แล้วกด สร้างบัญชีและเข้าใช้ (ย้ายงานมาได้ด้วยปุ่ม ส่งออก/นำเข้าโปรเจกต์)";if(p2)p2.focus()},80);return}
    var hh=await hashPw(pw,a.salt);if(hh!==a.hash){er.textContent="รหัสผ่านไม่ถูกต้อง";btn.disabled=false;Store.log("login_fail",{id:id});return}
    ST.acct=a;sessOn(a.handle);S.raw.set("sns:lastid",a.handle);afterLogin();return}
   if(pw.length<4){er.textContent="รหัสผ่านอย่างน้อย 4 ตัว";btn.disabled=false;return}
@@ -457,8 +469,9 @@ function dockNames(){var L={1:"1 เพลง & สไตล์",3:"3 สร้�
 function uiSimplify(){try{subTabs("pg1");subTabs("over");dockNames()}catch(e){Store.log("error",{msg:"subtabs: "+e})}}
 /* ---------- เริ่ม ---------- */
 async function start(){if(S.pid)document.documentElement.classList.add("sx-inproj");
+ if(INAPP=="LINE"&&!/openExternalBrowser=1/.test(location.search)){try{var u0=new URL(location.href);u0.searchParams.set("openExternalBrowser","1");location.replace(u0.toString());return}catch(e){}}
  if(!S.pid)splash();
- await detect();
+ await detect();if(ST.mode=="local")await restoreAccts();
  var acct=null;try{acct=await getAcct()}catch(e){Store.log("error",{msg:"acct: "+(e&&e.message||e)})}
  if(acct&&sessOk(acct)){ST.acct=acct;afterLogin();return}
  if(S.pid)splash("เข้าสู่ระบบก่อนเปิดโปรเจกต์");

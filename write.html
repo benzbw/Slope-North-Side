@@ -315,7 +315,7 @@ function textOf(r){if(r==null)return"";if(typeof r=="string")return r;var c=r.me
  if(Array.isArray(c))c=c.map(function(x){return x&&(x.text||"")||""}).join("");if(typeof c=="string")return c;try{return String(r)}catch(e){return""}}
 /* หน้าตาเหมือน sample ของ claude.ai: sample(messages,{onText}) → {text} */
 async function sample(msgs,opt){opt=opt||{};var p;try{p=await load()}catch(e){throw{code:"unavailable",message:"โหลดบริการ AI ฟรีไม่ได้ (เช็กเน็ต)"}}
- if(!signedIn()){if(!active()){upd(true);throw{code:"not_granted",message:"กด \"เปิดใช้ AI ฟรี\" ก่อน"}}try{await p.auth.signIn()}catch(e){upd(true);throw{code:"not_granted",message:"ยังไม่ได้ล็อกอิน Puter"}}upd()}
+ if(!signedIn()){/* ไม่เด้งหน้าสมัคร Puter เอง: ใช้คลังในแอปแทน จนกว่าผู้ใช้จะกดปุ่ม "เปิดใช้ AI ฟรี" เอง */upd(true);throw{code:"not_granted",message:"ใช้คลังในแอปแทน (AI ฟรีต้องกดปุ่ม เปิดใช้ AI ฟรี ก่อน)"}}
  var M=(msgs||[]).map(function(m){return{role:m.role||"user",content:typeof m.content=="string"?m.content:textOf({message:{content:m.content}})}});
  var r;try{r=await p.ai.chat(M)}catch(e){var m=String(e&&(e.message||e.error&&e.error.message||e)||"");throw{code:/limit|quota|credit|insufficient|funds/i.test(m)?"rate_limited":"error",message:m}}
  var t=textOf(r);if(typeof opt.onText=="function")try{opt.onText({text:t})}catch(e){}return{text:t}}
@@ -639,6 +639,7 @@ var ABOUT={
 "fellow fellow|ดาวหางฮัลเลย์":"รักที่เหมือนเจอได้แค่ครั้งเดียวในชีวิต",
 "SPRITE x GUYGEEGEE|ทน":"ทนสู้กับชีวิตที่หนัก เพื่อวันที่ดีกว่า",
 "F.HERO x MILLI x Changbin|Mirror Mirror":"มั่นใจในตัวเอง ไม่ต้องเป็นแบบใคร"};
+function aiOn(){return!!ST.sample&&(!window.SNSFreeAI||SNSFreeAI.signedIn())}
 function aboutOf(x){return x.about||ABOUT[x.artist+"|"+x.title]||""}
 
 /* ① แรงบันดาลใจ */
@@ -663,7 +664,7 @@ function ideaTab(){var P=J("sns:wprefs",{});W.mood=P.mood||W.mood;
 function savePrefs(inp){JS("sns:wprefs",{mood:inp.mood,art:inp.artist,song:inp.song,story:inp.story,g:$("sw-g").value,lang:inp.lang})}
 async function genIdeas(again,only){var inp=wInp();inp.story=$("sw-story").value.trim();savePrefs(inp);
  var st=$("sw-st"),go=$("sw-go");go.disabled=true;var res=null,prev=W.lastIdeas;
- if(ST.sample){st.textContent="AI กำลังคิด…";try{
+ if(aiOn()){st.textContent="AI กำลังคิด…";try{
   var ex=again&&prev?"\nห้ามซ้ำกับ: "+(only!="listen"?prev.ideas.map(function(x){return x.title}).join(", "):"")+" / "+prev.listen.map(function(x){return x.artist+" - "+x.title}).join(", "):"";
   var j=await aiJSON("คุณเป็นโปรดิวเซอร์/นักแต่งเพลงฮิปฮอป-R&B ระดับโลกที่ช่วยศิลปินอิสระชาวไทย (แบรนด์ Slope North Side จากภาคเหนือ)\n"+
    "ศิลปินที่อินตอนนี้: "+(inp.artist||"-")+"\nเพลงที่อินตอนนี้: "+(inp.song||"-")+"\nอารมณ์: "+(inp.mood.join(", ")||"ไม่ระบุ")+"\nแนว: "+(inp.genre=="auto"?"เลือกให้เหมาะกับศิลปิน/อารมณ์":GEN[inp.genre].n)+"\nภาษาเนื้อ: "+inp.lang+"\nเรื่องที่อยากเล่า: "+(inp.story||"-")+"\n"+
@@ -674,7 +675,7 @@ async function genIdeas(again,only){var inp=wInp();inp.story=$("sw-story").value
  if(!res){res=offlineIdeas(inp,Date.now());var pool=songPool(inp),r0=Date.now()>>>0,rnd=function(){r0=(Math.imul(r0,1664525)+1013904223)>>>0;return r0/4294967296};
   var own=pool.filter(function(x){return x.own}),oth=pool.filter(function(x){return!x.own});
   res.listen=pick(own,2,rnd).concat(pick(oth,6-Math.min(2,own.length),rnd)).map(function(x){return{artist:x.artist,title:x.title,why:whyFor(x,res.genre),own:x.own}});
-  if(!ST.sample)st.textContent="แนะนำจากคลังในแอป (เปิดผ่านลิงก์ claude.ai จะใช้ AI คิดให้ละเอียดกว่า)"}else st.textContent="";
+  if(!aiOn())st.textContent=window.SNSFreeAI?"แนะนำจากคลังในแอป ไม่ต้องล็อกอินอะไรเพิ่ม · อยากให้ AI คิดละเอียดขึ้น กดปุ่ม ✦ เปิดใช้ AI ฟรี มุมล่าง (ไม่บังคับ)":"แนะนำจากคลังในแอป (เปิดผ่านลิงก์ claude.ai จะใช้ AI คิดให้ละเอียดกว่า)"}else st.textContent="";
  if(only=="listen"&&prev){prev.listen=res.listen;res=prev}else if(only=="ideas"&&prev){prev.ideas=res.ideas;res=prev}
  res.inp={artist:inp.artist,song:inp.song};W.lastIdeas=res;renderIdeas(res);go.disabled=false}
 function renderIdeas(r){var o=$("sw-out");if(!o)return;var G=GEN[r.genre]||GEN.rnb,I=r.inp||{};
@@ -703,7 +704,7 @@ async function swapSong(r,i){var shown=(r.listen||[]).map(function(x){return(x.a
  W.seen=W.seen||{};shown.forEach(function(k){W.seen[k]=1});
  var pool=songPool(inp).filter(function(x){return!W.seen[(x.artist+"|"+x.title).toLowerCase()]});
  if(r.listen[i]&&r.listen[i].own){var ow=pool.filter(function(x){return x.own});if(ow.length)pool=ow}
- if(ST.sample&&(!pool.length||r.src=="ai")){try{var j=await aiJSON("แนะนำเพลงที่มีอยู่จริง 1 เพลง สำหรับศิลปินไทยที่กำลังอิน "+(inp.artist||"-")+" เพลง "+(inp.song||"-")+" แนว "+(GEN[r.genre]||GEN.rnb).n+(r.listen[i]&&r.listen[i].own?" (ขอเป็นเพลงของ "+inp.artist+")":"")+
+ if(aiOn()&&(!pool.length||r.src=="ai")){try{var j=await aiJSON("แนะนำเพลงที่มีอยู่จริง 1 เพลง สำหรับศิลปินไทยที่กำลังอิน "+(inp.artist||"-")+" เพลง "+(inp.song||"-")+" แนว "+(GEN[r.genre]||GEN.rnb).n+(r.listen[i]&&r.listen[i].own?" (ขอเป็นเพลงของ "+inp.artist+")":"")+
    "\nห้ามซ้ำกับ: "+Object.keys(W.seen).join(", ")+"\nต้องมั่นใจว่าชื่อเพลงและศิลปินถูกต้อง ตอบ JSON อย่างเดียว: {\"artist\":\"\",\"title\":\"\",\"about\":\"เพลงนี้เล่าเรื่องอะไร 1 ประโยค สรุปเอง ห้ามยกเนื้อ\",\"why\":\"ฟังเพื่อเรียนรู้อะไร 1 ประโยคภาษาไทย\"}");
    if(j&&j.title){W.seen[(j.artist+"|"+j.title).toLowerCase()]=1;return j}}catch(e){toastS(aiErr(e).replace(" ใช้คลังไอเดียในแอปแทนให้แล้ว",""))}}
  if(!pool.length){W.seen={};toastS("วนครบทุกเพลงในคลังแล้ว เริ่มรอบใหม่");pool=songPool(inp)}
