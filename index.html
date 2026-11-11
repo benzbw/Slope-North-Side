@@ -1577,7 +1577,7 @@ function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
   var shc=p.kw?"rgba("+TH.gl+",.95)":(sgi>0?col:(hook?"rgba("+TH.gl+",.85)":"rgba("+TH.gl+",.6)")),shb=sz*(p.kw?.55:.6)+gb,fc=fill||(p.kw?"#fff":col);
   if(pw&&act){shc="rgba("+TH.gl+",1)";shb=sz*.6+gb}
   if(chroma){x.shadowBlur=0;x.shadowColor="transparent";x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);x.fillStyle="rgba(0,255,255,.7)";x.fillText(tx2,-sz*.1,0);x.fillStyle="rgba(255,0,60,.8)";x.fillText(tx2,sz*.1,0);x.shadowColor=shc;x.shadowBlur=shb;x.fillStyle=fc;x.fillText(tx2,0,0);x.shadowBlur=0;x.shadowColor="transparent"}
-  else{x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);var SP=wordSprite(tx2,sz,fc,shc,shb);x.drawImage(SP.c,-SP.px,-SP.py,SP.w,SP.h);x.fillStyle=fc;x.fillText(tx2,0,0)}
+  else{/* แบบเดิม: เงาดำ + เรืองแสงสีธีมคมชัดเต็มความละเอียด */x.shadowBlur=0;x.shadowColor="transparent";x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);x.shadowColor=shc;x.shadowBlur=shb;x.fillStyle=fc;x.fillText(tx2,0,0);x.shadowBlur=0;x.shadowColor="transparent"}
   x.restore()})}
 /* ภาพคำสำเร็จรูป (มีเงา+เรืองแสงในตัว) วาดครั้งเดียวแล้วใช้ซ้ำทุกเฟรม: เบาเครื่องมาก ไม่กระตุกตอนอัด */
 var WSP=new Map();
