@@ -824,7 +824,8 @@ document.querySelectorAll("#pagesel button").forEach(function(b){b.onclick=funct
 var ENDC={on:true,title:"Dangerous",artist:"Bedupbiw ft. Killmonger"};try{var ej=JSON.parse(localStorage.getItem("bwend")||"null");if(ej)ENDC=Object.assign(ENDC,ej)}catch(e){}
 function endSave(){try{localStorage.setItem("bwend",JSON.stringify(ENDC))}catch(e){}endFill()}
 function endFill(){var c=$("endc");c.innerHTML=""}
-function endStart(){var le=N?((E&&E[N-1]!=null)?E[N-1]:T[N-1]+3):0,D=dur();return Math.min(D-4,Math.max(le+.8,D-12))}
+function endStart(){var le=N?((E&&E[N-1]!=null)?E[N-1]:T[N-1]+3):0,D=dur();if(le+.8>D-4)return le+.5;/* เนื้อร้องยาวถึงท้ายเพลง: ขึ้นหน้าปิดหลังร้องจบ ไม่ทับเนื้อ */return Math.min(D-4,Math.max(le+.8,D-12))}
+function endTail(){if(!ENDC.on)return 0;var D=dur();return Math.max(0,endStart()+3.4-D)}
 try{["400 40px Anton","italic 600 40px 'Playfair Display'","500 20px Montserrat"].forEach(function(f){document.fonts.load(f)})}catch(e){}
 $("end-on").checked=ENDC.on;$("end-title").value=ENDC.title;$("end-artist").value=ENDC.artist;endFill();
 $("end-on").onchange=function(){ENDC.on=this.checked;endSave()};$("end-title").oninput=function(){ENDC.title=this.value;endSave()};$("end-artist").oninput=function(){ENDC.artist=this.value;endSave()};
@@ -1540,17 +1541,27 @@ function makeTiles(){var n=document.createElement("canvas");n.width=n.height=128
 function blob(x,W,H,cx,cy,r,rgb,al){var g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,"rgba("+rgb+","+al+")");g.addColorStop(1,"rgba("+rgb+",0)");x.fillStyle=g;x.fillRect(0,0,W,H)}
 function rnd(n){var q=Math.sin(n*12.9898)*43758.5453;return q-Math.floor(q)}
 function clamp01(v){return v<0?0:v>1?1:v}
+/* จัดคำเป็นแถว: บรรทัดยาวตัดขึ้นแถวใหม่ (ไม่ย่อจนจิ๋ว ไม่ล้นขอบ) */
+var LMAXW=0;
+function lineLayout(x,j,sz,maxW,_b){var L0=lineLayout0(x,j,sz,maxW);if(_b===false||L0.n<2||!maxW)return L0;/* เกลี่ยแถวให้ยาวพอๆ กัน ไม่เหลือคำเดียวโดดๆ */var w=L0.tot/L0.n;for(var i=0;i<30&&w<maxW;i++){var L1=lineLayout0(x,j,sz,w);if(L1.n<=L0.n)return L1;w*=1.04}return L0}
+function lineLayout0(x,j,sz,maxW){var ws=wordsOf(j),up=LF[3]=="uppercase",rw=[0],last=[null],at={},tot=0,lh=sz*1.16;
+ ws.forEach(function(p,q){if(p.ad)return;var s2=up?p.tx.toUpperCase():p.tx,r=rw.length-1;if(!rw[r])s2=s2.replace(/^\s+/,"");var w=x.measureText(s2).width;
+  if(rw[r]>0&&maxW&&rw[r]+x.measureText(s2.replace(/\s+$/,"")).width>maxW){rw.push(0);last.push(null);r++;s2=s2.replace(/^\s+/,"");w=x.measureText(s2).width}
+  at[q]={r:r,x:rw[r],tx:s2,w:w};last[r]=at[q];rw[r]+=w;tot+=w});
+ var n=rw.length,tw=rw.map(function(v,r){var L=last[r];return L?v-(L.w-x.measureText(L.tx.replace(/\s+$/,"")).width):v});
+ Object.keys(at).forEach(function(q){var A=at[q];A.x=-tw[A.r]/2+A.x;A.y=(A.r-(n-1)/2)*lh});
+ return{n:n,at:at,tot:tot,maxRow:Math.max.apply(null,tw),h:(n-1)*lh}}
 function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
- var up=LF[3]=="uppercase"?txt.toUpperCase():txt,ws=wordsOf(j),tot=0,chroma=hook&&age>.6&&((age-.6)%2.6)>2.35,pos={},ads=[],cur0=null;
+ var ws=wordsOf(j),tot=0,chroma=hook&&age>.6&&((age-.6)%2.6)>2.35,ads=[],cur0=null;
  x.font=lfont(sz);x.textAlign="left";
- ws.forEach(function(p,q){if(p.ad){var tx=p.tx.replace(/[()（）]/g,"");if(cur0&&cur0.q==q-1){cur0.tx+=tx;cur0.q=q}else{cur0={p:p,q:q,tx:tx};ads.push(cur0)}return}
-  var s2=LF[3]=="uppercase"?p.tx.toUpperCase():p.tx;if(!tot)s2=s2.replace(/^\s+/,"");pos[p.o]=tot;tot+=x.measureText(s2).width});
+ ws.forEach(function(p,q){if(p.ad){var tx=p.tx.replace(/[()（）]/g,"");if(cur0&&cur0.q==q-1){cur0.tx+=tx;cur0.q=q}else{cur0={p:p,q:q,tx:tx};ads.push(cur0)}}});
+ var LY=lineLayout(x,j,sz,LMAXW);tot=LY.tot;
  drawAd(x,ads,sz,col,j,t,tot);
  var WSt=ws.map(function(p){return p.ad?null:wordT(j,p)}),lnEnd=(E&&E[j]!=null?E[j]:(j+1<N?T[j+1]:T[j]+3));
  function wEnd(q){for(var k=q+1;k<WSt.length;k++)if(WSt[k]!=null)return WSt[k];return lnEnd}
  var kar=ANIM=="kara",pw=ANIM=="kara"||ANIM=="bounce"||ANIM=="fx";
  ws.forEach(function(p,qi){if(p.ad)return;var wa=t-WSt[qi];if(wa<0&&!kar)return;
-  var cur=-tot/2+pos[p.o],tx2=LF[3]=="uppercase"?p.tx.toUpperCase():p.tx,
+  var AT=LY.at[qi],cur=AT.x,tx2=AT.tx,
    pp=clamp01(wa/.4),e=1-Math.pow(1-pp,3),al=clamp01(wa/.1),sc=1+(p.kw?.9:.6)*(1-e),dy=-sz*.12*(1-e),jx=0,gb=0,rot=0,fill=null,act=wa>=0&&t<wEnd(qi);
   if(kar){/* คาราโอเกะ: ทั้งบรรทัดขึ้นจางๆ คำที่กำลังร้องสว่าง ใหญ่ขึ้น เรืองแสง */al=wa<0?.3:1;sc=1;dy=0;if(act){var k1=clamp01(wa/.12);sc=1+.12*k1;dy=-sz*.06*k1;gb=sz*.5;fill="#fff"}else if(wa<0)fill=null}
   else if(ANIM=="bounce"){/* เด้งทีละคำ: หล่นลงมาแล้วเด้ง */pp=clamp01(wa/.45);var c1=1.70158,c3=c1+1,eb=1+c3*Math.pow(pp-1,3)+c1*Math.pow(pp-1,2);al=clamp01(wa/.08);sc=.4+.6*eb;dy=-sz*.7*(1-eb);rot=(rnd(p.o+j*13)-.5)*.5*(1-pp);if(act){sc*=1.08;gb=sz*.35}}
@@ -1562,7 +1573,7 @@ function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
   else if(ANIM=="type"){al=clamp01(wa/.14);sc=1;dy=0}
   else if(hook&&wa<.38){jx=(rnd(Math.floor(wa*40)+p.o)-.5)*sz*.4*(1-pp)}
   var cw=x.measureText(tx2).width;
-  x.save();x.globalAlpha*=al;x.translate(cur+cw/2+jx,dy);if(rot)x.rotate(rot);x.scale(sc,sc);x.translate(-cw/2,0);
+  x.save();x.globalAlpha*=al;x.translate(cur+cw/2+jx,dy+AT.y);if(rot)x.rotate(rot);x.scale(sc,sc);x.translate(-cw/2,0);
   x.shadowBlur=0;x.shadowColor="transparent";x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);
   if(chroma){x.fillStyle="rgba(0,255,255,.7)";x.fillText(tx2,-sz*.1,0);x.fillStyle="rgba(255,0,60,.8)";x.fillText(tx2,sz*.1,0)}
   x.shadowColor=p.kw?"rgba("+TH.gl+",.95)":(sgi>0?col:(hook?"rgba("+TH.gl+",.85)":"rgba("+TH.gl+",.6)"));x.shadowBlur=sz*(p.kw?.55:.6)+gb;
@@ -1571,22 +1582,27 @@ function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
 /* แอดลิบ: เก็บไว้ก่อน แล้ววาดทีหลังนอกบล็อกเนื้อ (มุมขวาล่าง ตัวโปร่งเรืองแสง) ไม่ทับเนื้อหลัก */
 var ADQ=[];
 function drawAd(x,ads,sz,col,j,t,tot){ads.forEach(function(a,n){var tx=a.tx.trim().toUpperCase();if(!tx)return;var wa=t-wordT(j,a.p);if(wa<0||wa>2.4)return;ADQ.push({tx:tx,wa:wa,sz:sz,only:!tot,k:j*7+n})})}
+function safeBox(W,H){if(H>W*1.3)return{w:W*.74,cx:W*.465,cy:H*.45};if(W>H*1.3)return{w:W*.78,cx:W/2,cy:H*.47};return{w:W*.8,cx:W/2,cy:H*.47}}
 function flushAd(x,W,H){var list=ADQ;ADQ=[];list.slice(-3).forEach(function(a,n){
  var pp=clamp01(a.wa/.25),e=1-Math.pow(1-pp,3),al=clamp01(a.wa/.12)*(a.wa>1.8?1-(a.wa-1.8)/.6:1),fs=a.sz*(a.only?.7:.55);
  x.save();x.font="italic 700 "+fs+"px Anton,'Noto Sans Thai',sans-serif";var w=x.measureText(a.tx).width;if(w>W*.6){fs*=W*.6/w;x.font="italic 700 "+fs+"px Anton,'Noto Sans Thai',sans-serif";w=W*.6}
- x.textAlign="center";x.textBaseline="middle";x.translate(W*(.66+(rnd(a.k)-.5)*.08),H*(.64+n*.05)-fs*.4*(1-e));x.rotate(-7*Math.PI/180);x.scale(.75+.25*e,.75+.25*e);
+ x.textAlign="center";x.textBaseline="middle";x.translate(W*((H>W*1.3?.56:.66)+(rnd(a.k)-.5)*.08),H*(.64+n*.05)-fs*.4*(1-e));x.rotate(-7*Math.PI/180);x.scale(.75+.25*e,.75+.25*e);
  x.globalAlpha=al*.95;x.lineWidth=Math.max(1,fs*.07);x.strokeStyle="rgba("+TH.gl+",.95)";x.shadowColor="rgba("+TH.gl+",.9)";x.shadowBlur=fs*.6;x.strokeText(a.tx,0,0);
  x.shadowBlur=0;x.globalAlpha=al*.5;x.fillStyle="#fff";x.fillText(a.tx,0,0);x.restore()})}
 function drawGroup(x,W,H,t,k,gi){
  var idx=pageIdx(gi),i;if(!idx.length)return;
  var first=LN[idx[0]],sgi=first.s||0,hook=first.h,multi=LN.some(function(l){return l.s>0});
  var ex=scolFor(sgi),col=ex||(hook?TH.hot:TH.txt),base=Math.min(W*.075,H*.052)*(hook?1.1:1)*TSZ;
- x.textAlign="left";x.textBaseline="middle";x.font=lfont(base);
- var maxw=1;idx.forEach(function(j){var mt=mainTxt(j)||LN[j].t;maxw=Math.max(maxw,x.measureText(LF[3]=="uppercase"?mt.toUpperCase():mt).width)});
- var sz=Math.min(base,base*(W*.8)/maxw),lh=sz*1.3,tagH=multi?sz*.9:0,total=idx.length*lh+tagH;
+ x.textAlign="left";x.textBaseline="middle";
+ /* กรอบปลอดภัย: แนวตั้ง (IG/TikTok) เว้นขวาไว้ให้ปุ่มไลก์/แชร์ และเว้นล่างให้แคปชัน */
+ var SB=safeBox(W,H),avail=SB.w/1.17,sz=base,lays,mn=base*.55,MR=H>W*1.3?(idx.length>1?3:4):2;
+ for(var it=0;it<14;it++){x.font=lfont(sz);var ok=true;lays=idx.map(function(j){var L=lineLayout(x,j,sz,avail);if(L.n>MR||L.maxRow>avail)ok=false;return L});if(ok||sz<=mn)break;sz*=.93}
+ if(sz<=mn){/* ยาวมากจริงๆ ยอมให้ 3 แถว */x.font=lfont(sz);lays=idx.map(function(j){return lineLayout(x,j,sz,avail)});var mr=1;lays.forEach(function(L){mr=Math.max(mr,L.maxRow/avail)});if(mr>1){sz/=mr;x.font=lfont(sz);lays=idx.map(function(j){return lineLayout(x,j,sz,avail)})}}
+ LMAXW=avail;
+ var lh=sz*1.3,tagH=multi?sz*.9:0,total=tagH,yy=[];lays.forEach(function(L){yy.push(total+(lh+L.h)/2);total+=lh+L.h});
  var sx=0,sy=0,k2=W/720;
  idx.forEach(function(j){var ag=t-T[j];if(ag>=0&&ag<.24&&(LN[j].h||KW.test(LN[j].t))){var d=1-ag/.24;sx+=Math.sin(ag*90)*9*d*k2;sy+=Math.cos(ag*70)*5*d*k2}});
- x.save();x.translate(W/2+sx,H*.47+sy);
+ x.save();x.translate(SB.cx+sx,SB.cy+sy);
  var gs=1+clamp01((t-T[idx[0]])/8)*.07+(PUNCH?kick(t)*.06:pulse*.03);x.scale(gs,gs);
  var y0=-total/2;
  if(multi){x.font="700 "+(sz*.4)+"px 'Noto Sans Thai',sans-serif";x.textAlign="center";x.fillStyle=col;x.globalAlpha=.9;x.fillText(SG[sgi].n.split("").join(" "),0,y0+tagH/2);x.globalAlpha=1;y0+=tagH}
@@ -1594,9 +1610,9 @@ function drawGroup(x,W,H,t,k,gi){
   var age=t-T[j],v=j%4,p=clamp01(age/.45),e=1-Math.pow(1-p,3),al=clamp01(age/.18),sc=1,skew=0,tx=0,ty=0;
   al=1;
   var dim=1;if(j<k&&j+1<N)dim=1-(ROLL()?.38:.62)*clamp01((t-T[j+1])/.5);
-  x.save();x.globalAlpha=al*dim;x.translate(tx,y0+q*lh+lh/2+ty);x.transform(1,0,Math.tan(skew*Math.PI/180),1,0,0);x.scale(sc,sc);
+  x.save();x.globalAlpha=al*dim;x.translate(tx,y0+yy[q]-(multi?tagH:0)+ty);x.transform(1,0,Math.tan(skew*Math.PI/180),1,0,0);x.scale(sc,sc);
   drawLine(x,LN[j].t,sz,col,hook,ex?1:0,age,j,t);x.restore()});
- x.restore();flushAd(x,W,H);
+ x.restore();LMAXW=0;flushAd(x,W,H);
  if(hook){var fa=t-T[idx[0]];if(fa>=0&&fa<.4){x.globalCompositeOperation="screen";x.globalAlpha=.5*(1-fa/.4);x.fillStyle="rgb("+TH.gl+")";x.fillRect(0,0,W,H);x.globalAlpha=1;x.globalCompositeOperation="source-over"}}}
 /* เอฟเฟกต์ท่อนเด็ด (ฮุคเริ่ม) และตอนศิลปินรับเชิญเข้า สำหรับวิดีโอที่ส่งออก */
 function drawBigFx(x,W,H,t,k){var gs=k;while(gs>0&&LN[gs-1].g==LN[k].g)gs--;var a2=t-T[gs],l=LN[gs],M=Math.min(W,H);
@@ -1614,17 +1630,17 @@ function bloodDrips(x,tt,tf,ts,cx,ty,at,al){if(at<0||!tt)return;var key=tt+"|"+M
   x.beginPath();x.moveTo(px-w*.9,py);x.quadraticCurveTo(px-w*.5,py+L*.3,px-w*.45,py+L);x.arc(px,py+L,w*.55,Math.PI,0,true);x.quadraticCurveTo(px+w*.5,py+L*.3,px+w*.9,py);x.closePath();
   var dg=x.createLinearGradient(0,py,0,py+L+w);dg.addColorStop(0,"#b0001a");dg.addColorStop(1,"#5a0009");x.fillStyle=dg;x.fill();
   x.globalAlpha=al*.5;x.fillStyle="rgba(255,120,120,.6)";x.beginPath();x.arc(px-w*.15,py+L-w*.1,w*.15,0,7);x.fill();x.globalAlpha=al});x.restore()}
-function drawEnd(x,W,H,t){var a0=t-endStart();if(a0<0)return;var D=dur(),fo=clamp01((D-t)/1),al=clamp01(a0/1.4)*fo,e=1-Math.pow(1-clamp01(a0/2.6),3),M=Math.min(W,H);
+function drawEnd(x,W,H,t){var a0=t-endStart();if(a0<0)return;var EW=H>W*1.3?.76:1;var D=dur()+endTail(),fo=clamp01((D-t)/1),al=clamp01(a0/1.4)*fo,e=1-Math.pow(1-clamp01(a0/2.6),3),M=Math.min(W,H);
  x.save();x.globalAlpha=al*.65;x.fillStyle="#000";x.fillRect(0,0,W,H);x.restore();
  x.save();x.textBaseline="middle";x.textAlign="left";
  /* ลายน้ำ: ตัวตั้งตรงแบบคอนเดนส์ เว้นห่าง ค่อยๆ ชัดจากเบลอ ระยะห่างตัวอักษรค่อยๆ หดเข้าที่ */
  var wm="SLOPE NORTH SIDE",fs=M*.11,spf=.28-.12*e;x.font="400 "+fs+"px Anton,'Noto Sans Thai',sans-serif";
- var tw=0,ch=Array.from(wm);ch.forEach(function(c){tw+=x.measureText(c).width+fs*spf});tw-=fs*spf;if(tw>W*.88){fs*=W*.88/tw;x.font="400 "+fs+"px Anton,'Noto Sans Thai',sans-serif";tw=W*.88}
+ var tw=0,ch=Array.from(wm);ch.forEach(function(c){tw+=x.measureText(c).width+fs*spf});tw-=fs*spf;if(tw>W*.88*EW){fs*=W*.88*EW/tw;x.font="400 "+fs+"px Anton,'Noto Sans Thai',sans-serif";tw=W*.88*EW}
  var cy=H*.42,cx=W/2-tw/2;x.globalAlpha=al;x.fillStyle="#fff";x.shadowColor="rgba("+TH.gl+",.55)";x.shadowBlur=fs*.45*(1.6-e*.6);ch.forEach(function(c){x.fillText(c,cx,cy);cx+=x.measureText(c).width+fs*spf});x.restore();
  x.save();var lw=W*.6*clamp01((a0-.4)/1.6),g=x.createLinearGradient(W/2-lw/2,0,W/2+lw/2,0);g.addColorStop(0,"rgba(255,255,255,0)");g.addColorStop(.5,"rgba(255,255,255,.7)");g.addColorStop(1,"rgba(255,255,255,0)");x.globalAlpha=al;x.fillStyle=g;x.fillRect(W/2-lw/2,cy+fs*.75,lw,Math.max(1,M/900));
  var a1=clamp01((a0-.7)/1.1)*fo,a2=clamp01((a0-1.2)/1.1)*fo;x.textAlign="center";x.textBaseline="middle";
  /* ชื่อเพลง: เซอริฟเอียง สีแดงเลือด มีเลือดค่อยๆ ไหลหยดจากใต้ตัวอักษร */
- var ts=M*.095,tt=ENDC.title||"",tf=ENDC.tf||"italic 700 $px 'Playfair Display','Noto Sans Thai',serif";x.font=tf.replace("$",ts);var tww=x.measureText(tt).width;if(tww>W*.86){ts*=W*.86/tww;x.font=tf.replace("$",ts);tww=W*.86}
+ var ts=M*.095,tt=ENDC.title||"",tf=ENDC.tf||"italic 700 $px 'Playfair Display','Noto Sans Thai',serif";x.font=tf.replace("$",ts);var tww=x.measureText(tt).width;if(tww>W*.86*EW){ts*=W*.86*EW/tww;x.font=tf.replace("$",ts);tww=W*.86*EW}
  var ty=cy+fs*.75+ts*1.05+(1-a1)*10;x.globalAlpha=a1;x.textAlign="center";
  var gr=x.createLinearGradient(0,ty-ts*.5,0,ty+ts*.5);gr.addColorStop(0,"#ff2a3a");gr.addColorStop(.55,"#c4001a");gr.addColorStop(1,"#6e000c");x.fillStyle=gr;x.shadowColor="rgba(200,0,20,.75)";x.shadowBlur=ts*.3;x.fillText(tt,W/2,ty);x.shadowBlur=0;
  if(ENDC.drip!==false)bloodDrips(x,tt,tf,ts,W/2,ty,a0-1.2,a1);
@@ -1889,10 +1905,11 @@ async function startVideo(){
  try{if(navigator.wakeLock)wl=await navigator.wakeLock.request("screen")}catch(e){}
  drawFrame(cvs,W,H,0);
  await new Promise(function(res){var done=false;function fin(){if(done)return;done=true;res()}
-  a.addEventListener("ended",fin,{once:true});vcancelFn=function(){cancelled=true;fin()};
+  var endT=0,endT0=0;a.addEventListener("ended",function(){var tl=CL?0:endTail();if(tl>0&&!cancelled){endT=tl;endT0=performance.now()}else fin()},{once:true});vcancelFn=function(){cancelled=true;fin()};
   var tailT0=0,tailTm=0,efOn=false,c0=CL?CL.s:0,c1=CL?CL.e+(CL.tail||0):dur();
   function shade(al){if(al<=0)return;var cx2=cvs.getContext("2d");cx2.save();cx2.globalAlpha=Math.min(1,al);cx2.fillStyle="#000";cx2.fillRect(0,0,W,H);cx2.restore()}
   function loop(){if(done)return;var now=a.currentTime;
+   if(endT){var el2=(performance.now()-endT0)/1000;drawFrame(cvs,W,H,dur()+el2);$("vst").textContent="กำลังบันทึกหน้าปิดท้าย… อย่าปิดหน้านี้";if(el2>=endT){fin();return}requestAnimationFrame(loop);return}
    if(tailT0){var el=(performance.now()-tailT0)/1000;drawFrame(cvs,W,H,tailTm);shade(CL.mode=="stop"?el/CL.tail:Math.pow(el/CL.tail,1.6));if(el>=CL.tail){fin();return}
     $("vst").textContent="กำลังบันทึกหางเสียง… อย่าปิดหน้านี้";requestAnimationFrame(loop);return}
    if(CL&&now>=CL.e){if(CL.tail){tailT0=performance.now();tailTm=tm();a.pause();if(EF.dry&&ac){EF.dry.gain.setTargetAtTime(0,ac.currentTime,.02);if(CL.mode=="stop"){EF.send.gain.setValueAtTime(.9,ac.currentTime);EF.send.gain.setTargetAtTime(0,ac.currentTime+.05,.05);EF.fb.gain.value=.3}}requestAnimationFrame(loop);return}fin();return}
