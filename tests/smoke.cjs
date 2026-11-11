@@ -26,7 +26,7 @@ async function run(browser, label, viewport) {
     if (await p.isVisible('#sx-pw2')) await p.fill('#sx-pw2', 'ci-pass-123');
     await p.click('#sx-lgo'); await p.waitForTimeout(1500);
   }
-  check(label + ': หน้าแรกมีเครื่องมือ 4 อัน', (await p.$$('#sx .sx-tool')).length === 4);
+  check(label + ': หน้าแรกมีเครื่องมือ 5 อัน', (await p.$$('#sx .sx-tool')).length === 5);
   await p.screenshot({ path: path.join(SHOTS, label + '-home.png') });
   await p.evaluate(() => window.SNSExplore && SNSExplore.open()); await p.waitForTimeout(300);
   await p.fill('#ex-q', 'The Weeknd'); await p.click('#ex-go'); await p.waitForTimeout(500);
