@@ -10,7 +10,7 @@ header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:
 header h1{font:400 22px/1 Anton,'Noto Sans Thai',sans-serif;letter-spacing:.04em;margin:0;flex:1}header a{font-size:13px;color:var(--mut);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:6px 12px}
 .tabs{display:flex;gap:6px;padding:12px 16px 0}.tabs button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;cursor:pointer}.tabs button.on{background:var(--hot);border-color:var(--hot);color:#fff}
 main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
-.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}@media(max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
 .h{font-weight:800;margin:0 0 8px}.mut{color:var(--mut);font-size:13px}
 .stage{background:#000;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:260px;position:sticky;top:76px}
@@ -19,7 +19,11 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
 .drop input{display:none}.drop b{display:block;font-size:16px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:1px solid var(--line);background:#1d161a;border-radius:10px;padding:7px 11px;cursor:pointer;font-size:13px;min-height:38px}
 .chips button.on{border-color:var(--hot);background:rgba(255,51,71,.16)}.chips small{display:block;color:var(--mut);font-size:11px}
-.looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}.looks button{background:#1d161a;border:2px solid transparent;border-radius:12px;padding:4px;cursor:pointer;text-align:center;font-size:12px}
+.looks{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}.looks button{flex:0 0 96px;scroll-snap-align:start;background:#1d161a;border:2px solid transparent;border-radius:12px;padding:4px;cursor:pointer;text-align:center;font-size:12px;line-height:1.25}
+.cats{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px}.cats button{flex:0 0 auto;border:1px solid var(--line);background:#1d161a;border-radius:99px;padding:6px 12px;font-size:13px;cursor:pointer}.cats button.on{background:var(--hot);border-color:var(--hot);color:#fff}
+.pv{position:relative}.cmp{position:absolute;right:10px;bottom:10px;border:0;border-radius:99px;background:rgba(0,0,0,.6);color:#fff;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:none}
+.lname{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700}
+@media(max-width:820px){.pcol{position:sticky;top:58px;z-index:4;background:var(--bg);padding-bottom:6px;align-self:start}.pcol .stage{position:relative;top:0;min-height:0}.pcol .stage canvas{max-height:40vh;max-width:100%}.pcol .strip{margin-top:4px}}
 .looks button.on{border-color:var(--hot)}.looks canvas{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;background:#222}
 .sl{display:grid;grid-template-columns:96px 1fr 38px;align-items:center;gap:8px;margin:6px 0;font-size:13px}.sl input{width:100%;accent-color:var(--hot)}.sl span:last-child{text-align:right;color:var(--mut)}
 .inp{width:100%;min-height:42px;border-radius:10px;border:1px solid var(--line);background:#0f0b0d;color:var(--txt);padding:0 12px;font:inherit;margin:4px 0}
@@ -32,10 +36,10 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
 <div class="tabs"><button class="on" data-t="ph">รูปภาพ</button><button data-t="vd">วิดีโอ</button></div>
 <main>
 <section id="tab-ph"><div class="grid">
- <div><div class="stage" id="pstage"><canvas id="pc"></canvas><p class="mut" id="pempty" style="padding:30px;text-align:center">ใส่รูปด้านขวา (เลือกได้หลายรูป แต่งพร้อมกันได้)</p></div><div class="strip" id="pstrip"></div></div>
+ <div class="pcol"><div class="stage pv" id="pstage"><canvas id="pc"></canvas><span class="lname" id="plname" hidden></span><button class="cmp" id="pcmp" type="button" hidden>กดค้าง ดูรูปเดิม</button><p class="mut" id="pempty" style="padding:30px;text-align:center">ใส่รูปด้านล่าง (เลือกได้หลายรูป แต่งพร้อมกันได้)</p></div><div class="strip" id="pstrip"></div></div>
  <div>
   <div class="card"><label class="drop"><b>+ ใส่รูป</b><span class="mut">ถ่ายจากมือถือได้ · เลือกหลายรูปได้ · รูปไม่ถูกส่งไปไหน</span><input type="file" id="pfile" accept="image/*" multiple></label></div>
-  <div class="card"><p class="h">ฟิลเตอร์แนวกล้องจริง / แนวแรปเปอร์</p><div class="looks" id="plooks"></div>
+  <div class="card"><p class="h">ฟิลเตอร์ <span class="mut" id="pcount"></span></p><div class="cats" id="pcats"></div><div class="looks" id="plooks"></div>
    <div class="sl"><span>ความแรง</span><input type="range" id="p-str" min="0" max="100" value="100"><span id="v-str">100</span></div></div>
   <div class="card"><p class="h">ปรับแต่ง</p>
    <div class="sl"><span>สว่าง</span><input type="range" id="p-bri" min="-60" max="60" value="0"><span></span></div>
@@ -70,12 +74,56 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
 (function(){"use strict";
 var $=function(i){return document.getElementById(i)};
 function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show")},2200)}
+/* ---------- ฟิล์มเอนจิน: โค้งโทน + สีเงา/สีไฮไลต์ + แฟลช + แสงเรือง + เกรน (ตั้งค่าเป็นสูตรต่อฟิล์ม) ---------- */
+var FILM={
+ nightflash:{n:"แฟลชฟิล์มกลางคืน",d:"แฟลชตรง 35mm พื้นหลังมืดอมเขียว แบบรูปแรปเปอร์ไทย",c:"แฟลช",flash:.75,fall:.55,con:1.12,sat:1.05,lift:26,roll:244,sh:[10,8,-12],md:[6,0,-6],hi:[0,0,-4],grain:.34,gs:1.6,vig:.32},
+ nightstreet:{n:"ฟิล์มถนนกลางคืน",d:"ไฟส้มอุ่น เงาเขียว เกรน แบบเดินถนนญี่ปุ่นตอนกลางคืน",c:"กลางคืน",con:1.16,sat:.95,lift:22,roll:236,sh:[-6,8,2],md:[14,4,-14],hi:[8,4,-8],grain:.3,gs:1.6,hal:.28,halc:[255,140,60],vig:.25},
+ cinestill:{n:"CineStill 800T",d:"แสงเรืองแดงรอบไฟ โทนเย็นอมฟ้า กลางคืนแบบหนัง",c:"กลางคืน",con:1.1,sat:1.05,lift:16,roll:242,sh:[-4,4,14],md:[-2,0,8],hi:[10,4,-4],grain:.26,gs:1.4,hal:.55,halc:[255,60,40],vig:.2},
+ neon:{n:"นีออนกลางคืน",d:"ม่วงชมพูฟ้า เงาดำลึก สีจัด",c:"กลางคืน",con:1.22,sat:1.35,lift:6,roll:250,sh:[6,-8,22],md:[14,-6,14],hi:[10,0,10],grain:.18,gs:1.2,hal:.3,halc:[255,60,200],vig:.35},
+ moody:{n:"มูดดี้เย็น",d:"ซีด เย็น หม่น แบบปกแรปสายเศร้า",c:"กลางคืน",con:1.08,sat:.6,lift:24,roll:228,sh:[-6,0,10],md:[-6,-2,6],hi:[-4,0,6],grain:.22,gs:1.3,vig:.4},
+ flash2k:{n:"แฟลชปาร์ตี้ 2000s",d:"แฟลชจ้า ไฮไลต์ขาวโพลน พื้นหลังดำ",c:"แฟลช",flash:1,fall:.42,con:1.3,sat:1.12,lift:4,roll:255,sh:[0,0,4],md:[4,2,0],hi:[0,0,0],grain:.16,gs:1.1,vig:.55},
+ flashwarm:{n:"แฟลชอุ่นวินเทจ",d:"แฟลชกล้องฟิล์ม โทนเหลืองส้ม ซีดนิดๆ",c:"แฟลช",flash:.7,fall:.5,con:1.1,sat:1.0,lift:22,roll:240,sh:[12,6,-10],md:[14,6,-12],hi:[6,4,-10],grain:.28,gs:1.5,vig:.3},
+ gold:{n:"Kodak Gold 200",d:"เหลืองทองอุ่น สีสด แดดเย็น",c:"ฟิล์ม",con:1.1,sat:1.15,lift:14,roll:246,sh:[8,4,-8],md:[16,8,-16],hi:[10,6,-10],grain:.24,gs:1.4,vig:.2},
+ ektar:{n:"Kodak Ektar",d:"สีสดคม ฟ้าลึก แดงจัด",c:"ฟิล์ม",con:1.18,sat:1.35,lift:8,roll:250,sh:[0,0,8],md:[6,0,-2],hi:[4,2,-4],grain:.14,gs:1.2,vig:.18},
+ superia:{n:"Fuji Superia",d:"เขียวสด ฟ้าอมเขียว ฟิล์มร้านถ่ายรูป",c:"ฟิล์ม",con:1.1,sat:1.1,lift:16,roll:242,sh:[-4,10,6],md:[0,6,0],hi:[4,6,0],grain:.28,gs:1.5,vig:.22},
+ tealorange:{n:"ทีลแอนด์ออเรนจ์",d:"ผิวส้ม เงาฟ้าเขียว แบบ MV",c:"วินเทจ",con:1.15,sat:1.1,lift:10,roll:246,sh:[-14,4,18],md:[12,2,-10],hi:[14,6,-10],grain:.12,gs:1.2,vig:.3},
+ matte:{n:"แมตต์ซีด",d:"ดำซีดเป็นเทา คอนทราสต์ต่ำ นุ่ม",c:"วินเทจ",con:.88,sat:.85,lift:42,roll:226,sh:[4,4,6],md:[2,0,0],hi:[2,0,-2],grain:.18,gs:1.3,vig:.12},
+ polaroid:{n:"โพลารอยด์",d:"ซีด อมฟ้าเขียวในเงา ไฮไลต์ครีม",c:"วินเทจ",con:.95,sat:.9,lift:30,roll:232,sh:[-8,6,12],md:[8,4,-4],hi:[10,8,-6],grain:.2,gs:1.3,vig:.35},
+ seventies:{n:"ยุค 70s",d:"ส้มน้ำตาล ซีด เกรนหยาบ",c:"วินเทจ",con:.95,sat:.8,lift:28,roll:232,sh:[14,6,-6],md:[18,8,-14],hi:[12,6,-10],grain:.26,gs:1.8,vig:.4},
+ cross:{n:"ครอสโพรเซส",d:"ไฮไลต์เหลืองเขียว เงาม่วง สีหลุดๆ",c:"วินเทจ",con:1.25,sat:1.2,lift:12,roll:248,sh:[10,-6,22],md:[-4,8,-12],hi:[6,14,-24],grain:.2,gs:1.3,vig:.3},
+ aero:{n:"อินฟราเรดชมพู",d:"ใบไม้กลายเป็นชมพูแดง แบบ Aerochrome",c:"วินเทจ",con:1.12,sat:1.15,lift:10,roll:248,aero:1,sh:[0,0,8],md:[0,0,0],hi:[0,0,0],grain:.2,gs:1.3,vig:.25},
+ trix:{n:"ขาวดำ Tri-X",d:"ขาวดำฟิล์มนุ่ม เกรนสวย",c:"ขาวดำ",bw:1,con:1.15,sat:0,lift:14,roll:246,sh:[0,0,0],md:[0,0,0],hi:[0,0,0],grain:.34,gs:1.6,vig:.3},
+ bwflash:{n:"ขาวดำแฟลช",d:"แฟลชจ้า ขาวดำคมแบบปาปารัซซี่",c:"ขาวดำ",bw:1,flash:.85,fall:.5,con:1.35,sat:0,lift:4,roll:255,sh:[0,0,0],md:[0,0,0],hi:[0,0,0],grain:.22,gs:1.2,vig:.5},
+ sepia:{n:"ซีเปีย",d:"น้ำตาลเก่า ขาวดำอมส้ม",c:"ขาวดำ",bw:1,con:1.05,sat:0,lift:20,roll:236,sh:[18,8,-6],md:[26,12,-10],hi:[14,8,-6],grain:.26,gs:1.5,vig:.4}
+};
+function filmApply(c,F,seed){var x=c.getContext("2d"),w=c.width,h=c.height,M=Math.max(w,h),im=x.getImageData(0,0,w,h),D=im.data,R=plRnd(seed||777),i,r,g,b,L,cx=w/2,cy=h*.42,
+ lift=F.lift||0,roll=F.roll||255,span=(roll-lift)/255,con=F.con||1,sat=F.sat==null?1:F.sat,sh=F.sh||[0,0,0],md=F.md||[0,0,0],hi=F.hi||[0,0,0],fl=F.flash||0,fall=F.fall||.5;
+ function sc(v){v/=255;var s=v*v*(3-2*v);v=v+(s-v)*(con-1)*1.6;v=(v-.5)*Math.max(.5,con)+.5;return v<0?0:v>1?1:v}
+ for(i=0;i<D.length;i+=4){r=D[i];g=D[i+1];b=D[i+2];
+  if(F.aero){var gg=g;g=r*.35+b*.1;r=Math.min(255,gg*1.15+r*.2);b=b*.9}
+  if(fl){var p=i>>2,px=p%w,py=p/w|0,dd=Math.hypot((px-cx)/M,(py-cy)/M),k=Math.max(0,1-dd/fall);var boost=1+fl*.55*k*k,dim=1-fl*.7*Math.min(1,Math.max(0,(dd-fall*.6)/(fall*1.1)));r*=boost*dim;g*=boost*dim;b*=boost*dim}
+  L=.299*r+.587*g+.114*b;
+  if(F.bw){r=g=b=L}else{r=L+(r-L)*sat;g=L+(g-L)*sat;b=L+(b-L)*sat}
+  r=sc(r);g=sc(g);b=sc(b);var l=(r*.299+g*.587+b*.114),ws=(1-l)*(1-l),wh=l*l,wm=1-ws-wh;
+  r=lift+r*255*span+sh[0]*ws+md[0]*wm+hi[0]*wh;g=lift+g*255*span+sh[1]*ws+md[1]*wm+hi[1]*wh;b=lift+b*255*span+sh[2]*ws+md[2]*wm+hi[2]*wh;
+  D[i]=r<0?0:r>255?255:r;D[i+1]=g<0?0:g>255?255:g;D[i+2]=b<0?0:b>255?255:b}
+ x.putImageData(im,0,0);
+ if(F.hal){var s=Math.max(64,Math.round(M/8)),t=document.createElement("canvas");t.width=Math.round(w*s/M);t.height=Math.round(h*s/M);var tx=t.getContext("2d");tx.drawImage(c,0,0,t.width,t.height);var ti=tx.getImageData(0,0,t.width,t.height),td=ti.data,hc=F.halc||[255,90,50];
+  for(i=0;i<td.length;i+=4){var lv=(td[i]*.299+td[i+1]*.587+td[i+2]*.114-185)/70;lv=lv<0?0:lv>1?1:lv;td[i]=hc[0]*lv;td[i+1]=hc[1]*lv;td[i+2]=hc[2]*lv}tx.putImageData(ti,0,0);
+  x.save();x.globalCompositeOperation="screen";x.globalAlpha=F.hal;try{x.filter="blur("+Math.round(M*.012)+"px)"}catch(e){}x.drawImage(t,0,0,w,h);x.restore()}
+ if(F.grain){var gs=F.gs||1.4,gw=Math.max(1,Math.round(w/gs)),gh=Math.max(1,Math.round(h/gs)),n=document.createElement("canvas");n.width=gw;n.height=gh;var nx=n.getContext("2d"),ni=nx.createImageData(gw,gh),nd=ni.data;
+  for(i=0;i<nd.length;i+=4){var v=128+(R()+R()+R()-1.5)*120;nd[i]=nd[i+1]=nd[i+2]=v;nd[i+3]=255}nx.putImageData(ni,0,0);x.save();x.globalCompositeOperation="overlay";x.globalAlpha=F.grain;x.imageSmoothingEnabled=true;x.drawImage(n,0,0,w,h);x.restore()}
+ if(F.vig){var vg=x.createRadialGradient(w/2,h/2,M*.28,w/2,h/2,M*.78);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,"+F.vig+")");x.fillStyle=vg;x.fillRect(0,0,w,h)}
+ return c}
+
 /* ---------- แต่งรูปแนวกล้องจริง: แฟลช · ฟิล์ม · กล้องทิ้ง · ขาวดำเกรน · แดงเรจ · CCD Y2K · ฟิชอาย · VHS (ทำในเครื่อง ฟรี ไม่เปลี่ยนหน้า) ---------- */
-var PLOOKS=[["none","รูปเดิม",""],["flash","แฟลชตรง","สว่างกลางหน้า เงาแข็ง แบบปาปารัซซี่"],["disp","กล้องใช้แล้วทิ้ง","แฟลช อมเขียวเหลือง แสงรั่ว วันที่สีส้ม"],["portra","ฟิล์ม Portra","อุ่น ผิวสวย ดำซีดนิดๆ แสงเรือง"],["fuji","ฟิล์ม Fuji","เย็น เงาเขียวฟ้า ซีดๆ"],["bw","ขาวดำเกรนหนัก","คอนทราสต์จัด แบบปกแรปอเมริกา"],["red","แดงเรจ","โมโนแดง ดุ ถ่ายเอกสาร"],["ccd","กล้องดิจิตอล Y2K","แฟลช สีจัด ขอบสีเพี้ยน วันที่ดิจิตอล"],["fish","ฟิชอาย 90s","เลนส์ตาปลา ขอบดำวงกลม แบบ MV ยุค 90"],["vhs","VHS","เส้นสแกน สีเหลื่อม PLAY ▶"]];
+var PLOOKS=[["none","รูปเดิม","",""],["flash","แฟลชตรง","สว่างกลางหน้า เงาแข็ง แบบปาปารัซซี่","แฟลช"],["disp","กล้องใช้แล้วทิ้ง","แฟลช อมเขียวเหลือง แสงรั่ว วันที่สีส้ม","แฟลช"],["portra","ฟิล์ม Portra","อุ่น ผิวสวย ดำซีดนิดๆ แสงเรือง","ฟิล์ม"],["fuji","ฟิล์ม Fuji","เย็น เงาเขียวฟ้า ซีดๆ","ฟิล์ม"],["bw","ขาวดำเกรนหนัก","คอนทราสต์จัด แบบปกแรปอเมริกา","ขาวดำ"],["red","แดงเรจ","โมโนแดง ดุ ถ่ายเอกสาร","พิเศษ"],["ccd","กล้องดิจิตอล Y2K","แฟลช สีจัด ขอบสีเพี้ยน วันที่ดิจิตอล","แฟลช"],["fish","ฟิชอาย 90s","เลนส์ตาปลา ขอบดำวงกลม แบบ MV ยุค 90","พิเศษ"],["vhs","VHS","เส้นสแกน สีเหลื่อม PLAY ▶","พิเศษ"]];
+Object.keys(FILM).forEach(function(k){PLOOKS.push([k,FILM[k].n,FILM[k].d,FILM[k].c])});
+
 function plRnd(s){return function(){s=(s*16807)%2147483647;return(s-1)/2147483646}}
 function plStamp(){var d=new Date();return "'"+String(d.getFullYear()).slice(2)+" "+(d.getMonth()+1)+" "+d.getDate()}
 function photoLook(src,look,maxS){var w=src.naturalWidth||src.width,h=src.naturalHeight||src.height,k=Math.min(1,(maxS||2400)/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
- var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.drawImage(src,0,0,w,h);if(!look||look=="none")return c;
+ var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.drawImage(src,0,0,w,h);if(!look||look=="none")return c;if(FILM[look])return filmApply(c,FILM[look],w*7+h);
  var M=Math.max(w,h),R=plRnd(12345),cl=function(v){return v<0?0:v>255?255:v};
  if(look=="fish"){var o=x.getImageData(0,0,w,h),n=x.createImageData(w,h),od=o.data,nd=n.data,cx=w/2,cy=h/2,rr=Math.min(w,h)/2;
   for(var y=0;y<h;y++)for(var xx=0;xx<w;xx++){var dx=(xx-cx)/rr,dy=(y-cy)/rr,d=Math.sqrt(dx*dx+dy*dy),q=(y*w+xx)*4;if(d>1){nd[q+3]=255;continue}
@@ -133,12 +181,14 @@ function render(src,maxS){var w=src.naturalWidth||src.width,h=src.naturalHeight|
  var c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d");x.drawImage(base,0,0);
  if(P.look!="none"){var L=photoLook(base,P.look,Math.max(W,H));x.globalAlpha=P.str/100;x.drawImage(L,0,0,W,H);x.globalAlpha=1}
  adjust(c);finish(x,W,H,P.grn,P.vig);var out=frameIt(c,P.frame);texts(out.getContext("2d"),out.width,out.height,P.t1,P.t2,P.tpos);return out}
-var rT=0;function draw(){clearTimeout(rT);rT=setTimeout(function(){var it=P.list[P.i];$("pempty").hidden=!!it;if(!it)return;var o=render(it.im,1100),pc=$("pc");pc.width=o.width;pc.height=o.height;pc.getContext("2d").drawImage(o,0,0)},40)}
-function thumbs(){var host=$("plooks"),it=P.list[P.i];host.innerHTML="";PLOOKS.forEach(function(L){var b=document.createElement("button"),cv=document.createElement("canvas");b.className=P.look==L[0]?"on":"";b.title=L[2];
-  if(it){var t=document.createElement("canvas"),w=it.im.naturalWidth,h=it.im.naturalHeight,s=Math.min(w,h);t.width=t.height=180;t.getContext("2d").drawImage(it.im,(w-s)/2,(h-s)/2,s,s,0,0,180,180);var o=photoLook(t,L[0],180);cv.width=cv.height=180;cv.getContext("2d").drawImage(o,0,0,180,180)}
+var rT=0;function draw(now){clearTimeout(rT);rT=setTimeout(function(){var it=P.list[P.i];$("pempty").hidden=!!it;$("pcmp").hidden=!it;var ln=$("plname");if(!it){ln.hidden=true;return}var o;if(CMP){var w=it.im.naturalWidth,h=it.im.naturalHeight,cr=cropRect(w,h,P.fmt,P.ox/100,P.oy/100),k=Math.min(1,900/Math.max(cr.w,cr.h));o=document.createElement("canvas");o.width=Math.round(cr.w*k);o.height=Math.round(cr.h*k);o.getContext("2d").drawImage(it.im,cr.x,cr.y,cr.w,cr.h,0,0,o.width,o.height)}else o=render(it.im,900);var pc=$("pc");pc.width=o.width;pc.height=o.height;pc.getContext("2d").drawImage(o,0,0);var L=PLOOKS.filter(function(q){return q[0]==P.look})[0];ln.hidden=false;ln.textContent=CMP?"รูปเดิม":(L?L[1]:"")},now?0:60)}
+var CAT="ทั้งหมด",TH={};function cats(){var host=$("pcats"),cs=["ทั้งหมด"];PLOOKS.forEach(function(L){if(L[3]&&cs.indexOf(L[3])<0)cs.push(L[3])});host.innerHTML="";cs.forEach(function(c){var b=document.createElement("button");b.type="button";b.textContent=c;b.className=c==CAT?"on":"";b.onclick=function(){CAT=c;cats();thumbs()};host.appendChild(b)});$("pcount").textContent="· "+(PLOOKS.length-1)+" แบบ"}
+function thumbs(){var host=$("plooks"),it=P.list[P.i];host.innerHTML="";PLOOKS.forEach(function(L){if(CAT!="ทั้งหมด"&&L[0]!="none"&&L[3]!=CAT)return;var b=document.createElement("button"),cv=document.createElement("canvas");b.className=P.look==L[0]?"on":"";b.title=L[2];
+  if(it){var key=P.i+":"+L[0];cv.width=cv.height=180;if(!TH[key]){var t=document.createElement("canvas"),w=it.im.naturalWidth,h=it.im.naturalHeight,s=Math.min(w,h);t.width=t.height=180;t.getContext("2d").drawImage(it.im,(w-s)/2,(h*.45-s/2)<0?0:Math.min(h-s,h*.45-s/2),s,s,0,0,180,180);TH[key]=photoLook(t,L[0],180)}cv.getContext("2d").drawImage(TH[key],0,0,180,180)}
   b.appendChild(cv);b.appendChild(document.createTextNode(L[1]));b.onclick=function(){P.look=L[0];thumbs();draw()};host.appendChild(b)})}
+var CMP=false;(function(){var b=$("pcmp");function on(e){e.preventDefault();CMP=true;draw(true)}function off(){if(!CMP)return;CMP=false;draw(true)}b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off)})();
 function strip(){var s=$("pstrip");s.innerHTML="";if(P.list.length<2){$("p-dlall").hidden=true;return}$("p-dlall").hidden=false;P.list.forEach(function(it,i){var im=document.createElement("img");im.src=it.url;im.className=i==P.i?"on":"";im.onclick=function(){P.i=i;strip();thumbs();draw()};s.appendChild(im)})}
-$("pfile").onchange=function(){var fs=[].slice.call(this.files||[]);if(!fs.length)return;var n=0;fs.forEach(function(f){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){P.list.push({im:im,url:u,name:f.name.replace(/\.[^.]+$/,"")});if(++n==fs.length){P.i=P.list.length-fs.length;strip();thumbs();draw()}};im.src=u})};
+$("pfile").onchange=function(){var fs=[].slice.call(this.files||[]);if(!fs.length)return;var n=0;fs.forEach(function(f){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){P.list.push({im:im,url:u,name:f.name.replace(/\.[^.]+$/,"")});if(++n==fs.length){P.i=P.list.length-fs.length;TH={};strip();thumbs();draw();try{document.querySelector(".pcol").scrollIntoView({behavior:"smooth"})}catch(e){}}};im.src=u})};
 [["str","str"],["bri","bri"],["con","con"],["sat","sat"],["wrm","wrm"],["grn","grn"],["vig","vig"],["ox","ox"],["oy","oy"]].forEach(function(a){var el=$("p-"+a[0]);el.oninput=function(){P[a[1]]=+el.value;var sp=el.parentNode.lastElementChild;if(sp&&sp.tagName=="SPAN")sp.textContent=el.value;draw()}});
 $("p-reset").onclick=function(){["bri","con","sat","wrm","grn","vig"].forEach(function(k){P[k]=0;$("p-"+k).value=0;$("p-"+k).parentNode.lastElementChild.textContent=""});draw()};
 chips("pfmt","f",function(v){P.fmt=v;P.ox=P.oy=0;$("p-ox").value=0;$("p-oy").value=0;draw()});chips("pframe","r",function(v){P.frame=v;draw()});chips("ptpos","p",function(v){P.tpos=v;draw()});
@@ -146,9 +196,10 @@ $("p-t1").oninput=function(){P.t1=this.value;draw()};$("p-t2").oninput=function(
 function save(c,name){return new Promise(function(res){c.toBlob(function(b){var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name+".jpg";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove();res()},800)},"image/jpeg",.93)})}
 $("p-dl").onclick=async function(){var it=P.list[P.i];if(!it){toast("ใส่รูปก่อน");return}toast("กำลังสร้างไฟล์เต็มความละเอียด…");await new Promise(function(r){setTimeout(r,30)});await save(render(it.im,4096),it.name+"-"+P.look);toast("ดาวน์โหลดแล้ว")};
 $("p-dlall").onclick=async function(){for(var i=0;i<P.list.length;i++){toast("กำลังทำรูป "+(i+1)+"/"+P.list.length);await new Promise(function(r){setTimeout(r,30)});await save(render(P.list[i].im,4096),P.list[i].name+"-"+P.look)}toast("ดาวน์โหลดครบ "+P.list.length+" รูป")};
-thumbs();
+cats();thumbs();
 /* ---------- วิดีโอ: ฟิลเตอร์แบบเร็ว (เล่นสดได้) ---------- */
 var VL={none:["none",""],flash:["brightness(1.12) contrast(1.3) saturate(1.05)","flash"],disp:["brightness(1.08) contrast(1.22) sepia(.25) saturate(1.1) hue-rotate(-8deg)","disp"],portra:["contrast(.92) saturate(1.08) sepia(.18) brightness(1.04)","warm"],fuji:["contrast(.92) saturate(.92) hue-rotate(8deg) brightness(1.03)","cool"],bw:["grayscale(1) contrast(1.45) brightness(.95)","grain"],red:["grayscale(1) contrast(1.7)","red"],ccd:["saturate(1.45) contrast(1.15) brightness(1.08) hue-rotate(-4deg)","ccd"],vhs:["saturate(.85) contrast(.95) blur(.6px)","vhs"]};
+Object.keys(FILM).forEach(function(k){var F=FILM[k],md=F.md||[0,0,0];VL[k]=[(F.bw?"grayscale(1) ":"")+"contrast("+(F.con||1).toFixed(2)+") saturate("+(F.sat==null?1:F.sat).toFixed(2)+") brightness("+(1+(F.lift||0)/500+(F.flash||0)*.08).toFixed(2)+")","film:"+k]});
 var V={v:null,look:"none",fmt:"orig",t1:"",t2:"",rec:false};
 (function(){var h=$("vlooks");PLOOKS.forEach(function(L){if(!VL[L[0]])return;var b=document.createElement("button");b.innerHTML=L[1];b.className=L[0]=="none"?"on":"";b.onclick=function(){h.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x==b)});V.look=L[0];vdraw()};h.appendChild(b)})})();
 chips("vfmt","f",function(v){V.fmt=v;vsize();vdraw()});$("v-t1").oninput=function(){V.t1=this.value;vdraw()};$("v-t2").oninput=function(){V.t2=this.value;vdraw()};
@@ -156,11 +207,15 @@ function vsize(){var v=V.v;if(!v)return;var w=v.videoWidth,h=v.videoHeight,cr=cr
 function vdraw(){var v=V.v,c=$("vc");if(!v||!V.cr)return;var x=c.getContext("2d"),W=c.width,H=c.height,L=VL[V.look]||VL.none,M=Math.max(W,H),cr=V.cr;x.save();try{x.filter=L[0]}catch(e){}x.drawImage(v,cr.x,cr.y,cr.w,cr.h,0,0,W,H);x.restore();var kd=L[1];
  if(kd=="flash"||kd=="disp"||kd=="ccd"){var g=x.createRadialGradient(W/2,H*.42,0,W/2,H*.42,M*.55);g.addColorStop(0,"rgba(255,255,255,.22)");g.addColorStop(.5,"rgba(255,255,255,0)");g.addColorStop(1,"rgba(0,0,0,.55)");x.fillStyle=g;x.fillRect(0,0,W,H)}
  if(kd=="disp"){x.globalCompositeOperation="screen";var lk=x.createRadialGradient(W,H*.1,0,W,H*.1,M*.5);lk.addColorStop(0,"rgba(255,120,30,.45)");lk.addColorStop(1,"rgba(255,120,30,0)");x.fillStyle=lk;x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
+ if(/^film:/.test(kd)){var F=FILM[kd.slice(5)],md=F.md||[0,0,0],sh=F.sh||[0,0,0];x.globalCompositeOperation="soft-light";x.fillStyle="rgb("+(128+md[0]*4)+","+(128+md[1]*4)+","+(128+md[2]*4)+")";x.fillRect(0,0,W,H);x.globalCompositeOperation="lighten";x.fillStyle="rgb("+Math.max(0,(F.lift||0)+sh[0])+","+Math.max(0,(F.lift||0)+sh[1])+","+Math.max(0,(F.lift||0)+sh[2])+")";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over";
+  if(F.flash){var g3=x.createRadialGradient(W/2,H*.42,0,W/2,H*.42,M*.6);g3.addColorStop(0,"rgba(255,255,255,"+(.2*F.flash)+")");g3.addColorStop(.45,"rgba(255,255,255,0)");g3.addColorStop(1,"rgba(0,0,0,"+(.55*F.flash)+")");x.fillStyle=g3;x.fillRect(0,0,W,H)}
+  if(F.grain){x.save();x.globalAlpha=F.grain*.8;x.globalCompositeOperation="overlay";x.fillStyle=x.createPattern(noise(),"repeat");x.translate(Math.random()*256,Math.random()*256);x.fillRect(-256,-256,W+512,H+512);x.restore()}
+  if(F.vig){var g4=x.createRadialGradient(W/2,H/2,M*.28,W/2,H/2,M*.78);g4.addColorStop(0,"rgba(0,0,0,0)");g4.addColorStop(1,"rgba(0,0,0,"+F.vig+")");x.fillStyle=g4;x.fillRect(0,0,W,H)}}
  if(kd=="warm"){x.globalCompositeOperation="soft-light";x.fillStyle="rgba(255,150,80,.25)";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
  if(kd=="cool"){x.globalCompositeOperation="soft-light";x.fillStyle="rgba(40,140,130,.3)";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
  if(kd=="red"){x.globalCompositeOperation="multiply";x.fillStyle="#ff2a2a";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
  if(kd=="vhs"){x.fillStyle="rgba(0,0,0,.18)";for(var y=0;y<H;y+=4)x.fillRect(0,y,W,1);x.globalCompositeOperation="screen";x.globalAlpha=.25;x.drawImage(c,M*.004,0);x.globalAlpha=1;x.globalCompositeOperation="source-over"}
- if(kd&&kd!="warm"&&kd!="cool"){x.save();x.globalAlpha=kd=="grain"||kd=="red"?.28:.16;x.globalCompositeOperation="overlay";x.fillStyle=x.createPattern(noise(),"repeat");x.translate(Math.random()*256,Math.random()*256);x.fillRect(-256,-256,W+512,H+512);x.restore()}
+ if(kd&&kd!="warm"&&kd!="cool"&&!/^film:/.test(kd)){x.save();x.globalAlpha=kd=="grain"||kd=="red"?.28:.16;x.globalCompositeOperation="overlay";x.fillStyle=x.createPattern(noise(),"repeat");x.translate(Math.random()*256,Math.random()*256);x.fillRect(-256,-256,W+512,H+512);x.restore()}
  if(kd=="disp"||kd=="ccd"||kd=="vhs"){var fs=Math.round(M*.032);x.font="700 "+fs+"px 'Courier New',monospace";x.textAlign="right";x.fillStyle=kd=="disp"?"rgba(255,140,40,.92)":"rgba(255,255,255,.9)";var d=new Date();x.fillText(kd=="vhs"?"PLAY ▶":kd=="ccd"?d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2):plStamp(),W-M*.04,kd=="vhs"?M*.07:H-M*.04)}
  texts(x,W,H,V.t1,V.t2,"bl")}
 $("vfile").onchange=function(){var f=this.files[0];if(!f)return;if(V.v){V.v.pause();URL.revokeObjectURL(V.v.src)}var v=document.createElement("video");v.playsInline=true;v.preload="auto";v.src=URL.createObjectURL(f);v.crossOrigin="anonymous";
