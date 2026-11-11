@@ -15,7 +15,7 @@ function textOf(r){if(r==null)return"";if(typeof r=="string")return r;var c=r.me
  if(Array.isArray(c))c=c.map(function(x){return x&&(x.text||"")||""}).join("");if(typeof c=="string")return c;try{return String(r)}catch(e){return""}}
 /* หน้าตาเหมือน sample ของ claude.ai: sample(messages,{onText}) → {text} */
 async function sample(msgs,opt){opt=opt||{};var p;try{p=await load()}catch(e){throw{code:"unavailable",message:"โหลดบริการ AI ฟรีไม่ได้ (เช็กเน็ต)"}}
- if(!signedIn()){if(!active()){upd(true);throw{code:"not_granted",message:"กด \"เปิดใช้ AI ฟรี\" ก่อน"}}try{await p.auth.signIn()}catch(e){upd(true);throw{code:"not_granted",message:"ยังไม่ได้ล็อกอิน Puter"}}upd()}
+ if(!signedIn()){/* ไม่เด้งหน้าสมัคร Puter เอง: ใช้คลังในแอปแทน จนกว่าผู้ใช้จะกดปุ่ม "เปิดใช้ AI ฟรี" เอง */upd(true);throw{code:"not_granted",message:"ใช้คลังในแอปแทน (AI ฟรีต้องกดปุ่ม เปิดใช้ AI ฟรี ก่อน)"}}
  var M=(msgs||[]).map(function(m){return{role:m.role||"user",content:typeof m.content=="string"?m.content:textOf({message:{content:m.content}})}});
  var r;try{r=await p.ai.chat(M)}catch(e){var m=String(e&&(e.message||e.error&&e.error.message||e)||"");throw{code:/limit|quota|credit|insufficient|funds/i.test(m)?"rate_limited":"error",message:m}}
  var t=textOf(r);if(typeof opt.onText=="function")try{opt.onText({text:t})}catch(e){}return{text:t}}
