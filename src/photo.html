@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>สตูดิโอภาพ & วิดีโอ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+Thai:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0709;--card:#151013;--line:#2a2125;--txt:#f4eef0;--mut:#a9989e;--hot:#ff3347}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 'Noto Sans Thai',system-ui,sans-serif}
+a{color:var(--hot)}button{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,7,9,.92);backdrop-filter:blur(10px);z-index:5}
+header h1{font:400 22px/1 Anton,'Noto Sans Thai',sans-serif;letter-spacing:.04em;margin:0;flex:1}header a{font-size:13px;color:var(--mut);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:6px 12px}
+.tabs{display:flex;gap:6px;padding:12px 16px 0}.tabs button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:700;cursor:pointer}.tabs button.on{background:var(--hot);border-color:var(--hot);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.h{font-weight:800;margin:0 0 8px}.mut{color:var(--mut);font-size:13px}
+.stage{background:#000;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:260px;position:sticky;top:76px}
+.stage canvas{max-width:100%;max-height:72vh;display:block}
+.drop{border:1.5px dashed #4a3a40;border-radius:14px;padding:22px;text-align:center;cursor:pointer;display:block}
+.drop input{display:none}.drop b{display:block;font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chips button{border:1px solid var(--line);background:#1d161a;border-radius:10px;padding:7px 11px;cursor:pointer;font-size:13px;min-height:38px}
+.chips button.on{border-color:var(--hot);background:rgba(255,51,71,.16)}.chips small{display:block;color:var(--mut);font-size:11px}
+.looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}.looks button{background:#1d161a;border:2px solid transparent;border-radius:12px;padding:4px;cursor:pointer;text-align:center;font-size:12px}
+.looks button.on{border-color:var(--hot)}.looks canvas{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;background:#222}
+.sl{display:grid;grid-template-columns:96px 1fr 38px;align-items:center;gap:8px;margin:6px 0;font-size:13px}.sl input{width:100%;accent-color:var(--hot)}.sl span:last-child{text-align:right;color:var(--mut)}
+.inp{width:100%;min-height:42px;border-radius:10px;border:1px solid var(--line);background:#0f0b0d;color:var(--txt);padding:0 12px;font:inherit;margin:4px 0}
+.cta{width:100%;min-height:48px;border-radius:12px;border:0;background:var(--hot);color:#fff;font-weight:800;cursor:pointer;margin-top:8px}.cta.alt{background:#241b1f;border:1px solid var(--line)}.cta:disabled{opacity:.5}
+.strip{display:flex;gap:6px;overflow-x:auto;margin-top:8px}.strip img{height:54px;border-radius:8px;border:2px solid transparent;cursor:pointer}.strip img.on{border-color:var(--hot)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:12px;font-weight:600;z-index:20;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1}
+[hidden]{display:none!important}
+</style></head><body>
+<header><h1>สตูดิโอภาพ & วิดีโอ</h1><a href="index.html" id="back">‹ กลับแอป</a></header>
+<div class="tabs"><button class="on" data-t="ph">รูปภาพ</button><button data-t="vd">วิดีโอ</button></div>
+<main>
+<section id="tab-ph"><div class="grid">
+ <div><div class="stage" id="pstage"><canvas id="pc"></canvas><p class="mut" id="pempty" style="padding:30px;text-align:center">ใส่รูปด้านขวา (เลือกได้หลายรูป แต่งพร้อมกันได้)</p></div><div class="strip" id="pstrip"></div></div>
+ <div>
+  <div class="card"><label class="drop"><b>+ ใส่รูป</b><span class="mut">ถ่ายจากมือถือได้ · เลือกหลายรูปได้ · รูปไม่ถูกส่งไปไหน</span><input type="file" id="pfile" accept="image/*" multiple></label></div>
+  <div class="card"><p class="h">ฟิลเตอร์แนวกล้องจริง / แนวแรปเปอร์</p><div class="looks" id="plooks"></div>
+   <div class="sl"><span>ความแรง</span><input type="range" id="p-str" min="0" max="100" value="100"><span id="v-str">100</span></div></div>
+  <div class="card"><p class="h">ปรับแต่ง</p>
+   <div class="sl"><span>สว่าง</span><input type="range" id="p-bri" min="-60" max="60" value="0"><span></span></div>
+   <div class="sl"><span>คอนทราสต์</span><input type="range" id="p-con" min="-50" max="60" value="0"><span></span></div>
+   <div class="sl"><span>สีสด</span><input type="range" id="p-sat" min="-100" max="80" value="0"><span></span></div>
+   <div class="sl"><span>อุ่น/เย็น</span><input type="range" id="p-wrm" min="-50" max="50" value="0"><span></span></div>
+   <div class="sl"><span>เกรนฟิล์ม</span><input type="range" id="p-grn" min="0" max="60" value="0"><span></span></div>
+   <div class="sl"><span>ขอบมืด</span><input type="range" id="p-vig" min="0" max="90" value="0"><span></span></div>
+   <button class="cta alt" id="p-reset" style="min-height:38px;font-size:13px">รีเซ็ตการปรับ</button></div>
+  <div class="card"><p class="h">ขนาด / ตัดภาพ</p><div class="chips" id="pfmt"><button data-f="orig" class="on">เดิม</button><button data-f="1:1">1:1<small>ปกเพลง</small></button><button data-f="4:5">4:5<small>โพสต์ IG</small></button><button data-f="9:16">9:16<small>สตอรี่/TikTok</small></button><button data-f="16:9">16:9<small>YouTube</small></button></div>
+   <div class="sl"><span>เลื่อนซ้าย-ขวา</span><input type="range" id="p-ox" min="-100" max="100" value="0"><span></span></div>
+   <div class="sl"><span>เลื่อนขึ้น-ลง</span><input type="range" id="p-oy" min="-100" max="100" value="0"><span></span></div></div>
+  <div class="card"><p class="h">กรอบ</p><div class="chips" id="pframe"><button data-r="none" class="on">ไม่มี</button><button data-r="film">ขอบฟิล์ม 35mm</button><button data-r="polar">โพลารอยด์</button><button data-r="cine">แถบดำหนัง</button><button data-r="white">ขอบขาวมินิมอล</button></div></div>
+  <div class="card"><p class="h">ตัวหนังสือบนรูป</p><input class="inp" id="p-t1" maxlength="40" placeholder="ข้อความใหญ่ เช่น ชื่อเพลง / OUT NOW"><input class="inp" id="p-t2" maxlength="40" placeholder="ข้อความเล็ก เช่น ชื่อศิลปิน">
+   <div class="chips" id="ptpos" style="margin-top:6px"><button data-p="bl" class="on">ล่างซ้าย</button><button data-p="bc">ล่างกลาง</button><button data-p="c">กลางจอ</button><button data-p="tl">บนซ้าย</button></div></div>
+  <button class="cta" id="p-dl">ดาวน์โหลดรูปนี้ (.jpg เต็มความละเอียด)</button>
+  <button class="cta alt" id="p-dlall" hidden>แต่งแบบเดียวกันทุกรูป แล้วดาวน์โหลดทั้งหมด</button>
+ </div></div></section>
+<section id="tab-vd" hidden><div class="grid">
+ <div><div class="stage"><canvas id="vc"></canvas><p class="mut" id="vempty" style="padding:30px;text-align:center">ใส่คลิปวิดีโอด้านขวา</p></div>
+  <div style="display:flex;gap:8px;margin-top:8px"><button class="cta alt" id="v-play" style="margin:0" disabled>▶ เล่น</button></div></div>
+ <div>
+  <div class="card"><label class="drop"><b>+ ใส่คลิปวิดีโอ</b><span class="mut">คลิปจากมือถือ · แต่งสีแล้วส่งออกพร้อมเสียงเดิม</span><input type="file" id="vfile" accept="video/*"></label></div>
+  <div class="card"><p class="h">ฟิลเตอร์วิดีโอ</p><div class="chips" id="vlooks"></div></div>
+  <div class="card"><p class="h">ขนาด</p><div class="chips" id="vfmt"><button data-f="orig" class="on">เดิม</button><button data-f="9:16">9:16<small>TikTok/Reels</small></button><button data-f="1:1">1:1</button><button data-f="4:5">4:5</button><button data-f="16:9">16:9</button></div></div>
+  <div class="card"><p class="h">ตัวหนังสือบนคลิป</p><input class="inp" id="v-t1" maxlength="40" placeholder="ข้อความใหญ่"><input class="inp" id="v-t2" maxlength="40" placeholder="ข้อความเล็ก"></div>
+  <button class="cta" id="v-rec" disabled>ส่งออกวิดีโอที่แต่งแล้ว</button>
+  <p class="mut" id="v-st" style="margin-top:8px">ส่งออกแบบเล่นจริง ใช้เวลาเท่าความยาวคลิป อย่าปิดหน้านี้ระหว่างส่งออก</p>
+ </div></div></section>
+</main><div class="toast" id="toast"></div>
+<script>
+(function(){"use strict";
+var $=function(i){return document.getElementById(i)};
+function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show")},2200)}
+/* ---------- แต่งรูปแนวกล้องจริง: แฟลช · ฟิล์ม · กล้องทิ้ง · ขาวดำเกรน · แดงเรจ · CCD Y2K · ฟิชอาย · VHS (ทำในเครื่อง ฟรี ไม่เปลี่ยนหน้า) ---------- */
+var PLOOKS=[["none","รูปเดิม",""],["flash","แฟลชตรง","สว่างกลางหน้า เงาแข็ง แบบปาปารัซซี่"],["disp","กล้องใช้แล้วทิ้ง","แฟลช อมเขียวเหลือง แสงรั่ว วันที่สีส้ม"],["portra","ฟิล์ม Portra","อุ่น ผิวสวย ดำซีดนิดๆ แสงเรือง"],["fuji","ฟิล์ม Fuji","เย็น เงาเขียวฟ้า ซีดๆ"],["bw","ขาวดำเกรนหนัก","คอนทราสต์จัด แบบปกแรปอเมริกา"],["red","แดงเรจ","โมโนแดง ดุ ถ่ายเอกสาร"],["ccd","กล้องดิจิตอล Y2K","แฟลช สีจัด ขอบสีเพี้ยน วันที่ดิจิตอล"],["fish","ฟิชอาย 90s","เลนส์ตาปลา ขอบดำวงกลม แบบ MV ยุค 90"],["vhs","VHS","เส้นสแกน สีเหลื่อม PLAY ▶"]];
+function plRnd(s){return function(){s=(s*16807)%2147483647;return(s-1)/2147483646}}
+function plStamp(){var d=new Date();return "'"+String(d.getFullYear()).slice(2)+" "+(d.getMonth()+1)+" "+d.getDate()}
+function photoLook(src,look,maxS){var w=src.naturalWidth||src.width,h=src.naturalHeight||src.height,k=Math.min(1,(maxS||2400)/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
+ var c=document.createElement("canvas");c.width=w;c.height=h;var x=c.getContext("2d");x.drawImage(src,0,0,w,h);if(!look||look=="none")return c;
+ var M=Math.max(w,h),R=plRnd(12345),cl=function(v){return v<0?0:v>255?255:v};
+ if(look=="fish"){var o=x.getImageData(0,0,w,h),n=x.createImageData(w,h),od=o.data,nd=n.data,cx=w/2,cy=h/2,rr=Math.min(w,h)/2;
+  for(var y=0;y<h;y++)for(var xx=0;xx<w;xx++){var dx=(xx-cx)/rr,dy=(y-cy)/rr,d=Math.sqrt(dx*dx+dy*dy),q=(y*w+xx)*4;if(d>1){nd[q+3]=255;continue}
+   var f=d<1e-6?1:Math.asin(Math.min(1,d))/(Math.PI/2)/d*1.0,sx=Math.round(cx+dx*f*rr*.92),sy=Math.round(cy+dy*f*rr*.92);if(sx<0||sy<0||sx>=w||sy>=h){nd[q+3]=255;continue}
+   var p=(sy*w+sx)*4;nd[q]=od[p];nd[q+1]=od[p+1];nd[q+2]=od[p+2];nd[q+3]=255}x.putImageData(n,0,0)}
+ var im=x.getImageData(0,0,w,h),D=im.data,i,r,g,b,L,cx2=w/2,cy2=h*.42;
+ for(i=0;i<D.length;i+=4){r=D[i];g=D[i+1];b=D[i+2];var px=(i>>2)%w,py=(i>>2)/w|0,dd=Math.hypot((px-cx2)/w,(py-cy2)/h);L=.299*r+.587*g+.114*b;
+  if(look=="flash"||look=="disp"||look=="ccd"){var fl=Math.max(0,1-dd*1.9)*(look=="disp"?55:70);r+=fl;g+=fl;b+=fl*(look=="ccd"?1.15:.95);
+   r=(r-128)*1.28+128;g=(g-128)*1.28+128;b=(b-128)*1.25+128;var fall=Math.min(1,Math.max(0,(dd-.35)*1.6));r*=1-fall*.75;g*=1-fall*.75;b*=1-fall*.72;
+   if(look=="disp"){r=r*.96+10;g=g*1.02+8;b=b*.85}if(look=="ccd"){L=.299*r+.587*g+.114*b;r=L+(r-L)*1.35-6;g=L+(g-L)*1.35;b=L+(b-L)*1.35+14}}
+  else if(look=="portra"){r=r*1.04+10;g=g*1.0+4;b=b*.9;r=24+r*.88;g=20+g*.88;b=22+b*.86;var hl=Math.max(0,L-200)/55;r+=hl*20}
+  else if(look=="fuji"){var sh=Math.max(0,1-L/120);r=r*.94-sh*6;g=g*1.0+sh*10;b=b*1.02+sh*14;r=18+r*.9;g=20+g*.9;b=22+b*.9;var hi=Math.max(0,L-170)/85;r+=hi*8;b+=hi*6}
+  else if(look=="bw"){L=(L-128)*1.45+132;L=L<30?L*.6:L;r=g=b=L;var v2=Math.min(1,Math.max(0,(dd-.3)*1.5));r=g=b=L*(1-v2*.6)}
+  else if(look=="red"){L=cl((L-128)*1.6+128);L=255*Math.pow(L/255,1.15);r=L*1.05+18;g=L*.16;b=L*.18}
+  else if(look=="fish"){r=(r-128)*1.12+128+6;g=(g-128)*1.12+128;b=(b-128)*1.12+128+4}
+  else if(look=="vhs"){r=(r-128)*.92+130+6;g=(g-128)*.9+128;b=(b-128)*.95+132;if((py&3)==0){r*=.82;g*=.82;b*=.82}}
+  var gr=(look=="bw"||look=="red"?42:look=="disp"?30:look=="vhs"?18:look=="ccd"?14:22)*(R()-.5);D[i]=cl(r+gr);D[i+1]=cl(g+gr);D[i+2]=cl(b+gr)}
+ x.putImageData(im,0,0);
+ if(look=="ccd"||look=="vhs"){var sh2=Math.max(1,Math.round(M*(look=="vhs"?.005:.0025)));function tint(col){var t=document.createElement("canvas");t.width=w;t.height=h;var q=t.getContext("2d");q.drawImage(c,0,0);q.globalCompositeOperation="multiply";q.fillStyle=col;q.fillRect(0,0,w,h);q.globalCompositeOperation="destination-in";q.drawImage(c,0,0);return t}
+  var tr=tint("#f00"),tc=tint("#0ff");x.clearRect(0,0,w,h);x.drawImage(tc,-sh2,0);x.globalCompositeOperation="lighter";x.drawImage(tr,sh2,0);x.globalCompositeOperation="source-over"}
+ if(look=="portra"||look=="disp"){x.globalCompositeOperation="screen";var lk=x.createRadialGradient(look=="disp"?w*.98:w*.05,h*.1,0,look=="disp"?w*.98:w*.05,h*.1,M*.55);lk.addColorStop(0,look=="disp"?"rgba(255,120,30,.55)":"rgba(255,90,40,.18)");lk.addColorStop(1,"rgba(255,90,40,0)");x.fillStyle=lk;x.fillRect(0,0,w,h);x.globalCompositeOperation="source-over"}
+ if(look=="fish"){x.save();x.globalCompositeOperation="destination-in";x.beginPath();x.arc(w/2,h/2,Math.min(w,h)/2,0,7);x.fill();x.restore();x.globalCompositeOperation="destination-over";x.fillStyle="#000";x.fillRect(0,0,w,h);x.globalCompositeOperation="source-over"}
+ if(look=="disp"||look=="ccd"){var fs=Math.round(M*.035);x.font=(look=="ccd"?"600 ":"700 ")+fs+"px 'Courier New',monospace";x.textAlign="right";x.fillStyle=look=="ccd"?"rgba(255,255,255,.9)":"rgba(255,140,40,.92)";x.shadowColor=look=="ccd"?"rgba(0,0,0,.6)":"rgba(255,90,0,.8)";x.shadowBlur=fs*.3;
+  var d=new Date();x.fillText(look=="ccd"?(d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)):plStamp(),w-M*.04,h-M*.04);x.shadowBlur=0}
+ if(look=="vhs"){var fs2=Math.round(M*.04);x.font="700 "+fs2+"px 'Courier New',monospace";x.fillStyle="rgba(255,255,255,.88)";x.textAlign="left";x.fillText("PLAY ▶",M*.05,M*.08);x.textAlign="right";x.fillText("SP 0:00:"+("0"+(new Date().getSeconds())).slice(-2),w-M*.05,h-M*.05);
+  for(var s2=0;s2<3;s2++){var yy=R()*h;x.drawImage(c,0,yy,w,M*.01,(R()-.5)*M*.03,yy,w,M*.01)}}
+ return c}
+
+
+document.querySelectorAll(".tabs button").forEach(function(b){b.onclick=function(){document.querySelectorAll(".tabs button").forEach(function(x){x.classList.toggle("on",x==b)});$("tab-ph").hidden=b.dataset.t!="ph";$("tab-vd").hidden=b.dataset.t!="vd";if(b.dataset.t!="vd"&&V.v)V.v.pause()}});
+try{if(/claude\.ai|claudeusercontent/.test(location.hostname))$("back").hidden=true}catch(e){}
+function chips(id,attr,cb){var host=$(id);host.querySelectorAll("button").forEach(function(b){b.onclick=function(){host.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x==b)});cb(b.dataset[attr])}})}
+function ratio(f,w,h){if(f=="orig")return w/h;var p=f.split(":");return +p[0]/+p[1]}
+function cropRect(w,h,f,ox,oy){var r=ratio(f,w,h),cw=w,ch=h;if(w/h>r)cw=h*r;else ch=w/r;return{x:(w-cw)/2*(1+ox),y:(h-ch)/2*(1+oy),w:cw,h:ch}}
+/* ---------- รูปภาพ ---------- */
+var P={list:[],i:0,look:"none",str:100,bri:0,con:0,sat:0,wrm:0,grn:0,vig:0,fmt:"orig",ox:0,oy:0,frame:"none",t1:"",t2:"",tpos:"bl"},looked={};
+function adjust(c){if(!(P.bri||P.con||P.sat||P.wrm))return;var x=c.getContext("2d"),im=x.getImageData(0,0,c.width,c.height),d=im.data,cf=(100+P.con)/100,sf=(100+P.sat)/100,i,r,g,b,L;
+ for(i=0;i<d.length;i+=4){r=d[i]+P.bri+P.wrm*.6;g=d[i+1]+P.bri;b=d[i+2]+P.bri-P.wrm*.6;r=(r-128)*cf+128;g=(g-128)*cf+128;b=(b-128)*cf+128;L=.299*r+.587*g+.114*b;r=L+(r-L)*sf;g=L+(g-L)*sf;b=L+(b-L)*sf;d[i]=r;d[i+1]=g;d[i+2]=b}x.putImageData(im,0,0)}
+var NT=null;function noise(){if(NT)return NT;NT=document.createElement("canvas");NT.width=NT.height=256;var x=NT.getContext("2d"),im=x.createImageData(256,256);for(var i=0;i<im.data.length;i+=4){var v=Math.random()*255;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}x.putImageData(im,0,0);return NT}
+function finish(x,W,H,grn,vig){if(grn){x.save();x.globalAlpha=grn/100;x.globalCompositeOperation="overlay";x.fillStyle=x.createPattern(noise(),"repeat");x.fillRect(0,0,W,H);x.restore()}
+ if(vig){var M=Math.max(W,H),g=x.createRadialGradient(W/2,H/2,M*.25,W/2,H/2,M*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+(vig/100)+")");x.fillStyle=g;x.fillRect(0,0,W,H)}}
+function texts(x,W,H,t1,t2,pos){if(!t1&&!t2)return;var M=Math.min(W,H),s1=M*.11,s2=M*.034,pad=M*.06;x.save();x.textBaseline="alphabetic";x.shadowColor="rgba(0,0,0,.55)";x.shadowBlur=M*.02;
+ x.font="400 "+s1+"px Anton,'Noto Sans Thai',sans-serif";while(t1&&x.measureText(t1.toUpperCase()).width>W-pad*2&&s1>M*.04){s1*=.92;x.font="400 "+s1+"px Anton,'Noto Sans Thai',sans-serif"}
+ var al=pos=="bc"||pos=="c"?"center":"left",X=al=="center"?W/2:pad,Y=pos=="tl"?pad+s1:pos=="c"?H/2+s1*.35:H-pad-(t2?s2*1.6:0);x.textAlign=al;x.fillStyle="#fff";if(t1)x.fillText(t1.toUpperCase(),X,Y);
+ if(t2){x.font="600 "+s2+"px 'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.88)";x.fillText(t2.toUpperCase().split("").join(" "),X,pos=="tl"?Y+s2*1.8:Y+s2*1.7)}x.restore()}
+function frameIt(src,kind){if(kind=="none")return src;var w=src.width,h=src.height,M=Math.max(w,h),c=document.createElement("canvas"),x;
+ if(kind=="polar"){var b=Math.round(M*.05);c.width=w+b*2;c.height=h+b*2+Math.round(M*.16);x=c.getContext("2d");x.fillStyle="#f4f1ea";x.fillRect(0,0,c.width,c.height);x.drawImage(src,b,b);return c}
+ if(kind=="white"){var b2=Math.round(M*.04);c.width=w+b2*2;c.height=h+b2*2;x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(src,b2,b2);return c}
+ if(kind=="cine"){c.width=w;c.height=h;x=c.getContext("2d");x.drawImage(src,0,0);x.fillStyle="#000";var bh=h*.11;x.fillRect(0,0,w,bh);x.fillRect(0,h-bh,w,bh);return c}
+ var fb=Math.round(Math.min(w,h)*.09);c.width=w+fb*2;c.height=h+fb*2;x=c.getContext("2d");x.fillStyle="#0c0a08";x.fillRect(0,0,c.width,c.height);x.drawImage(src,fb,fb);
+ var hw=fb*.42,hh=fb*.3,step=fb*.75;x.fillStyle="#e9e2d0";for(var px=fb*.4;px<c.width-hw;px+=step){x.beginPath();x.roundRect?x.roundRect(px,fb*.32,hw,hh,hh*.25):x.rect(px,fb*.32,hw,hh);x.fill();x.beginPath();x.roundRect?x.roundRect(px,c.height-fb*.32-hh,hw,hh,hh*.25):x.rect(px,c.height-fb*.32-hh,hw,hh);x.fill()}
+ x.fillStyle="rgba(255,170,60,.85)";x.font="700 "+Math.round(fb*.2)+"px 'Courier New',monospace";x.fillText("SNS 400  ▸ 24",fb*1.2,fb*.92);x.fillText("▸ 24A",c.width-fb*3,c.height-fb*.66);return c}
+function render(src,maxS){var w=src.naturalWidth||src.width,h=src.naturalHeight||src.height,cr=cropRect(w,h,P.fmt,P.ox/100,P.oy/100),k=Math.min(1,maxS/Math.max(cr.w,cr.h)),W=Math.round(cr.w*k),H=Math.round(cr.h*k);
+ var base=document.createElement("canvas");base.width=W;base.height=H;base.getContext("2d").drawImage(src,cr.x,cr.y,cr.w,cr.h,0,0,W,H);
+ var c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d");x.drawImage(base,0,0);
+ if(P.look!="none"){var L=photoLook(base,P.look,Math.max(W,H));x.globalAlpha=P.str/100;x.drawImage(L,0,0,W,H);x.globalAlpha=1}
+ adjust(c);finish(x,W,H,P.grn,P.vig);var out=frameIt(c,P.frame);texts(out.getContext("2d"),out.width,out.height,P.t1,P.t2,P.tpos);return out}
+var rT=0;function draw(){clearTimeout(rT);rT=setTimeout(function(){var it=P.list[P.i];$("pempty").hidden=!!it;if(!it)return;var o=render(it.im,1100),pc=$("pc");pc.width=o.width;pc.height=o.height;pc.getContext("2d").drawImage(o,0,0)},40)}
+function thumbs(){var host=$("plooks"),it=P.list[P.i];host.innerHTML="";PLOOKS.forEach(function(L){var b=document.createElement("button"),cv=document.createElement("canvas");b.className=P.look==L[0]?"on":"";b.title=L[2];
+  if(it){var t=document.createElement("canvas"),w=it.im.naturalWidth,h=it.im.naturalHeight,s=Math.min(w,h);t.width=t.height=180;t.getContext("2d").drawImage(it.im,(w-s)/2,(h-s)/2,s,s,0,0,180,180);var o=photoLook(t,L[0],180);cv.width=cv.height=180;cv.getContext("2d").drawImage(o,0,0,180,180)}
+  b.appendChild(cv);b.appendChild(document.createTextNode(L[1]));b.onclick=function(){P.look=L[0];thumbs();draw()};host.appendChild(b)})}
+function strip(){var s=$("pstrip");s.innerHTML="";if(P.list.length<2){$("p-dlall").hidden=true;return}$("p-dlall").hidden=false;P.list.forEach(function(it,i){var im=document.createElement("img");im.src=it.url;im.className=i==P.i?"on":"";im.onclick=function(){P.i=i;strip();thumbs();draw()};s.appendChild(im)})}
+$("pfile").onchange=function(){var fs=[].slice.call(this.files||[]);if(!fs.length)return;var n=0;fs.forEach(function(f){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){P.list.push({im:im,url:u,name:f.name.replace(/\.[^.]+$/,"")});if(++n==fs.length){P.i=P.list.length-fs.length;strip();thumbs();draw()}};im.src=u})};
+[["str","str"],["bri","bri"],["con","con"],["sat","sat"],["wrm","wrm"],["grn","grn"],["vig","vig"],["ox","ox"],["oy","oy"]].forEach(function(a){var el=$("p-"+a[0]);el.oninput=function(){P[a[1]]=+el.value;var sp=el.parentNode.lastElementChild;if(sp&&sp.tagName=="SPAN")sp.textContent=el.value;draw()}});
+$("p-reset").onclick=function(){["bri","con","sat","wrm","grn","vig"].forEach(function(k){P[k]=0;$("p-"+k).value=0;$("p-"+k).parentNode.lastElementChild.textContent=""});draw()};
+chips("pfmt","f",function(v){P.fmt=v;P.ox=P.oy=0;$("p-ox").value=0;$("p-oy").value=0;draw()});chips("pframe","r",function(v){P.frame=v;draw()});chips("ptpos","p",function(v){P.tpos=v;draw()});
+$("p-t1").oninput=function(){P.t1=this.value;draw()};$("p-t2").oninput=function(){P.t2=this.value;draw()};
+function save(c,name){return new Promise(function(res){c.toBlob(function(b){var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name+".jpg";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove();res()},800)},"image/jpeg",.93)})}
+$("p-dl").onclick=async function(){var it=P.list[P.i];if(!it){toast("ใส่รูปก่อน");return}toast("กำลังสร้างไฟล์เต็มความละเอียด…");await new Promise(function(r){setTimeout(r,30)});await save(render(it.im,4096),it.name+"-"+P.look);toast("ดาวน์โหลดแล้ว")};
+$("p-dlall").onclick=async function(){for(var i=0;i<P.list.length;i++){toast("กำลังทำรูป "+(i+1)+"/"+P.list.length);await new Promise(function(r){setTimeout(r,30)});await save(render(P.list[i].im,4096),P.list[i].name+"-"+P.look)}toast("ดาวน์โหลดครบ "+P.list.length+" รูป")};
+thumbs();
+/* ---------- วิดีโอ: ฟิลเตอร์แบบเร็ว (เล่นสดได้) ---------- */
+var VL={none:["none",""],flash:["brightness(1.12) contrast(1.3) saturate(1.05)","flash"],disp:["brightness(1.08) contrast(1.22) sepia(.25) saturate(1.1) hue-rotate(-8deg)","disp"],portra:["contrast(.92) saturate(1.08) sepia(.18) brightness(1.04)","warm"],fuji:["contrast(.92) saturate(.92) hue-rotate(8deg) brightness(1.03)","cool"],bw:["grayscale(1) contrast(1.45) brightness(.95)","grain"],red:["grayscale(1) contrast(1.7)","red"],ccd:["saturate(1.45) contrast(1.15) brightness(1.08) hue-rotate(-4deg)","ccd"],vhs:["saturate(.85) contrast(.95) blur(.6px)","vhs"]};
+var V={v:null,look:"none",fmt:"orig",t1:"",t2:"",rec:false};
+(function(){var h=$("vlooks");PLOOKS.forEach(function(L){if(!VL[L[0]])return;var b=document.createElement("button");b.innerHTML=L[1];b.className=L[0]=="none"?"on":"";b.onclick=function(){h.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x==b)});V.look=L[0];vdraw()};h.appendChild(b)})})();
+chips("vfmt","f",function(v){V.fmt=v;vsize();vdraw()});$("v-t1").oninput=function(){V.t1=this.value;vdraw()};$("v-t2").oninput=function(){V.t2=this.value;vdraw()};
+function vsize(){var v=V.v;if(!v)return;var w=v.videoWidth,h=v.videoHeight,cr=cropRect(w,h,V.fmt,0,0),k=Math.min(1,1280/Math.max(cr.w,cr.h)),c=$("vc");c.width=Math.round(cr.w*k/2)*2;c.height=Math.round(cr.h*k/2)*2;V.cr=cr}
+function vdraw(){var v=V.v,c=$("vc");if(!v||!V.cr)return;var x=c.getContext("2d"),W=c.width,H=c.height,L=VL[V.look]||VL.none,M=Math.max(W,H),cr=V.cr;x.save();try{x.filter=L[0]}catch(e){}x.drawImage(v,cr.x,cr.y,cr.w,cr.h,0,0,W,H);x.restore();var kd=L[1];
+ if(kd=="flash"||kd=="disp"||kd=="ccd"){var g=x.createRadialGradient(W/2,H*.42,0,W/2,H*.42,M*.55);g.addColorStop(0,"rgba(255,255,255,.22)");g.addColorStop(.5,"rgba(255,255,255,0)");g.addColorStop(1,"rgba(0,0,0,.55)");x.fillStyle=g;x.fillRect(0,0,W,H)}
+ if(kd=="disp"){x.globalCompositeOperation="screen";var lk=x.createRadialGradient(W,H*.1,0,W,H*.1,M*.5);lk.addColorStop(0,"rgba(255,120,30,.45)");lk.addColorStop(1,"rgba(255,120,30,0)");x.fillStyle=lk;x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
+ if(kd=="warm"){x.globalCompositeOperation="soft-light";x.fillStyle="rgba(255,150,80,.25)";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
+ if(kd=="cool"){x.globalCompositeOperation="soft-light";x.fillStyle="rgba(40,140,130,.3)";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
+ if(kd=="red"){x.globalCompositeOperation="multiply";x.fillStyle="#ff2a2a";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over"}
+ if(kd=="vhs"){x.fillStyle="rgba(0,0,0,.18)";for(var y=0;y<H;y+=4)x.fillRect(0,y,W,1);x.globalCompositeOperation="screen";x.globalAlpha=.25;x.drawImage(c,M*.004,0);x.globalAlpha=1;x.globalCompositeOperation="source-over"}
+ if(kd&&kd!="warm"&&kd!="cool"){x.save();x.globalAlpha=kd=="grain"||kd=="red"?.28:.16;x.globalCompositeOperation="overlay";x.fillStyle=x.createPattern(noise(),"repeat");x.translate(Math.random()*256,Math.random()*256);x.fillRect(-256,-256,W+512,H+512);x.restore()}
+ if(kd=="disp"||kd=="ccd"||kd=="vhs"){var fs=Math.round(M*.032);x.font="700 "+fs+"px 'Courier New',monospace";x.textAlign="right";x.fillStyle=kd=="disp"?"rgba(255,140,40,.92)":"rgba(255,255,255,.9)";var d=new Date();x.fillText(kd=="vhs"?"PLAY ▶":kd=="ccd"?d.getFullYear()+"/"+("0"+(d.getMonth()+1)).slice(-2)+"/"+("0"+d.getDate()).slice(-2):plStamp(),W-M*.04,kd=="vhs"?M*.07:H-M*.04)}
+ texts(x,W,H,V.t1,V.t2,"bl")}
+$("vfile").onchange=function(){var f=this.files[0];if(!f)return;if(V.v){V.v.pause();URL.revokeObjectURL(V.v.src)}var v=document.createElement("video");v.playsInline=true;v.preload="auto";v.src=URL.createObjectURL(f);v.crossOrigin="anonymous";
+ v.onloadedmetadata=function(){V.v=v;V.name=f.name.replace(/\.[^.]+$/,"");$("vempty").hidden=true;vsize();v.currentTime=Math.min(.5,v.duration/2);$("v-play").disabled=false;$("v-rec").disabled=false};v.onseeked=function(){vdraw()};
+ (function loop(){if(V.v===v||!V.v){if(!v.paused)vdraw();requestAnimationFrame(loop)}})()};
+$("v-play").onclick=function(){var v=V.v;if(!v)return;if(v.paused){v.play();this.textContent="❚❚ หยุด"}else{v.pause();this.textContent="▶ เล่น"}};
+function pickMime(){var L=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];for(var i=0;i<L.length;i++)if(window.MediaRecorder&&MediaRecorder.isTypeSupported(L[i]))return L[i];return ""}
+$("v-rec").onclick=async function(){var v=V.v;if(!v||V.rec)return;if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){toast("เบราว์เซอร์นี้ส่งออกวิดีโอไม่ได้ ใช้ Chrome รุ่นใหม่");return}
+ var b=this;V.rec=true;b.disabled=true;v.pause();v.currentTime=0;await new Promise(function(r){v.onseeked=function(){v.onseeked=function(){vdraw()};r()}});
+ var st=$("vc").captureStream(30);try{if(!V.ac){V.ac=new (window.AudioContext||window.webkitAudioContext)();V.src=V.ac.createMediaElementSource(v);V.dst=V.ac.createMediaStreamDestination();V.src.connect(V.dst);V.src.connect(V.ac.destination)}await V.ac.resume();V.dst.stream.getAudioTracks().forEach(function(t){st.addTrack(t)})}catch(e){}
+ var mime=pickMime(),mr=new MediaRecorder(st,mime?{mimeType:mime,videoBitsPerSecond:8e6}:{}),ch=[];mr.ondataavailable=function(e){if(e.data.size)ch.push(e.data)};mr.start(500);await v.play();
+ var iv=setInterval(function(){$("v-st").textContent="กำลังส่งออก "+Math.round(v.currentTime/v.duration*100)+"% · อย่าปิดหน้านี้"},500);
+ await new Promise(function(r){v.onended=r});clearInterval(iv);mr.stop();await new Promise(function(r){mr.onstop=r});
+ var bl=new Blob(ch,{type:mime||"video/webm"}),u=URL.createObjectURL(bl),a=document.createElement("a");a.href=u;a.download=V.name+"-"+V.look+(/mp4/.test(mime)?".mp4":".webm");document.body.appendChild(a);a.click();
+ $("v-st").textContent="ส่งออกเสร็จแล้ว ("+Math.round(bl.size/1048576)+" MB)";V.rec=false;b.disabled=false};
+})();
+</script><script>/* บน claude.ai: บันทึกไฟล์ผ่านสิทธิ์ดาวน์โหลดของหน้า (ที่อื่นดาวน์โหลดตามปกติ) */(function(){var D=null;try{if(window.claude&&claude.use)claude.use("downloads").then(function(d){D=d}).catch(function(){})}catch(e){}
+var oc=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){var a=this;if(D&&a.download&&/^(blob:|data:)/.test(a.href)){var fn=a.download;fetch(a.href).then(function(r){return r.blob()}).then(function(b){return D.save({filename:fn,data:b})}).catch(function(){});return}return oc.call(this)}})()</script>
+</body></html>

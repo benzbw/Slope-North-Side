@@ -17,4 +17,6 @@ for f in ('icon-192.png','icon-512.png'): shutil.copy(APP+'/'+f,out+'/'+f)
 open(out+'/.nojekyll','w').write('')
 WR=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','write.html')
 if os.path.exists(WR): shutil.copy(WR,out+'/write.html')  # หน้าแต่งเพลง & หาบีต (ในแอปเดียวกัน)
+PH=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','photo.html')
+if os.path.exists(PH): shutil.copy(PH,out+'/photo.html')  # สตูดิโอภาพ & วิดีโอ
 print('web ok',len(z))
