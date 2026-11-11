@@ -185,6 +185,7 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
 .w.on.a1{animation-name:wsl}.w.on.a2{animation-name:wbl}
 .g.h .w.on{animation:wgl .38s linear forwards}
 .w.k.on{color:#fff;text-shadow:0 0 18px var(--hot),0 0 2px #000}
+.w.k.now{animation:pkf .55s ease-out}@keyframes pkf{0%{color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
 /* แบบนุ่มไหล: ค่อยๆ ลอยขึ้นจากเบลอ เรืองแสงแล้วนิ่ง ทุกคำเหมือนกันไม่สะดุด */
 .anim-soft .w.on,.anim-soft .w.on.a1,.anim-soft .w.on.a2{animation:wsoft .6s cubic-bezier(.22,.61,.36,1) forwards}
 .anim-soft .g.h .w.on,.anim-soft .g.h .w.on.a1,.anim-soft .g.h .w.on.a2{animation:wsofth .7s cubic-bezier(.22,.61,.36,1) forwards}
@@ -298,6 +299,11 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
    <input type="checkbox" id="skchk" hidden>
    <div class="h" style="margin-top:14px">ฉากหลังเคลื่อนไหว</div>
    <div class="chips" id="ambsel"><button data-m="auto">อัตโนมัติ<small>เลือกตามเนื้อเพลง</small></button><button data-m="rage">ดุดัน<small>ควันแดง ประกายไฟ เต้นตามกลอง</small></button><button data-m="fog">หลอน<small>หมอกซีดลอย</small></button><button data-m="city">เมืองกลางคืน<small>แสงไฟเบลอ</small></button><button data-m="off">ไม่ใส่</button></div>
+   <div class="h" style="margin-top:14px">คำเด่น (เน้นคำเด็ดอัตโนมัติ)</div>
+   <label class="tgl"><input type="checkbox" id="pkchk"><span>เน้นคำเด่นของเพลง: คำกระแทก ซูม แยกสี + คำยักษ์ประทับกลางจอ (เลือกจากชื่อเพลง ท่อนฮุค คำแรงๆ)</span></label>
+   <div id="pklist" class="chips" style="margin-top:6px"></div>
+   <div style="display:flex;gap:8px;margin-top:8px"><input id="pkadd" maxlength="30" placeholder="เพิ่มคำเด่นเอง เช่น ไร้ค่า" style="flex:1;min-width:0"><button id="pkaddb" type="button" style="border:1px solid var(--line,#333);background:rgba(255,255,255,.06);color:inherit;border-radius:10px;padding:0 14px;font:inherit;cursor:pointer">+ เพิ่ม</button></div>
+   <p class="mut" style="font-size:12px;margin:6px 0 0">แตะคำเพื่อปิด/เปิด · คำที่มี ★ จะขึ้นตัวยักษ์กลางจอด้วย</p>
    <label class="tgl"><input type="checkbox" id="lfxchk"><span>เอฟเฟกต์ตามเนื้อเพลง (รอยกระสุน ไฟลุก ทุบจอร้าว ผีหลอน กลิตช์ แถบอันตราย ควัน ฝน ฯลฯ ขึ้นตามคำที่ร้อง)</span></label>
    <label class="tgl"><input type="checkbox" id="litechk"><span>โหมดประหยัดเครื่อง (ลดเอฟเฟกต์ให้ลื่นขึ้น)</span></label>
    <div id="thg" class="thg"></div>
@@ -587,12 +593,41 @@ function beat(){if(an&&!a.paused){an.getByteFrequencyData(fd);var e=0,i;for(i=1;
  pulse*=.88;$("pl").style.opacity=pulse>.02?pulse*.8:0;st.style.transform=pulse>.02?"scale("+(1+pulse*.03)+")":""}
 
 var SEG=null;try{if(window.Intl&&Intl.Segmenter)SEG=new Intl.Segmenter("th",{granularity:"word"})}catch(e){}
+/* ---------- คำเด่น (punch words): เลือกอัตโนมัติทุกเพลง ---------- */
+var PK_ON=true,PKU={add:[],off:[]};try{PK_ON=localStorage.getItem("bwpk")!=="0";var _pu=JSON.parse(localStorage.getItem("bwkw")||"null");if(_pu)PKU={add:_pu.add||[],off:_pu.off||[]}}catch(e){}
+var PKSTOP=/^(กู|มึง|ฉัน|เธอ|เรา|ผม|คุณ|มัน|เขา|พวก|ที่|และ|ก็|จะ|ไม่|ได้|ให้|แล้ว|ว่า|มา|ไป|อยู่|เป็น|มี|กับ|ของ|ใน|นี้|นั้น|แต่|ยัง|เลย|นะ|ครับ|ค่ะ|คะ|อะ|อ่ะ|ละ|หรือ|ถ้า|เมื่อ|ตอน|แค่|ทุก|อีก|เอา|ทำ|คือ|เพราะ|เหมือน|ต้อง|อย่า|จาก|ถึง|กัน|ด้วย|เข้า|ออก|ขึ้น|ลง|นี่|โว้ย|วะ|เว้ย|ยู|เดอะ|ไอ้|อี|โคตร|มาก|ไหน|อะไร|ยังไง|ทำไม|แบบ|นั้นแหละ|เอง|ตัว|คน|อัน|เค้า|ตัวเอง|ใคร|really|never|ever|always|every|everything|something|nothing|know|want|need|feel|say|said|make|made|go|come|see|look|one|now|then|when|why|how|out|up|down|back|too|more|much|still|only|cause|cuz|bout|from|into|been|was|were|are|am|had|have|has|did|let|lets|let's|ya|ma|da|wit|tho|the|a|an|i|im|i'm|you|me|my|your|to|and|of|it|its|is|in|on|at|be|oh|ooh|ohh|yeah|yea|yeh|uh|uhh|la|na|hey|yo|baby|ay|ayy|woah|whoa|huh|we|us|our|they|them|he|she|his|her|that|this|so|but|just|like|got|get|do|don't|dont|for|with|what|all|no|yes|can|will|gonna|wanna)$/i;
+var PKSTRONG=/ไร้ค่า|เจ็บ|ตาย|เกลียด|โกหก|ทรยศ|หักหลัง|แหลก|พัง|ร้าว|เลือด|น้ำตา|บ้า|โง่|เหงา|ทิ้ง|ลืม|แพ้|ชนะ|รวย|จน|ปีศาจ|นรก|สวรรค์|ไฟ|ระเบิด|คำสาป|หัวใจ|ความรัก|รัก|curse|cursed|worthless|dead|die|kill|hate|lie|liar|fake|real|pain|blood|fire|crazy|money|devil|hell|heaven|broken|alone|savage|boss|king|queen|ghost|dangerous|shaky|hustle|grind|legend|rich|broke/i;
+function pkNorm(tx){return String(tx||"").toLowerCase().replace(/[\s"'“”‘’.,!?()（）\[\]{}:;…\-–—~*]+/g,"")}
+var PKC=null,PKK="";
+function pkData(){var key=LN.map(function(l){return l.t}).join("\n")+"|"+(STS.title||ENDC.title||"")+"|"+JSON.stringify(PKU)+"|"+PK_ON+"|"+T.join(",");if(PKC&&PKK==key)return PKC;
+ var cnt={},hookc={},endw={},disp={},toks=[],title=pkNorm(STS.title||ENDC.title||""),seg=function(t){if(SEG)return Array.from(SEG.segment(t)).map(function(x){return x.segment});return t.split(/\s+/)};
+ for(var i=0;i<N;i++){var ws=seg(LN[i].t).map(function(x){return x.replace(/[()（）]/g,"")}).filter(function(x){return/\S/.test(x)}),L=[];
+  ws.forEach(function(w,q){var n=pkNorm(w);if(!n)return;var th=/[\u0E00-\u0E7F]/.test(n);if((th&&n.length<2)||(!th&&n.length<3)||PKSTOP.test(n)||/^\d+$/.test(n))return;
+   cnt[n]=(cnt[n]||0)+1;if(LN[i].h)hookc[n]=(hookc[n]||0)+1;if(q>=ws.length-2)endw[n]=(endw[n]||0)+1;disp[n]=disp[n]||w.trim();L.push(n)});toks.push(L)}
+ var sc={};Object.keys(cnt).forEach(function(n){var th=/[\u0E00-\u0E7F]/.test(n),v=0;
+  if(title&&n.length>=2&&(title.indexOf(n)>=0&&n.length>=Math.min(3,title.length)))v+=6;
+  if(PKSTRONG.test(n))v+=4;if(hookc[n])v+=Math.min(4,hookc[n]*1.5);if(cnt[n]>=3)v+=Math.min(3,cnt[n]*.5);
+  if(!th&&n.length>=4)v+=2;if(endw[n])v+=1.5;if(th&&n.length>=4)v+=1;if(cnt[n]>8&&!hookc[n])v-=3;sc[n]=v});
+ /* วลี/คำหลายพยางค์ (เช่น ไร้ค่า ที่ตัวตัดคำแยกเป็น ไร้+ค่า): ชื่อเพลง + คำที่เพิ่มเอง จับจากข้อความทั้งบรรทัด */
+ var phr={},lowL=LN.map(function(l){return pkNorm(l.t)});
+ function addP(raw,v){var n=pkNorm(raw);if(!n||n.length<2)return;var c=0;lowL.forEach(function(L){if(L.indexOf(n)>=0)c++});if(!c&&v<99)return;phr[n]={v:v+Math.min(3,c*.5),d:String(raw).trim(),c:c}}
+ if(title&&title.length<=24)addP(STS.title||ENDC.title,14);PKU.add.forEach(function(a){addP(a,99)});
+ Object.keys(phr).forEach(function(n){if(phr[n].v>=99)Object.keys(sc).forEach(function(k){if(k!==n&&n.indexOf(k)>=0)delete sc[k]});var key="~"+n;sc[key]=phr[n].v;disp[key]=phr[n].d});
+ PKU.off.forEach(function(a){var n=pkNorm(a);delete sc[n];delete sc["~"+n]});
+ for(var i3=0;i3<N;i3++)Object.keys(phr).forEach(function(n){if(sc["~"+n]!=null&&lowL[i3].indexOf(n)>=0)toks[i3].unshift("~"+n)});
+ var cand=Object.keys(sc).filter(function(n){return sc[n]>=5}).sort(function(a,b){return sc[b]-sc[a]}),lim=Math.max(4,Math.min(10,Math.round(N/5)));
+ var pick=cand.slice(0,lim).concat(cand.slice(lim).filter(function(n){return sc[n]>=99})),P={};pick.forEach(function(n){P[n]=sc[n]});
+ /* ไม่ให้ถี่เกิน: บรรทัดละ 1 คำ คำเดิมห่าง 7 วิ ทุกคำห่างกัน 2.5 วิ */
+ var PL={},lastW={},lastAny=-99;if(PK_ON)for(var i2=0;i2<N;i2++){var best=null;(toks[i2]||[]).forEach(function(n){if(P[n]!=null&&(!best||P[n]>P[best]))best=n});if(!best)continue;var tt=T[i2]||0;
+  if(tt-lastAny<2.5&&P[best]<12)continue;if(lastW[best]!=null&&tt-lastW[best]<7&&P[best]<99)continue;PL[i2]={};PL[i2][best]=1;lastW[best]=tt;lastAny=tt}
+ PKK=key;PKC={P:P,PL:PL,list:pick.map(function(n){return{n:n.replace(/^~/,""),d:disp[n]||n.replace(/^~/,""),s:sc[n],top:sc[n]>=8,miss:n[0]=="~"&&phr[n.slice(1)]&&!phr[n.slice(1)].c}}),sc:sc};return PKC}
+function pkRefresh(){PKC=null;WC={};wg=-2;try{BDC={}}catch(e){}try{pkUI()}catch(e){}}
 var WC={};
 function wordsOf(i){if(WC[i])return WC[i];var t=LN[i].t,parts=[],off=0,m;
  if(SEG){Array.from(SEG.segment(t)).forEach(function(sg){var tx=sg.segment;if(/^\s+$/.test(tx)&&parts.length)parts[parts.length-1].tx+=tx;else parts.push({tx:tx})})}
  else{t.split(/(\s+)/).forEach(function(tx){if(!tx)return;if(/^\s+$/.test(tx)&&parts.length)parts[parts.length-1].tx+=tx;else if(tx.length>9){var q=0;while(q<tx.length){var en=Math.min(tx.length,q+4);while(en<tx.length&&(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/.test(tx[en])||/[เแโใไ]/.test(tx[en-1])))en++;parts.push({tx:tx.slice(q,en)});q=en}}else parts.push({tx:tx})})}
  var rg=[],re=new RegExp(KW.source,"gi");while((m=re.exec(t))){rg.push([m.index,m.index+m[0].length]);if(!m[0].length)re.lastIndex++}
- var tot=0;parts.forEach(function(p){p.o=off;off+=p.tx.length;p.kw=rg.some(function(r){return p.o<r[1]&&off>r[0]});p.f=tot;tot+=p.tx.replace(/\s/g,"").length||1});
+ var PLi=(pkData().PL||{})[i],pkd=false,tot=0,pkR=null;if(PLi)Object.keys(PLi).forEach(function(k){if(k[0]!="~")return;var ph=k.slice(1),src="",map=[];for(var c=0;c<t.length;c++){var nc=pkNorm(t[c]);if(nc){src+=nc.toLowerCase();map.push(c)}}var ix=src.indexOf(ph);if(ix>=0){pkR=[map[ix],map[ix+ph.length-1]+1];pkd=true}});parts.forEach(function(p){p.o=off;off+=p.tx.length;p.kw=rg.some(function(r){return p.o<r[1]&&off>r[0]});if(pkR&&p.o<pkR[1]&&off>pkR[0]){p.pk=1;p.kw=true}else if(PLi&&!pkd&&PLi[pkNorm(p.tx.replace(/[()（）]/g,""))]){p.pk=1;p.kw=true;pkd=true}p.f=tot;tot+=p.tx.replace(/\s/g,"").length||1});
  parts.forEach(function(p){p.f/=Math.max(1,tot)});
  /* แอดลิบ = ข้อความใน ( ) ไม่ใช่เนื้อหลัก: แสดงเป็นลูกเล่นแยก */
  var ad=[],am,are=/[(（][^)）]*[)）]/g;while((am=are.exec(t)))ad.push([am.index,am.index+am[0].length]);
@@ -1398,8 +1433,11 @@ function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
   else if(ANIM=="soft"||(ANIM=="mix"&&!hook)){pp=clamp01(wa/.6);e=1-Math.pow(1-pp,3);al=clamp01(wa/.33);al=al*al*(3-2*al);sc=1+(hook?.07:.025)*(1-e);dy=sz*.3*(1-e);gb=(1-e)*sz*.9}
   else if(ANIM=="type"){al=clamp01(wa/.14);sc=1;dy=0}
   else if(hook&&wa<.38){jx=(rnd(Math.floor(wa*40)+p.o)-.5)*sz*.4*(1-pp)}
+  var pkA=p.pk&&wa>=0&&wa<.7?wa:-1;if(pkA>=0){/* คำเด่น: กระแทกใหญ่ + สั่น + สว่าง */var pq=clamp01(pkA/.32);sc*=1+.55*(1-pq)*(1-pq);if(pkA<.22)jx+=(rnd(Math.floor(pkA*60)+p.o*7)-.5)*sz*.3*(1-pkA/.22);gb=Math.max(gb,sz*(1.1-pq*.6));al=Math.max(al,clamp01(pkA/.05))}
   var cw=AT.w;
   x.save();x.globalAlpha*=al;x.translate(cur+cw/2+jx,dy+AT.y);if(rot)x.rotate(rot);x.scale(sc,sc);x.translate(-cw/2,0);
+  if(pkA>=0){/* เงาคำซูมพุ่งออก + แยกสี RGB ช่วงแรก */var ek=pkA/.7;x.save();x.globalAlpha*=.5*(1-ek)*(1-ek);x.translate(cw/2,0);x.scale(1+1.6*ek,1+1.6*ek);x.translate(-cw/2,0);x.fillStyle=TH.hot;x.fillText(tx2,0,0);x.restore();
+   if(pkA<.28){var cs=sz*.09*(1-pkA/.28);x.save();x.globalCompositeOperation="lighter";x.globalAlpha*=.8;x.fillStyle="rgba(0,240,255,.9)";x.fillText(tx2,-cs,0);x.fillStyle="rgba(255,0,70,.9)";x.fillText(tx2,cs,0);x.restore()}}
   var shc=p.kw?"rgba("+TH.gl+",.95)":(sgi>0?col:(hook?"rgba("+TH.gl+",.85)":"rgba("+TH.gl+",.6)")),shb=sz*(p.kw?.55:.6)+gb,fc=fill||(p.kw?"#fff":col);
   if(pw&&act){shc="rgba("+TH.gl+",1)";shb=sz*.6+gb}
   if(chroma){x.shadowBlur=0;x.shadowColor="transparent";x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);x.fillStyle="rgba(0,255,255,.7)";x.fillText(tx2,-sz*.1,0);x.fillStyle="rgba(255,0,60,.8)";x.fillText(tx2,sz*.1,0);x.shadowColor=shc;x.shadowBlur=shb;x.fillStyle=fc;x.fillText(tx2,0,0);x.shadowBlur=0;x.shadowColor="transparent"}
@@ -1554,6 +1592,15 @@ var LFXR=[
  ["glitch",/crazy|raging|rage|บ้า|เพี้ยน|shady|hack|glitch|daydream|shaky/i,1.1],
  ["danger",/อันตราย|danger|ตาย|ฆ่า|เตือน|warning/i,2.2]];
 var LFXC=null,LFXK="";
+function pkSave(){try{localStorage.setItem("bwkw",JSON.stringify(PKU));localStorage.setItem("bwpk",PK_ON?"1":"0")}catch(e){}}
+function pkUI(){var h=$("pklist");if(!h)return;$("pkchk").checked=PK_ON;h.innerHTML="";var D=pkData(),seen={};
+ D.list.forEach(function(it){seen[it.n]=1;var b=document.createElement("button");b.type="button";b.className="on";b.textContent=(it.top?"★ ":"")+it.d+(it.miss?" (ไม่พบในเนื้อ)":"");b.title="แตะเพื่อปิดคำนี้";b.onclick=function(){PKU.add=PKU.add.filter(function(a){return pkNorm(a)!=it.n});PKU.off.push(it.n);pkSave();pkRefresh();toast("ปิดคำเด่น: "+it.d)};h.appendChild(b)});
+ PKU.off.forEach(function(n){if(seen[n])return;var b=document.createElement("button");b.type="button";b.style.opacity=".45";b.style.textDecoration="line-through";b.textContent=n;b.title="แตะเพื่อเปิดคืน";b.onclick=function(){PKU.off=PKU.off.filter(function(a){return a!=n});pkSave();pkRefresh()};h.appendChild(b)});
+ if(!h.firstChild)h.innerHTML='<span class="mut" style="font-size:13px">ยังไม่มีคำเด่น (ใส่เนื้อเพลงก่อน หรือเพิ่มเองด้านล่าง)</span>'}
+$("pkchk").onchange=function(){PK_ON=this.checked;pkSave();pkRefresh()};
+$("pkaddb").onclick=function(){var v=$("pkadd").value.trim();if(!v)return;PKU.off=PKU.off.filter(function(a){return a!=pkNorm(v)});PKU.add.push(v);$("pkadd").value="";pkSave();pkRefresh();toast("เพิ่มคำเด่น: "+v)};
+$("pkadd").onkeydown=function(e){if(e.key=="Enter"){e.preventDefault();$("pkaddb").click()}};
+setTimeout(function(){try{pkUI()}catch(e){}},1500);
 $("lfxchk").checked=LFX_ON;$("lfxchk").onchange=function(){LFX_ON=this.checked;try{localStorage.setItem("bwlfx",LFX_ON?"1":"0")}catch(e){}};
 function lfxEvents(){var key=T.join(",");if(LFXC&&LFXK==key)return LFXC;var ev=[],last={};
  for(var i=0;i<N;i++)LFXR.forEach(function(r){var m=LN[i].t.match(r[1]);if(!m)return;var ws=wordsOf(i),p=null;ws.forEach(function(q){if(q.o<=m.index)p=q});
@@ -1562,7 +1609,18 @@ function lfxEvents(){var key=T.join(",");if(LFXC&&LFXK==key)return LFXC;var ev=[
 function lfxRnd(s){return function(){s=(s*9301+49297)%233280;return s/233280}}
 function ambUI(){var am=ambMode();document.querySelectorAll("#ambsel button").forEach(function(b){b.classList.toggle("on",b.dataset.m==AMB);var sm=b.querySelector("small");if(b.dataset.m=="auto"&&sm)sm.textContent="เลือกตามเนื้อเพลง"+(AMB=="auto"?" (ตอนนี้: "+({rage:"ดุดัน",fog:"หลอน",city:"เมืองกลางคืน",off:"ไม่ใส่"})[am]+")":"")})}
 document.querySelectorAll("#ambsel button").forEach(function(b){b.onclick=function(){AMB=b.dataset.m;try{localStorage.setItem("bwamb",AMB)}catch(e){}ambUI();toast("เปลี่ยนฉากหลังแล้ว")}});ambUI();
-function lfxDraw(x,W,H,t){if(!LFX_ON)return false;var ev=lfxEvents(),any=false,M=Math.min(W,H);
+/* คำเด่นตัวยักษ์ประทับกลางจอด้านหลังเนื้อ (เฉพาะคำเด่นอันดับต้น) */
+var PKEV=null,PKEK="";
+function pkEvents(){var D=pkData(),key=PKK;if(PKEV&&PKEK==key)return PKEV;var ev=[],lastS=-99;
+ Object.keys(D.PL).sort(function(a,b){return a-b}).forEach(function(i){i=+i;var ks=Object.keys(D.PL[i]),k=ks[0],v=D.P[k];if(!(v>=8))return;var ws=wordsOf(i),pk=ws.filter(function(p){return p.pk});if(!pk.length)return;var t0=wordT(i,pk[0]);if(t0-lastS<6)return;lastS=t0;
+  var w=k[0]=="~"?pk.map(function(p){return p.tx}).join("").replace(/[()（）]/g,"").trim():pk[0].tx.trim().replace(/[()（）]/g,"");ev.push({t:t0,w:w,s:i*7+3})});
+ PKEK=key;PKEV=ev;return ev}
+function pkStamp(x,W,H,t){if(!PK_ON||!N)return false;var any=false,M=Math.min(W,H);pkEvents().forEach(function(e){var a=t-e.t;if(a<0||a>1.1)return;any=true;
+  var up=LF[3]=="uppercase",w=up?e.w.toUpperCase():e.w,fs=M*.34;x.save();x.font=lfont(fs);var mw=x.measureText(w).width;if(mw>W*.8){fs*=W*.8/mw;x.font=lfont(fs)}
+  var e1=clamp01(a/.18),k=1.18-.2*(1-Math.pow(1-e1,3))+a*.03,al=a<.18?e1:(1-clamp01((a-.35)/.75));x.globalAlpha=al*.3;x.textAlign="center";x.textBaseline="middle";
+  x.translate(W/2+(a<.15?(lfxRnd(e.s+Math.floor(a*60))()-.5)*M*.03:0),H*.46);x.scale(k,k);x.lineWidth=Math.max(2,fs*.025);x.strokeStyle=TH.hot;x.strokeText(w,0,0);x.globalAlpha=al*.1;x.fillStyle=TH.hot;x.fillText(w,0,0);
+  if(a<.08){x.setTransform(1,0,0,1,0,0);x.globalAlpha=(1-a/.08)*.22;x.fillStyle="#fff";x.fillRect(0,0,W,H)}x.restore()});return any}
+function lfxDraw(x,W,H,t){var sa=false;try{sa=pkStamp(x,W,H,t)}catch(e){}if(!LFX_ON)return sa;var ev=lfxEvents(),any=sa,M=Math.min(W,H);
  ev.forEach(function(e){var a=t-e.t;if(a<0||a>e.d)return;any=true;var R=lfxRnd(e.s),fo=a>e.d-.7?(e.d-a)/.7:1;x.save();
   if(e.k=="bleed"){/* คำเจ็บปวด: ขอบจอแดงเลือดหมูเต้นตุบเดียวแล้วจาง */var pb=a/e.d,ab=pb<.15?pb/.15:1-(pb-.15)/.85;var vb=x.createRadialGradient(W/2,H/2,M*.42,W/2,H/2,Math.max(W,H)*.7);vb.addColorStop(0,"rgba(0,0,0,0)");vb.addColorStop(1,"rgba(110,0,12,.9)");x.globalAlpha=Math.max(0,ab)*.6;x.fillStyle=vb;x.fillRect(0,0,W,H)}
   else if(e.k=="bullet"){for(var b=0;b<3;b++){var ba2=a-b*.18;if(ba2<0)continue;var bx=W*(.15+R()*.7),by=H*(.15+R()*.25),br=M*.012;x.globalAlpha=fo;
