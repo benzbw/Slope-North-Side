@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>สตูดิโอภาพ & วิดีโอ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+Thai:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Kanit:ital,wght@0,400;0,800;1,800&family=Prompt:wght@700&family=Mitr:wght@600&family=Chakra+Petch:wght@700&family=Sriracha&family=Itim&family=Pridi:wght@700&family=Playfair+Display:ital,wght@1,800&family=Permanent+Marker&family=Space+Mono:wght@700&family=UnifrakturMaguntia&family=Noto+Sans+Thai:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0b0709;--card:#151013;--line:#2a2125;--txt:#f4eef0;--mut:#a9989e;--hot:#ff3347}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 'Noto Sans Thai',system-ui,sans-serif}
@@ -31,6 +31,9 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
 .strip{display:flex;gap:6px;overflow-x:auto;margin-top:8px}.strip img{height:54px;border-radius:8px;border:2px solid transparent;cursor:pointer}.strip img.on{border-color:var(--hot)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:12px;font-weight:600;z-index:20;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1}
 [hidden]{display:none!important}
+.fonts{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px}.fonts button{flex:0 0 auto;min-width:84px;min-height:52px;border:1px solid var(--line);background:#1d161a;border-radius:10px;padding:4px 10px;cursor:pointer;font-size:19px;line-height:1.15;color:#fff}.fonts button small{display:block;font:500 10px "Noto Sans Thai",sans-serif;color:var(--mut)}.fonts button.on{border-color:var(--hot);background:rgba(255,51,71,.16)}
+.tcols{display:flex;gap:8px;margin:2px 0 6px}.tcols button{width:30px;height:30px;border-radius:50%;border:2px solid #555;cursor:pointer}.tcols button.on{border-color:#fff;box-shadow:0 0 0 2px var(--hot)}
+.txc .lb{font-size:13px;color:var(--mut);margin:8px 0 2px}
 </style></head><body>
 <header><h1>สตูดิโอภาพ & วิดีโอ</h1><a href="index.html" id="back">‹ กลับแอป</a></header>
 <div class="tabs"><button class="on" data-t="ph">รูปภาพ</button><button data-t="vd">วิดีโอ</button></div>
@@ -54,7 +57,7 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
    <div class="sl"><span>เลื่อนขึ้น-ลง</span><input type="range" id="p-oy" min="-100" max="100" value="0"><span></span></div></div>
   <div class="card"><p class="h">กรอบ</p><div class="chips" id="pframe"><button data-r="none" class="on">ไม่มี</button><button data-r="film">ขอบฟิล์ม 35mm</button><button data-r="polar">โพลารอยด์</button><button data-r="cine">แถบดำหนัง</button><button data-r="white">ขอบขาวมินิมอล</button></div></div>
   <div class="card"><p class="h">ตัวหนังสือบนรูป</p><input class="inp" id="p-t1" maxlength="40" placeholder="ข้อความใหญ่ เช่น ชื่อเพลง / OUT NOW"><input class="inp" id="p-t2" maxlength="40" placeholder="ข้อความเล็ก เช่น ชื่อศิลปิน">
-   <div class="chips" id="ptpos" style="margin-top:6px"><button data-p="bl" class="on">ล่างซ้าย</button><button data-p="bc">ล่างกลาง</button><button data-p="c">กลางจอ</button><button data-p="tl">บนซ้าย</button></div></div>
+   <div class="txc" data-host="p"></div><div class="chips" id="ptpos" style="margin-top:6px"><button data-p="bl" class="on">ล่างซ้าย</button><button data-p="bc">ล่างกลาง</button><button data-p="c">กลางจอ</button><button data-p="tl">บนซ้าย</button></div></div>
   <button class="cta" id="p-dl">ดาวน์โหลดรูปนี้ (.jpg เต็มความละเอียด)</button>
   <button class="cta alt" id="p-dlall" hidden>แต่งแบบเดียวกันทุกรูป แล้วดาวน์โหลดทั้งหมด</button>
  </div></div></section>
@@ -65,7 +68,7 @@ main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
   <div class="card"><label class="drop"><b>+ ใส่คลิปวิดีโอ</b><span class="mut">คลิปจากมือถือ · แต่งสีแล้วส่งออกพร้อมเสียงเดิม</span><input type="file" id="vfile" accept="video/*"></label></div>
   <div class="card"><p class="h">ฟิลเตอร์วิดีโอ</p><div class="chips" id="vlooks"></div></div>
   <div class="card"><p class="h">ขนาด</p><div class="chips" id="vfmt"><button data-f="orig" class="on">เดิม</button><button data-f="9:16">9:16<small>TikTok/Reels</small></button><button data-f="1:1">1:1</button><button data-f="4:5">4:5</button><button data-f="16:9">16:9</button></div></div>
-  <div class="card"><p class="h">ตัวหนังสือบนคลิป</p><input class="inp" id="v-t1" maxlength="40" placeholder="ข้อความใหญ่"><input class="inp" id="v-t2" maxlength="40" placeholder="ข้อความเล็ก"></div>
+  <div class="card"><p class="h">ตัวหนังสือบนคลิป</p><input class="inp" id="v-t1" maxlength="40" placeholder="ข้อความใหญ่"><input class="inp" id="v-t2" maxlength="40" placeholder="ข้อความเล็ก"><div class="txc" data-host="v"></div></div>
   <button class="cta" id="v-rec" disabled>ส่งออกวิดีโอที่แต่งแล้ว</button>
   <p class="mut" id="v-st" style="margin-top:8px">ส่งออกแบบเล่นจริง ใช้เวลาเท่าความยาวคลิป อย่าปิดหน้านี้ระหว่างส่งออก</p>
  </div></div></section>
@@ -165,10 +168,23 @@ function adjust(c){if(!(P.bri||P.con||P.sat||P.wrm))return;var x=c.getContext("2
 var NT=null;function noise(){if(NT)return NT;NT=document.createElement("canvas");NT.width=NT.height=256;var x=NT.getContext("2d"),im=x.createImageData(256,256);for(var i=0;i<im.data.length;i+=4){var v=Math.random()*255;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}x.putImageData(im,0,0);return NT}
 function finish(x,W,H,grn,vig){if(grn){x.save();x.globalAlpha=grn/100;x.globalCompositeOperation="overlay";x.fillStyle=x.createPattern(noise(),"repeat");x.fillRect(0,0,W,H);x.restore()}
  if(vig){var M=Math.max(W,H),g=x.createRadialGradient(W/2,H/2,M*.25,W/2,H/2,M*.75);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+(vig/100)+")");x.fillStyle=g;x.fillRect(0,0,W,H)}}
-function texts(x,W,H,t1,t2,pos){if(!t1&&!t2)return;var M=Math.min(W,H),s1=M*.11,s2=M*.034,pad=M*.06;x.save();x.textBaseline="alphabetic";x.shadowColor="rgba(0,0,0,.55)";x.shadowBlur=M*.02;
- x.font="400 "+s1+"px Anton,'Noto Sans Thai',sans-serif";while(t1&&x.measureText(t1.toUpperCase()).width>W-pad*2&&s1>M*.04){s1*=.92;x.font="400 "+s1+"px Anton,'Noto Sans Thai',sans-serif"}
- var al=pos=="bc"||pos=="c"?"center":"left",X=al=="center"?W/2:pad,Y=pos=="tl"?pad+s1:pos=="c"?H/2+s1*.35:H-pad-(t2?s2*1.6:0);x.textAlign=al;x.fillStyle="#fff";if(t1)x.fillText(t1.toUpperCase(),X,Y);
- if(t2){x.font="600 "+s2+"px 'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.88)";x.fillText(t2.toUpperCase().split("").join(" "),X,pos=="tl"?Y+s2*1.8:Y+s2*1.7)}x.restore()}
+/* ---------- ฟอนต์ + ขนาดตัวหนังสือ ---------- */
+var FONTS=[["anton","400","Anton","โปสเตอร์",1],["bebas","400","'Bebas Neue'","สูงผอม",1],["kanit","800","Kanit","ไทยหนา",0],["kaniti","italic 800","Kanit","ไทยเอียง",0],["prompt","700","Prompt","ไทยโมเดิร์น",0],["mitr","600","Mitr","ไทยมน",0],["chakra","700","'Chakra Petch'","ดิจิทัล",0],["sriracha","400","Sriracha","ลายมือ",0],["itim","400","Itim","น่ารัก",0],["pridi","700","Pridi","มีหัว คลาสสิก",0],["play","italic 800","'Playfair Display'","หรู แฟชั่น",0],["marker","400","'Permanent Marker'","ปากกาเมจิก",1],["mono","700","'Space Mono'","พิมพ์ดีด",0],["goth","400","UnifrakturMaguntia","โกธิกแรป",2]];
+var TCOLS=["#ffffff","#ff3347","#ffd23f","#7CFF6B","#6fd3ff","#111111"];
+var TX={f:"anton",s1:100,s2:100,c:"#ffffff",up:true};try{var _t=JSON.parse(localStorage.getItem("sns:phtx")||"null");if(_t)for(var k in _t)TX[k]=_t[k]}catch(e){}
+function txFont(id){for(var i=0;i<FONTS.length;i++)if(FONTS[i][0]==id)return FONTS[i];return FONTS[0]}
+function txCss(F,px){return F[1]+" "+px+"px "+F[2]+",Kanit,'Noto Sans Thai',sans-serif"}
+function texts(x,W,H,t1,t2,pos){if(!t1&&!t2)return;var F=txFont(TX.f),up=TX.up&&F[4]!==2,M=Math.min(W,H),s1=M*.11*TX.s1/100,s2=M*.034*TX.s2/100,pad=M*.06;x.save();x.textBaseline="alphabetic";var dark=TX.c=="#111111";x.shadowColor=dark?"rgba(255,255,255,.35)":"rgba(0,0,0,.55)";x.shadowBlur=M*.02;
+ var T1=t1&&(up?t1.toUpperCase():t1);x.font=txCss(F,s1);while(T1&&x.measureText(T1).width>W-pad*2&&s1>M*.03){s1*=.94;x.font=txCss(F,s1)}
+ var al=pos=="bc"||pos=="c"?"center":"left",X=al=="center"?W/2:pad,Y=pos=="tl"?pad+s1:pos=="c"?H/2+s1*.35:H-pad-(t2?s2*1.6:0);x.textAlign=al;x.fillStyle=TX.c;if(T1)x.fillText(T1,X,Y);
+ if(t2){x.font="600 "+s2+"px 'Noto Sans Thai',sans-serif";var T2=up?t2.toUpperCase():t2;if(/^[\x20-\x7e]+$/.test(T2))T2=T2.split("").join(" ");while(x.measureText(T2).width>W-pad*2&&s2>M*.015){s2*=.94;x.font="600 "+s2+"px 'Noto Sans Thai',sans-serif"}x.globalAlpha=.9;x.fillText(T2,X,pos=="tl"?Y+s2*1.8:Y+s2*1.7)}x.restore()}
+function txRedraw(){try{localStorage.setItem("sns:phtx",JSON.stringify(TX))}catch(e){}try{draw()}catch(e){}try{vdraw()}catch(e){}}
+function txLoad(F){try{document.fonts.load(F[1]+" 40px "+F[2]).then(txRedraw,function(){})}catch(e){}}
+function txUI(){document.querySelectorAll(".txc").forEach(function(h){var id=h.dataset.host;h.innerHTML='<div class="lb">ฟอนต์ (ข้อความใหญ่)</div><div class="fonts"></div><div class="sl"><span>ขนาดใหญ่</span><input type="range" min="40" max="200" data-k="s1"><span></span></div><div class="sl"><span>ขนาดเล็ก</span><input type="range" min="50" max="220" data-k="s2"><span></span></div><div class="lb">สีตัวหนังสือ</div><div class="tcols"></div><label class="mut" style="display:flex;gap:6px;align-items:center"><input type="checkbox" data-k="up">ตัวพิมพ์ใหญ่ (ABC)</label>';
+ var fh=h.querySelector(".fonts");FONTS.forEach(function(F){var b=document.createElement("button");b.type="button";b.className=TX.f==F[0]?"on":"";b.style.font=F[1]+" 19px "+F[2]+",Kanit,sans-serif";b.innerHTML=(F[4]==2?"Abc":F[4]?"ABC":"Aa ก")+"<small>"+F[3]+"</small>";b.onclick=function(){TX.f=F[0];txSync();txLoad(F);txRedraw()};fh.appendChild(b)});
+ var ch=h.querySelector(".tcols");TCOLS.forEach(function(c){var b=document.createElement("button");b.type="button";b.style.background=c;b.dataset.c=c;b.onclick=function(){TX.c=c;txSync();txRedraw()};ch.appendChild(b)});
+ h.querySelectorAll("input[type=range]").forEach(function(r){r.oninput=function(){TX[r.dataset.k]=+r.value;txSync();txRedraw()}});h.querySelector("input[type=checkbox]").onchange=function(){TX.up=this.checked;txSync();txRedraw()}});txSync();txLoad(txFont(TX.f));try{document.fonts.ready.then(txRedraw)}catch(e){}}
+function txSync(){document.querySelectorAll(".txc").forEach(function(h){h.querySelectorAll(".fonts button").forEach(function(b,i){b.className=FONTS[i][0]==TX.f?"on":""});h.querySelectorAll(".tcols button").forEach(function(b){b.className=b.dataset.c==TX.c?"on":""});h.querySelectorAll("input[type=range]").forEach(function(r){r.value=TX[r.dataset.k];r.nextElementSibling.textContent=TX[r.dataset.k]+"%"});h.querySelector("input[type=checkbox]").checked=TX.up})}
 function frameIt(src,kind){if(kind=="none")return src;var w=src.width,h=src.height,M=Math.max(w,h),c=document.createElement("canvas"),x;
  if(kind=="polar"){var b=Math.round(M*.05);c.width=w+b*2;c.height=h+b*2+Math.round(M*.16);x=c.getContext("2d");x.fillStyle="#f4f1ea";x.fillRect(0,0,c.width,c.height);x.drawImage(src,b,b);return c}
  if(kind=="white"){var b2=Math.round(M*.04);c.width=w+b2*2;c.height=h+b2*2;x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(src,b2,b2);return c}
@@ -196,7 +212,7 @@ $("p-t1").oninput=function(){P.t1=this.value;draw()};$("p-t2").oninput=function(
 function save(c,name){return new Promise(function(res){c.toBlob(function(b){var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name+".jpg";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(u);a.remove();res()},800)},"image/jpeg",.93)})}
 $("p-dl").onclick=async function(){var it=P.list[P.i];if(!it){toast("ใส่รูปก่อน");return}toast("กำลังสร้างไฟล์เต็มความละเอียด…");await new Promise(function(r){setTimeout(r,30)});await save(render(it.im,4096),it.name+"-"+P.look);toast("ดาวน์โหลดแล้ว")};
 $("p-dlall").onclick=async function(){for(var i=0;i<P.list.length;i++){toast("กำลังทำรูป "+(i+1)+"/"+P.list.length);await new Promise(function(r){setTimeout(r,30)});await save(render(P.list[i].im,4096),P.list[i].name+"-"+P.look)}toast("ดาวน์โหลดครบ "+P.list.length+" รูป")};
-cats();thumbs();
+cats();thumbs();txUI();
 /* ---------- วิดีโอ: ฟิลเตอร์แบบเร็ว (เล่นสดได้) ---------- */
 var VL={none:["none",""],flash:["brightness(1.12) contrast(1.3) saturate(1.05)","flash"],disp:["brightness(1.08) contrast(1.22) sepia(.25) saturate(1.1) hue-rotate(-8deg)","disp"],portra:["contrast(.92) saturate(1.08) sepia(.18) brightness(1.04)","warm"],fuji:["contrast(.92) saturate(.92) hue-rotate(8deg) brightness(1.03)","cool"],bw:["grayscale(1) contrast(1.45) brightness(.95)","grain"],red:["grayscale(1) contrast(1.7)","red"],ccd:["saturate(1.45) contrast(1.15) brightness(1.08) hue-rotate(-4deg)","ccd"],vhs:["saturate(.85) contrast(.95) blur(.6px)","vhs"]};
 Object.keys(FILM).forEach(function(k){var F=FILM[k],md=F.md||[0,0,0];VL[k]=[(F.bw?"grayscale(1) ":"")+"contrast("+(F.con||1).toFixed(2)+") saturate("+(F.sat==null?1:F.sat).toFixed(2)+") brightness("+(1+(F.lift||0)/500+(F.flash||0)*.08).toFixed(2)+")","film:"+k]});
