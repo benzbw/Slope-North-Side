@@ -552,7 +552,7 @@ function nameFixLine(t){var hits=[];t.replace(/[A-Za-z][A-Za-z\s]{3,14}[A-Za-z]/
  return hits}
 function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.slice(0,h[i][0])+"Bedupbiw"+t.slice(h[i][1]);return t}
 (function autoSplit(){try{var keys=["bw"+"3","bw3s57l"],K=null,sv=null;
- var raw=RAW.split("\n"),map=[],secStart=true;for(var r=0;r<raw.length;r++){var l=raw[r];if(l===""){secStart=true;continue}var pre="";if(secStart){var m=l.match(/^((?:§|@[1-4])[ \t]*)+/);if(m)pre=m[0];secStart=false}if(l.slice(pre.length).trim())map.push({r:r,pre:pre})}
+ var raw=RAW.split("\n"),map=[];function bmap(){map=[];var secStart=true;for(var r=0;r<raw.length;r++){var l=raw[r];if(l===""){secStart=true;continue}var pre="";if(secStart){var m=l.match(/^((?:§|@[1-4])[ \t]*)+/);if(m)pre=m[0];secStart=false}if(l.slice(pre.length).trim())map.push({r:r,pre:pre})}}bmap();
  keys.some(function(k){try{var v=JSON.parse(localStorage.getItem(k)||"null");if(v&&v.s&&v.T&&v.T.length==map.length&&v.U&&v.U.length==map.length){K=k;sv=v;return true}}catch(e){}return false});
  if(!sv){var fx=nameFixText(RAW);if(fx!==RAW){RAW=fx;localStorage.setItem("bwraw",RAW);FIXED.push(["ชื่อศิลปินสะกดผิด","แก้เป็น Bedupbiw"])}return}
  var nNm=0;map.forEach(function(mp,i){var full=raw[mp.r],t=full.slice(mp.pre.length),h=nameFixLine(t);if(!h.length)return;var U=sv.U[i]||[];
@@ -561,6 +561,14 @@ function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.s
    U.forEach(function(w){if(w[0]>=e0)w[0]+=dl});if(keep){U.push(keep);U.sort(function(a,b){return a[0]-b[0]})}}
   sv.U[i]=U;raw[mp.r]=mp.pre+t;nNm++});
  if(nNm){RAW=raw.join("\n");localStorage.setItem("bwraw",RAW);localStorage.setItem(K,JSON.stringify(sv));FIXED.push(["ชื่อศิลปินสะกดผิด "+nNm+" ที่","แก้เป็น Bedupbiw (เวลาเดิมไม่เปลี่ยน)"])}
+ /* รวมเศษบรรทัดสั้นๆ ที่ตัดกลางคำ เช่น "…ไม่บอก" / "ยาย" (ขึ้นแวบเดียวแล้วหาย) กลับเข้าบรรทัดก่อนหน้า */
+ var nMg=0;for(var i=map.length-1;i>0;i--){var U=sv.U[i]||[],Up=sv.U[i-1]||[];if(!U.length||!Up.length||map[i].pre)continue;var t=raw[map[i].r].slice(map[i].pre.length);if(/^\s*[\(（]/.test(t))continue;
+  var Ei=(sv.E&&sv.E[i]!=null)?sv.E[i]:U[U.length-1][3],dur=Ei-sv.T[i],gap=sv.T[i]-Up[Up.length-1][3],pt=raw[map[i-1].r].slice(map[i-1].pre.length);
+  if(!(U.length<=2&&dur<.8&&gap<.35&&pt.length+t.length<90))continue;
+  var base=pt.replace(/\s+$/,""),tt=t.trim(),sep=(/[\u0E00-\u0E7F]$/.test(base)&&/^[\u0E00-\u0E7F]/.test(tt))?"":" ",lead=t.length-t.replace(/^\s+/,"").length,sh=base.length+sep.length-lead;
+  sv.U[i-1]=Up.concat(U.map(function(w){var w2=w.slice();w2[0]+=sh;return w2}));raw[map[i-1].r]=map[i-1].pre+base+sep+tt;raw[map[i].r]=null;
+  if(sv.E){sv.E[i-1]=sv.E[i];sv.E.splice(i,1)}sv.T.splice(i,1);if(sv.C){sv.C[i-1]=Math.min(sv.C[i-1]||1,sv.C[i]||1);sv.C.splice(i,1)}if(sv.V&&sv.V.length>i)sv.V.splice(i,1);sv.U.splice(i,1);nMg++}
+ if(nMg){raw=raw.filter(function(l){return l!==null});RAW=raw.join("\n").replace(/\n{3,}/g,"\n\n");raw=RAW.split("\n");bmap();localStorage.setItem("bwraw",RAW);localStorage.setItem(K,JSON.stringify(sv));FIXED.push(["เศษบรรทัดที่ตัดกลางคำ "+nMg+" ที่","รวมกลับเข้าบรรทัดก่อนหน้า (เวลาเดิมไม่เปลี่ยน)"])}
  var n=map.length,outRaw=raw.slice(),ins={},del={},T2=[],E2=[],C2=[],U2=[],V2=[],nSplit=0,nDel=0,LB=/^\s*[\(\[\{]\s*(?:rap|แร็พ|แร็ป|แรพ|แรป|hook|chorus|verse\s*\d*|pre[- ]?(?:hook|chorus)|bridge|intro|outro|ฮุค|ฮุก|ท่อน[^\)\]\}]*)\s*\d*\s*[\)\]\}]\s*$/i;
  for(var i=0;i<n;i++){var mp=map[i],full=raw[mp.r],t=full.slice(mp.pre.length),U=sv.U[i]||[],Ti=sv.T[i],Ei=sv.E?sv.E[i]:null;
   if(LB.test(t)){del[mp.r]=1;nDel++;if(mp.pre&&i+1<n&&map[i+1].r>mp.r){outRaw[map[i+1].r]=mp.pre+raw[map[i+1].r];map[i+1].pre=mp.pre}continue}
@@ -582,7 +590,10 @@ function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.s
  if(nSplit)FIXED.push(["บรรทัดยาวเกิน "+nSplit+" บรรทัด","แยกเป็นบรรทัดสั้นตามช่วงที่หยุดร้อง (เวลาเดิมไม่เปลี่ยน)"]);if(nDel)FIXED.push(["ป้ายท่อน "+nDel+" อัน เช่น (Rap)","ลบออก ไม่ขึ้นเป็นเนื้อเพลง"])}catch(e){try{console.warn("autoSplit",e)}catch(_){}}})();
 if(!THEMES[thIdx])thIdx=0;var TH=THEMES[thIdx];
 function scolFor(q){return SAME||SG[q].c=="auto"?null:SG[q].c}
-var LN=[];RAW.split("\n\n").forEach(function(s,gi){var h=false,sg=0,mm;while(mm=s.match(/^(§|@([1-4]))[ \t]*/)){if(mm[1]=="§")h=true;else sg=+mm[2]-1;s=s.slice(mm[0].length)}s.split("\n").forEach(function(l){if(l.trim())LN.push({g:gi,t:l,h:h,s:sg})})});
+var LN=[];RAW.split("\n\n").forEach(function(s,gi){var h=false,sg=0,mm,mm0=/^(§|@[1-4])/.test(s);while(mm=s.match(/^(§|@([1-4]))[ \t]*/)){if(mm[1]=="§")h=true;else sg=+mm[2]-1;s=s.slice(mm[0].length)}s.split("\n").forEach(function(l){if(l.trim())LN.push({g:gi,t:l,h:h,s:sg,pf:!!mm0})})});
+/* เว้นบรรทัดว่างคั่นทุกบรรทัด (วางเนื้อมาแบบนั้น) = ไม่ใช่ท่อนจริง: รวมเป็นท่อนเดียวกัน ให้ขึ้น 2 บรรทัดต่อจอได้ ไม่หายไวทีละบรรทัด */
+(function(){var c={},tot=0,one=0;LN.forEach(function(l){c[l.g]=(c[l.g]||0)+1});Object.keys(c).forEach(function(k){tot++;if(c[k]==1)one++});if(tot<6||one/tot<.6)return;
+ var g=-1,ph=null,ps=null;LN.forEach(function(l,i){if(i==0||l.h!==ph||l.s!==ps)g=l.g;ph=l.h;ps=l.s;l.g=g})})();
 /* ขนาดตัวหนังสือ + บรรทัดต่อจอ: ตั้งครั้งเดียวใช้กับทุกเพลง (เก่าและใหม่) */
 var TSZ=.85;try{var tz0=localStorage.getItem("sns:tsz");if(tz0)TSZ=+tz0||.85}catch(e){}
 /* แบ่งหน้าจอ: แต่ละหน้าแสดงไม่เกิน PAGE บรรทัด (0 = ทั้งท่อน) ไม่รก อ่านทัน */
