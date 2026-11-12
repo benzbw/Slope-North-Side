@@ -65,7 +65,7 @@ jobs:
         if: steps.q.outputs.n != '0'
         run: |
           pip install --quiet torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install --quiet demucs soundfile av transformers uroman pythainlp numpy scipy cryptography
+          pip install --quiet demucs soundfile av transformers uroman pythainlp numpy scipy cryptography faster-whisper
       - name: Place aligner next to server code
         if: steps.q.outputs.n != '0'
         run: cp -r code/src/fa code/src/app/fa
