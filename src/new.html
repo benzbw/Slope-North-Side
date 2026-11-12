@@ -615,7 +615,9 @@ if(!synced)["bw"+"3","bw3s57l"].some(function(kk){try{var sv2=JSON.parse(localSt
 fixT();
 function fixT(){for(var i=1;i<N;i++)if(!(T[i]>=T[i-1]+.05))T[i]=Math.round((T[i-1]+.05)*100)/100}
 function save(){fixT();try{localStorage.setItem("bw3",JSON.stringify({T:T,E:E,s:synced,o:off,C:CONF,V:VER,Q:VSEG,Y:SYL,U:UT}))}catch(e){}}
-function tm(){return a.currentTime+off}
+/* เพลงที่ร้องจนวินาทีสุดท้าย: หน้าปิดท้ายขึ้นหลังเพลงจบ ให้หน้าตัดต่อเล่นต่ออีกไม่กี่วิเหมือนวิดีโอที่ส่งออก */
+var LTAIL0=0;try{a.addEventListener("ended",function(){LTAIL0=performance.now()});["play","seeking"].forEach(function(ev){a.addEventListener(ev,function(){LTAIL0=0})})}catch(e){}
+function tm(){if(LTAIL0&&a.ended){try{var tl=endTail();if(tl>0)return a.currentTime+off+Math.min((performance.now()-LTAIL0)/1000,tl)}catch(e){}}return a.currentTime+off}
 function dur(){return a.duration||176.6}
 function fmt(x,d){x=Math.max(0,x);var m=Math.floor(x/60),s=x-m*60;return m+":"+(s<10?"0":"")+(d?s.toFixed(1):Math.floor(s))}
 function seek(t){a.currentTime=Math.max(0,Math.min(dur()-.05,t-off))}
