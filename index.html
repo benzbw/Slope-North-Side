@@ -214,7 +214,8 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
 .w.on.a1{animation-name:wsl}.w.on.a2{animation-name:wbl}
 .g.h .w.on{animation:wgl .38s linear forwards}
 .w.k.on{color:#fff;text-shadow:0 0 18px var(--hot),0 0 2px #000}
-.w.k.now{animation:pkf .55s ease-out}@keyframes pkf{0%{color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
+.w.k.now{animation:pkf .55s ease-out}
+/* ตัวหนังสือนิ่ง ไม่เด้ง/ไม่สั่น (ใช้แค่จางเข้า+เรืองแสง) และตัดบรรทัดให้แถวยาวพอๆ กัน */#stage .w{transform:none!important;rotate:none!important;scale:none!important;translate:none!important}#stage .l{text-wrap:balance}@keyframes pkf{0%{color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
 /* แบบนุ่มไหล: ค่อยๆ ลอยขึ้นจากเบลอ เรืองแสงแล้วนิ่ง ทุกคำเหมือนกันไม่สะดุด */
 .anim-soft .w.on,.anim-soft .w.on.a1,.anim-soft .w.on.a2{animation:wsoft .6s cubic-bezier(.22,.61,.36,1) forwards}
 .anim-soft .g.h .w.on,.anim-soft .g.h .w.on.a1,.anim-soft .g.h .w.on.a2{animation:wsofth .7s cubic-bezier(.22,.61,.36,1) forwards}
@@ -724,6 +725,7 @@ function nameFixLine(t){var hits=[];t.replace(/[A-Za-z][A-Za-z\s]{3,14}[A-Za-z]/
   for(var a=0;a<words.length;a++)for(var b=Math.min(words.length-1,a+2);b>=a;b--){var cand=words.slice(a,b+1).join(""),lc=cand.toLowerCase();if(lc.length<6||lc.length>11||lc[0]!="b")continue;var d=lev(lc,"bedupbiw");if(d==0&&b==a&&words[a]=="Bedupbiw")continue;if(d<=3&&/[wu]$/.test(lc)){var s0=st+pos[a],e0=st+pos[b]+words[b].length;hits.push([s0,e0]);a=b;break}}
   re.lastIndex=m.index+m[0].length}
  return hits}
+function isArtistLabel(t){/* บรรทัดที่มีแค่ชื่อศิลปิน (ไม่มีวงเล็บ) เช่น "YOLO ZoloDope V.2" = ป้ายบอกคนร้อง ไม่ใช่เนื้อ */if(/[()（）]/.test(t))return false;var n=t.toLowerCase().replace(/\bv\.?\s*\d+\b/g,"").replace(/[^a-z0-9]/g,"");if(n.length<4||/[\u0E00-\u0E7F]/.test(t))return false;var names=[];try{var rel=JSON.parse(localStorage.getItem("bwrel")||"{}");String((rel.artist||"")+","+(rel.feat||"")).split(/[,&/]| feat\.? /i).forEach(function(a){a=a.toLowerCase().replace(/[^a-z0-9]/g,"");if(a.length>=4)names.push(a)})}catch(e){}names.push("bedupbiw");return names.some(function(a){return n==a||lev(n,a)<=2})}
 function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.slice(0,h[i][0])+"Bedupbiw"+t.slice(h[i][1]);return t}
 (function autoSplit(){try{var keys=["bw"+"3","bw3s57l"],K=null,sv=null;
  var raw=RAW.split("\n"),map=[];function bmap(){map=[];var secStart=true;for(var r=0;r<raw.length;r++){var l=raw[r];if(l===""){secStart=true;continue}var pre="";if(secStart){var m=l.match(/^((?:§|@[1-4])[ \t]*)+/);if(m)pre=m[0];secStart=false}if(l.slice(pre.length).trim())map.push({r:r,pre:pre})}}bmap();
@@ -745,7 +747,7 @@ function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.s
  if(nMg){raw=raw.filter(function(l){return l!==null});RAW=raw.join("\n").replace(/\n{3,}/g,"\n\n");raw=RAW.split("\n");bmap();localStorage.setItem("bwraw",RAW);localStorage.setItem(K,JSON.stringify(sv));FIXED.push(["เศษบรรทัดที่ตัดกลางคำ "+nMg+" ที่","รวมกลับเข้าบรรทัดก่อนหน้า (เวลาเดิมไม่เปลี่ยน)"])}
  var n=map.length,outRaw=raw.slice(),ins={},del={},T2=[],E2=[],C2=[],U2=[],V2=[],nSplit=0,nDel=0,LB=/^\s*[\(\[\{]\s*(?:rap|แร็พ|แร็ป|แรพ|แรป|hook|chorus|verse\s*\d*|pre[- ]?(?:hook|chorus)|bridge|intro|outro|ฮุค|ฮุก|ท่อน[^\)\]\}]*)\s*\d*\s*[\)\]\}]\s*$/i;
  for(var i=0;i<n;i++){var mp=map[i],full=raw[mp.r],t=full.slice(mp.pre.length),U=sv.U[i]||[],Ti=sv.T[i],Ei=sv.E?sv.E[i]:null;
-  if(LB.test(t)){del[mp.r]=1;nDel++;if(mp.pre&&i+1<n&&map[i+1].r>mp.r){outRaw[map[i+1].r]=mp.pre+raw[map[i+1].r];map[i+1].pre=mp.pre}continue}
+  if(LB.test(t)||isArtistLabel(t)){del[mp.r]=1;nDel++;if(mp.pre&&i+1<n&&map[i+1].r>mp.r){outRaw[map[i+1].r]=mp.pre+raw[map[i+1].r];map[i+1].pre=mp.pre}continue}
   var dur=(Ei!=null?Ei:(U.length?U[U.length-1][3]:Ti+3))-Ti,pieces=[[0,U.length-1]];
   function need(a,b){var d=U[b][3]-U[a][2];return(d>7||b-a+1>14)&&b-a+1>=6}
   if(U.length>=6&&need(0,U.length-1)){var guard=0;while(guard++<20){var idx=-1;for(var z=0;z<pieces.length;z++)if(need(pieces[z][0],pieces[z][1])){idx=z;break}if(idx<0)break;var a=pieces[idx][0],b=pieces[idx][1],best=-1,bs=-1e9;
@@ -1639,7 +1641,12 @@ function rnd(n){var q=Math.sin(n*12.9898)*43758.5453;return q-Math.floor(q)}
 function clamp01(v){return v<0?0:v>1?1:v}
 /* จัดคำเป็นแถว: บรรทัดยาวตัดขึ้นแถวใหม่ (ไม่ย่อจนจิ๋ว ไม่ล้นขอบ) */
 var LMAXW=0;
-function lineLayout(x,j,sz,maxW,_b){var L0=lineLayout0(x,j,sz,maxW);if(_b===false||L0.n<2||!maxW)return L0;/* เกลี่ยแถวให้ยาวพอๆ กัน ไม่เหลือคำเดียวโดดๆ */var w=L0.tot/L0.n;for(var i=0;i<30&&w<maxW;i++){var L1=lineLayout0(x,j,sz,w);if(L1.n<=L0.n)return L1;w*=1.04}return L0}
+function lineLayout(x,j,sz,maxW,_b){var L0=lineLayout0(x,j,sz,maxW);if(_b===false||L0.n<2||!maxW)return L0;
+ /* เกลี่ยแถวให้ยาวพอๆ กัน และห้ามมีแถวที่เหลือคำเดียวโดดๆ: ลองหลายความกว้าง เลือกแบบที่สวยสุด */
+ function score(L){var rc={},rw={};Object.keys(L.at).forEach(function(q){var A=L.at[q];rc[A.r]=(rc[A.r]||0)+1;var e=A.x+A.w;rw[A.r]=Math.max(rw[A.r]||-1e9,e)-0});var lone=0,ws=[];for(var r=0;r<L.n;r++){if((rc[r]||0)<=1&&L.n>1)lone++}
+  var mx=L.maxRow,mn=1e9;var byR={};Object.keys(L.at).forEach(function(q){var A=L.at[q];if(!byR[A.r])byR[A.r]=[1e9,-1e9];byR[A.r][0]=Math.min(byR[A.r][0],A.x);byR[A.r][1]=Math.max(byR[A.r][1],A.x+A.w)});Object.keys(byR).forEach(function(r){mn=Math.min(mn,byR[r][1]-byR[r][0])});
+  return lone*1000+L.n*200+(mx-mn)/Math.max(1,mx)*100}
+ var best=L0,bs=score(L0),w=L0.tot/L0.n*.98;for(var i=0;i<40&&w<=maxW*1.0001;i++){var L1=lineLayout0(x,j,sz,Math.min(w,maxW));if(L1.maxRow<=maxW+.5){var sc1=score(L1);if(sc1<bs){bs=sc1;best=L1}}w*=1.03}return best}
 function lineLayout0(x,j,sz,maxW){var ws=wordsOf(j),up=LF[3]=="uppercase",rw=[0],last=[null],at={},tot=0,lh=sz*1.16;
  ws.forEach(function(p,q){if(p.ad)return;var s2=up?p.tx.toUpperCase():p.tx,r=rw.length-1;if(!rw[r])s2=s2.replace(/^\s+/,"");var w=x.measureText(s2).width;
   if(rw[r]>0&&maxW&&rw[r]+x.measureText(s2.replace(/\s+$/,"")).width>maxW){rw.push(0);last.push(null);r++;s2=s2.replace(/^\s+/,"");w=x.measureText(s2).width}
@@ -1670,9 +1677,10 @@ function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
   if(LRW){if(AT.r<LRW.lo-1||AT.r>LRW.lo+MAXROWS-1)return;if(AT.r==LRW.lo-1)al*=1-LRW.f;dy+=LRW.dy}
   var pkA=p.pk&&wa>=0&&wa<.7?wa:-1;if(pkA>=0){/* คำเด่น: กระแทกใหญ่ + สั่น + สว่าง */var pq=clamp01(pkA/.32);sc*=1+.55*(1-pq)*(1-pq);gb=Math.max(gb,sz*(1.1-pq*.6));al=Math.max(al,clamp01(pkA/.05))}
   var cw=AT.w;
+  /* ตัวหนังสือนิ่ง: ไม่ขยาย ไม่เด้ง ไม่ขยับ (ร้องรัวแล้วดูสั่น) ใช้แค่ค่อยๆ ชัด + เรืองแสง */sc=1;rot=0;jx=0;
   if(sc>1&&LMAXW&&cw>0){/* คำที่เด้งขยายห้ามล้นขอบจอ */var lim=LMAXW*1.06/2,cx0=Math.abs(cur+cw/2+jx),smax=(lim-cx0)*2/cw;if(smax>=1&&sc>smax)sc=smax;else if(smax<1)sc=1}
   x.save();x.globalAlpha*=al;x.translate(cur+cw/2+jx,dy+AT.y);if(rot)x.rotate(rot);x.scale(sc,sc);x.translate(-cw/2,0);
-  if(pkA>=0){/* เงาคำซูมพุ่งออก + แยกสี RGB ช่วงแรก */var ek=pkA/.7;x.save();x.globalAlpha*=.5*(1-ek)*(1-ek);x.translate(cw/2,0);x.scale(1+1.6*ek,1+1.6*ek);x.translate(-cw/2,0);x.fillStyle=TH.hot;x.fillText(tx2,0,0);x.restore();
+  if(pkA>=0){/* เงาคำซูมพุ่งออก + แยกสี RGB ช่วงแรก */var ek=pkA/.7;x.save();x.globalAlpha*=.3*(1-ek)*(1-ek);x.translate(cw/2,0);x.scale(1+.5*ek,1+.5*ek);x.translate(-cw/2,0);x.fillStyle=TH.hot;x.fillText(tx2,0,0);x.restore();
    if(pkA<.28){var cs=sz*.09*(1-pkA/.28);x.save();x.globalCompositeOperation="lighter";x.globalAlpha*=.8;x.fillStyle="rgba(0,240,255,.9)";x.fillText(tx2,-cs,0);x.fillStyle="rgba(255,0,70,.9)";x.fillText(tx2,cs,0);x.restore()}}
   var shc=p.kw?"rgba("+TH.gl+",.95)":(sgi>0?col:(hook?"rgba("+TH.gl+",.85)":"rgba("+TH.gl+",.6)")),shb=sz*(p.kw?.55:.6)+gb,fc=fill||(p.kw?"#fff":col);
   if(pw&&act){shc="rgba("+TH.gl+",1)";shb=sz*.6+gb}
