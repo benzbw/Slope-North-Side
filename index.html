@@ -577,6 +577,7 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <div class="h" style="margin-top:18px;font-size:15px">ปกเพลง</div>
    <button class="cta alt" id="cv-open" style="min-height:44px;font-size:14px">ทำปกเพลง (3000×3000 สำหรับลงแพลตฟอร์ม)</button>
    <div class="h" style="margin-top:18px;font-size:15px">ฉากจบเพลง</div>
+   <label class="tgl"><input type="checkbox" id="intro-on" checked><span>ขึ้นชื่อเพลง + SLOPE NORTH SIDE ตอนเริ่มเพลง (3–4 วิแรก)</span></label>
    <label class="tgl"><input type="checkbox" id="end-on" checked><span>ใส่ลายน้ำ SLOPE NORTH SIDE + ชื่อเพลง + ศิลปิน ตอนจบเพลง</span></label>
    <div class="row"><input class="inp" id="end-title" maxlength="40" placeholder="ชื่อเพลง"></div>
    <div class="row"><input class="inp" id="end-artist" maxlength="60" placeholder="ศิลปิน เช่น Bedupbiw ft. Killmonger"></div>
@@ -909,6 +910,20 @@ $("tszr").oninput=function(){TSZ=+this.value/100;try{localStorage.setItem("sns:t
 document.querySelectorAll("#tszsel button").forEach(function(b){b.onclick=function(){TSZ=+b.dataset.z;try{localStorage.setItem("sns:tsz",String(TSZ))}catch(e){}tszUI();toast("ปรับขนาดตัวหนังสือแล้ว")}});tszUI();
 function pageUI(){document.querySelectorAll("#pagesel button").forEach(function(b){b.classList.toggle("on",+b.dataset.n==PAGE)})}
 document.querySelectorAll("#pagesel button").forEach(function(b){b.onclick=function(){PAGE=+b.dataset.n;try{localStorage.setItem("sns:page",String(PAGE))}catch(e){}paginate();wg=-2;pageUI();toast(PAGE?"แสดงหน้าละ "+PAGE+" บรรทัด":"แสดงทั้งท่อน")}});pageUI();
+/* ---------- ไตเติลเปิดเพลง: ชื่อเพลง + SLOPE NORTH SIDE (ทุกเพลง ทั้งเก่าและใหม่) ---------- */
+var INTRO_ON=true;try{INTRO_ON=localStorage.getItem("bwintro")!=="0"}catch(e){}
+function introInfo(){var t="",a="";try{var r=JSON.parse(localStorage.getItem("bwrel")||"null");if(r){t=(r.title||"").trim();a=(r.artist||"").trim();if(r.feat)a+=(a?" ft. ":"")+r.feat}}catch(e){}
+ if(!t){try{var e0=JSON.parse(localStorage.getItem("bwend")||"null");if(e0&&e0.title)t=e0.title.trim();if(!a&&e0&&e0.artist)a=e0.artist}catch(e){}}if(!t)t=(STS&&STS.title||"").trim();return{t:t,a:a.replace(/\s*,\s*/g," x ")}}
+function drawIntro(x,W,H,t){if(!INTRO_ON||t<0)return false;var D=3.8;if(t>D)return false;var I=introInfo();
+ var al=clamp01(t<.5?t/.5:(D-t)/.8),e=1-Math.pow(1-clamp01(t/1),3),M=Math.min(W,H),cy=H>W*1.3?H*.25:H*.23;
+ x.save();x.setTransform(1,0,0,1,0,0);x.textAlign="center";x.textBaseline="middle";x.globalAlpha=al;
+ var bs=M*.03;x.font="600 "+bs+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.9)";x.shadowColor="rgba(0,0,0,.7)";x.shadowBlur=bs*.8;
+ var br="SLOPE NORTH SIDE".split("").join(String.fromCharCode(8202,8202));try{x.letterSpacing=(bs*.35)+"px"}catch(_){}x.fillText("SLOPE NORTH SIDE",W/2,cy-M*.085);try{x.letterSpacing="0px"}catch(_){}
+ x.shadowBlur=0;var lw=M*.2*e;x.fillStyle=TH.hot;x.fillRect(W/2-lw/2,cy-M*.052,lw,Math.max(2,M*.004));
+ if(I.t){var up=LF[3]=="uppercase",tt=up?I.t.toUpperCase():I.t,fs=M*.095;x.font=lfont(fs);var mw=x.measureText(tt).width;if(mw>W*.8){fs*=W*.8/mw;x.font=lfont(fs)}
+  x.shadowColor="rgba("+TH.gl+",.85)";x.shadowBlur=fs*.45;x.fillStyle="#fff";x.globalAlpha=al;x.fillText(tt,W/2,cy+fs*.12);x.shadowBlur=0}
+ if(I.a){var as=M*.032;x.font="500 "+as+"px Montserrat,'Noto Sans Thai',sans-serif";var aw=x.measureText(I.a).width;if(aw>W*.8){as*=W*.8/aw;x.font="500 "+as+"px Montserrat,'Noto Sans Thai',sans-serif"}x.fillStyle="rgba(255,255,255,.75)";x.fillText(I.a,W/2,cy+M*.1)}
+ x.restore();return true}
 var ENDC={on:true,title:"Dangerous",artist:"Bedupbiw ft. Killmonger"};try{var ej=JSON.parse(localStorage.getItem("bwend")||"null");if(ej)ENDC=Object.assign(ENDC,ej)}catch(e){}
 function endSave(){try{localStorage.setItem("bwend",JSON.stringify(ENDC))}catch(e){}endFill()}
 function endFill(){var c=$("endc");c.innerHTML=""}
@@ -916,6 +931,7 @@ function endStart(){var le=N?((E&&E[N-1]!=null)?E[N-1]:T[N-1]+3):0,D=dur();if(le
 function endTail(){if(!ENDC.on)return 0;var D=dur();return Math.max(0,endStart()+3.4-D)}
 try{["400 40px Anton","italic 600 40px 'Playfair Display'","500 20px Montserrat"].forEach(function(f){document.fonts.load(f)})}catch(e){}
 $("end-on").checked=ENDC.on;$("end-title").value=ENDC.title;$("end-artist").value=ENDC.artist;endFill();
+$("intro-on").checked=INTRO_ON;$("intro-on").onchange=function(){INTRO_ON=this.checked;try{localStorage.setItem("bwintro",INTRO_ON?"1":"0")}catch(e){}toast(INTRO_ON?"เปิดชื่อเพลงตอนเริ่ม":"ปิดชื่อเพลงตอนเริ่ม")};
 $("end-on").onchange=function(){ENDC.on=this.checked;endSave()};$("end-title").oninput=function(){ENDC.title=this.value;endSave()};$("end-artist").oninput=function(){ENDC.artist=this.value;endSave()};
 var fT=0,fN=0,fSum=0,autoDone=false,LITE=false;
 function setLite(v,sv2){LITE=v;document.body.classList.toggle("lite",v);$("litechk").checked=v;if(sv2)try{localStorage.setItem("bwlite",v?"1":"0")}catch(e){}}
@@ -1869,7 +1885,7 @@ function pkStamp(x,W,H,t){if(!PK_ON||!N)return false;var any=false,M=Math.min(W,
   var e1=clamp01(a/.18),k=1.18-.2*(1-Math.pow(1-e1,3))+a*.03,al=a<.18?e1:(1-clamp01((a-.35)/.75));x.globalAlpha=al*.3;x.textAlign="center";x.textBaseline="middle";
   x.translate(W/2,H*.46);x.scale(k,k);x.lineWidth=Math.max(2,fs*.025);x.strokeStyle=TH.hot;x.strokeText(w,0,0);x.globalAlpha=al*.1;x.fillStyle=TH.hot;x.fillText(w,0,0);
   if(a<.1){x.setTransform(1,0,0,1,0,0);x.globalAlpha=(1-a/.1)*.07;x.fillStyle="#fff";x.fillRect(0,0,W,H)}x.restore()});return any}
-function lfxDraw(x,W,H,t){var sa=false;try{sa=pkStamp(x,W,H,t)}catch(e){}if(!LFX_ON)return sa;var ev=lfxEvents(),any=sa,M=Math.min(W,H);
+function lfxDraw(x,W,H,t){var sa=false;try{sa=pkStamp(x,W,H,t)}catch(e){}try{if(drawIntro(x,W,H,t))sa=true}catch(e){}if(!LFX_ON)return sa;var ev=lfxEvents(),any=sa,M=Math.min(W,H);
  ev.forEach(function(e){var a=t-e.t;if(a<0||a>e.d)return;any=true;var R=lfxRnd(e.s),fo=a>e.d-.7?(e.d-a)/.7:1;x.save();
   if(e.k=="bleed"){/* คำเจ็บปวด: ขอบจอแดงเลือดหมูเต้นตุบเดียวแล้วจาง */var pb=a/e.d,ab=pb<.15?pb/.15:1-(pb-.15)/.85;var vb=x.createRadialGradient(W/2,H/2,M*.42,W/2,H/2,Math.max(W,H)*.7);vb.addColorStop(0,"rgba(0,0,0,0)");vb.addColorStop(1,"rgba(110,0,12,.9)");x.globalAlpha=Math.max(0,ab)*.6;x.fillStyle=vb;x.fillRect(0,0,W,H)}
   else if(e.k=="bullet"){for(var b=0;b<3;b++){var ba2=a-b*.18;if(ba2<0)continue;var bx=W*(.15+R()*.7),by=H*(.15+R()*.25),br=M*.012;x.globalAlpha=fo;
