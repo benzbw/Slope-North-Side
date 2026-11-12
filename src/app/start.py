@@ -527,7 +527,7 @@ def _run(jid, body):
         segs, info = MODELS[name].transcribe(pcm, language="th", word_timestamps=True, beam_size=BEAM,
                                              condition_on_previous_text=False, temperature=0.0, no_repeat_ngram_size=4, max_new_tokens=160,
                                              vad_filter=bool(J.get("sep")) and use_vad, vad_parameters={"min_silence_duration_ms": 600},
-                                             hallucination_silence_threshold=2.0, initial_prompt=" ".join(lines)[:600])
+                                             hallucination_silence_threshold=2.0, initial_prompt=("Bedupbiw, Slope North Side. "+" ".join(lines))[:600])
         words = []
         import time
         t0 = time.time()
