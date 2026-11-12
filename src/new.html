@@ -186,7 +186,7 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
 .g.h .w.on{animation:wgl .38s linear forwards}
 .w.k.on{color:#fff;text-shadow:0 0 18px var(--hot),0 0 2px #000}
 .w.k.now{animation:pkf .55s ease-out}
-/* ตัวหนังสือนิ่ง ไม่เด้ง/ไม่สั่น (ใช้แค่จางเข้า+เรืองแสง) และตัดบรรทัดให้แถวยาวพอๆ กัน */#stage .w{transform:none!important;rotate:none!important;scale:none!important;translate:none!important}#stage .l{text-wrap:balance}@keyframes pkf{0%{color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
+/* ตัวหนังสือนิ่ง ไม่เด้ง/ไม่สั่น (ใช้แค่จางเข้า+เรืองแสง) และตัดบรรทัดให้แถวยาวพอๆ กัน */#stage .w{transform:none!important;rotate:none!important;scale:none!important;translate:none!important}#stage .l{text-wrap:balance}#stage .w.ad{font-size:.58em;font-style:italic;opacity:.8;color:var(--hot);vertical-align:.35em;margin:0 .15em;text-transform:uppercase}@keyframes pkf{0%{color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
 /* แบบนุ่มไหล: ค่อยๆ ลอยขึ้นจากเบลอ เรืองแสงแล้วนิ่ง ทุกคำเหมือนกันไม่สะดุด */
 .anim-soft .w.on,.anim-soft .w.on.a1,.anim-soft .w.on.a2{animation:wsoft .6s cubic-bezier(.22,.61,.36,1) forwards}
 .anim-soft .g.h .w.on,.anim-soft .g.h .w.on.a1,.anim-soft .g.h .w.on.a2{animation:wsofth .7s cubic-bezier(.22,.61,.36,1) forwards}
@@ -572,7 +572,7 @@ function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.s
   sv.U[i-1]=Up.concat(U.map(function(w){var w2=w.slice();w2[0]+=sh;return w2}));raw[map[i-1].r]=map[i-1].pre+base+sep+tt;raw[map[i].r]=null;
   if(sv.E){sv.E[i-1]=sv.E[i];sv.E.splice(i,1)}sv.T.splice(i,1);if(sv.C){sv.C[i-1]=Math.min(sv.C[i-1]||1,sv.C[i]||1);sv.C.splice(i,1)}if(sv.V&&sv.V.length>i)sv.V.splice(i,1);sv.U.splice(i,1);nMg++}
  if(nMg){raw=raw.filter(function(l){return l!==null});RAW=raw.join("\n").replace(/\n{3,}/g,"\n\n");raw=RAW.split("\n");bmap();localStorage.setItem("bwraw",RAW);localStorage.setItem(K,JSON.stringify(sv));FIXED.push(["เศษบรรทัดที่ตัดกลางคำ "+nMg+" ที่","รวมกลับเข้าบรรทัดก่อนหน้า (เวลาเดิมไม่เปลี่ยน)"])}
- var n=map.length,outRaw=raw.slice(),ins={},del={},T2=[],E2=[],C2=[],U2=[],V2=[],nSplit=0,nDel=0,LB=/^\s*[\(\[\{]\s*(?:rap|แร็พ|แร็ป|แรพ|แรป|hook|chorus|verse\s*\d*|pre[- ]?(?:hook|chorus)|bridge|intro|outro|ฮุค|ฮุก|ท่อน[^\)\]\}]*)\s*\d*\s*[\)\]\}]\s*$/i;
+ var n=map.length,outRaw=raw.slice(),ins={},del={},T2=[],E2=[],C2=[],U2=[],V2=[],nSplit=0,nDel=0,LB=/^\s*[\(\[\{]\s*(?:rap|แร็พ|แร็ป|แรพ|แรป|hook|chorus|v\.?\s*\d+|verse\s*\d*|pre[- ]?(?:hook|chorus)|bridge|intro|outro|interlude|ฮุค|ฮุก|ท่อน[^\)\]\}]*|อินโทร|เอาท์โทร)(?![A-Za-z0-9])[^\)\]\}]{0,40}[\)\]\}]\s*$/i;
  for(var i=0;i<n;i++){var mp=map[i],full=raw[mp.r],t=full.slice(mp.pre.length),U=sv.U[i]||[],Ti=sv.T[i],Ei=sv.E?sv.E[i]:null;
   if(LB.test(t)||isArtistLabel(t)){del[mp.r]=1;nDel++;if(mp.pre&&i+1<n&&map[i+1].r>mp.r){outRaw[map[i+1].r]=mp.pre+raw[map[i+1].r];map[i+1].pre=mp.pre}continue}
   var dur=(Ei!=null?Ei:(U.length?U[U.length-1][3]:Ti+3))-Ti,pieces=[[0,U.length-1]];
@@ -603,7 +603,7 @@ var TSZ=.85;try{var tz0=localStorage.getItem("sns:tsz");if(tz0)TSZ=+tz0||.85}cat
 var PAGE=2;try{var pg0=localStorage.getItem("sns:page");if(pg0!=null)PAGE=+pg0||0}catch(e){}
 function ROLL(){return PAGE>=2}
 /* บรรทัดที่อยู่บนจอ: โหมด 2-3 บรรทัดเลื่อนต่อเนื่อง (บรรทัดที่เพิ่งร้องค้างไว้ด้านบนให้อ่านทัน) */
-function pageIdx(gi){if(gi<0||gi==null)return[];if(ROLL()){var lo=gi;while(lo>0&&LN[lo-1].g==LN[gi].g&&gi-lo<PAGE-1)lo--;var r=[];for(var q=lo;q<=gi;q++)r.push(q);return r}var o=[];for(var i=0;i<LN.length;i++)if(LN[i].p==gi)o.push(i);return o}
+function pageIdx(gi){if(gi<0||gi==null)return[];if(ROLL()){var lo=gi;while(lo>0&&LN[lo-1].g==LN[gi].g&&gi-lo<PAGE-1&&!(E&&E[lo-1]!=null&&T[lo]-E[lo-1]>2.4))lo--;/* บรรทัดก่อนหน้าที่หายไปแล้ว (เว้นนานเกิน 2.4 วิ) ไม่ดึงกลับมาโผล่แว็บ */var r=[];for(var q=lo;q<=gi;q++)r.push(q);return r}var o=[];for(var i=0;i<LN.length;i++)if(LN[i].p==gi)o.push(i);return o}
 function pickGi(k,t){var nx=k+1,c=-1;if(nx<N&&T[nx]-t<.12)c=nx;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+2.4))c=k;if(c<0)return -1;return ROLL()?c:LN[c].p}
 function paginate(){try{document.body.classList.toggle("roll",ROLL())}catch(e){}var pid=-1,pg=-1,cnt=0;LN.forEach(function(l){if(l.g!==pg||(PAGE>0&&cnt>=PAGE)){pid++;cnt=0;pg=l.g}l.p=pid;cnt++})}paginate();
 var N=LN.length,EST=[],sum=0,acc=0;LN.forEach(function(l){sum+=l.t.length+6});LN.forEach(function(l){EST.push(18.5+150.5*acc/sum);acc+=l.t.length+6});
@@ -721,7 +721,7 @@ function wordTimes(i){var en0=lineEnd(i),key=T[i]+"|"+en0;if(WTC[i]&&WTC[i].k==k
  for(k=1;k<n;k++)v[k]=Math.max(v[k],v[k-1]+.06);
  WTC[i]={k:key,v:v};return v}
 function wordT(i,p){if((SYL&&SYL.length)||(UT&&UT[i])){var ws=wordsOf(i),q=ws.indexOf(p);if(q>=0)return wordTimes(i)[q]}var en=Math.max(T[i]+.3,lineEnd(i)-.35),cap=LN[i].t.replace(/\s/g,"").length*.16+.5;en=Math.min(en,T[i]+cap);return T[i]+(en-T[i])*p.f}
-function mkLine(i){var e=document.createElement("div");e.className="l";e.dataset.i=i;wordsOf(i).forEach(function(p,q){var sp=document.createElement("span");sp.className="w"+(p.kw?" k":"")+" a"+((i+q)%3==0?1:(i+q)%5==0?2:0);sp.textContent=p.tx;e.appendChild(sp)});return e}
+function mkLine(i){var e=document.createElement("div");e.className="l";e.dataset.i=i;wordsOf(i).forEach(function(p,q){var sp=document.createElement("span");sp.className="w"+(p.kw?" k":"")+(p.ad?" ad":"")+" a"+((i+q)%3==0?1:(i+q)%5==0?2:0);sp.textContent=p.tx;e.appendChild(sp)});return e}
 function build(gi){var prev=wg;wg=gi;var idx=pageIdx(gi);
  /* โหมดเลื่อนต่อเนื่อง: เก็บบรรทัดเดิมไว้ ไม่ให้คำเด้งซ้ำ แค่ตัดบรรทัดบนสุดออกแล้วเติมบรรทัดใหม่ */
  if(ROLL()&&gi>=0&&prev>=0&&LN[prev]&&LN[prev].g==LN[gi].g&&st.firstChild&&els.length){var d0=st.firstChild,keep={};els=els.filter(function(e){var i=+e.dataset.i;if(idx.indexOf(i)<0){e.remove();return false}keep[i]=1;return true});idx.forEach(function(i){if(!keep[i]){var e=mkLine(i);els.push(e);d0.appendChild(e)}});return}
@@ -1577,7 +1577,7 @@ function drawGroup(x,W,H,t,k,gi){
  if(multi){var ty0=(PS?PS.top+(NS.top-PS.top)*e:NS.top)+tagH/2;x.font="700 "+(tagH*.45)+"px 'Noto Sans Thai',sans-serif";x.textAlign="center";x.fillStyle=col;x.globalAlpha=.9;x.fillText(SG[sgi].n.split("").join(" "),0,ty0);x.globalAlpha=1;x.textAlign="left"}
  var DIM=ROLL()?.38:.62;
  var SH=0;if(PS)idx.forEach(function(j){if(PS.ys[j]!=null)SH=NS.ys[j]-PS.ys[j]});
- if(PS)prev.forEach(function(j){if(idx.indexOf(j)>=0)return;var F=lineFit(x,j,W,H),fo2=1-clamp01(e*(SH?1.8:4));if(fo2<=0)return;x.save();x.globalAlpha=(SH?1-DIM:1)*fo2*fo2;x.translate(0,PS.ys[j]+SH*e-F.sz*(SH?.3:1.2)*e);LMAXW=F.avail;LCUR=F.L;drawLine(x,LN[j].t,F.sz,col,hook,ex?1:0,t-T[j],j,t);x.restore()});
+ if(PS)prev.forEach(function(j){if(idx.indexOf(j)>=0)return;var F=lineFit(x,j,W,H),fo2=1-clamp01(e*(SH?1.8:1.15));if(fo2<=0)return;x.save();x.globalAlpha=(SH?1-DIM:.85)*fo2;x.translate(0,PS.ys[j]+SH*e-F.sz*(SH?.3:(1.2+F.L.n*1.2))*e);LMAXW=F.avail;LCUR=F.L;drawLine(x,LN[j].t,F.sz,col,hook,ex?1:0,t-T[j],j,t);x.restore()});
  idx.forEach(function(j){var F=lineFit(x,j,W,H),y=NS.ys[j];if(PS&&PS.ys[j]!=null)y=PS.ys[j]+(NS.ys[j]-PS.ys[j])*e;
   var dim=1;if(j<k&&j+1<N)dim=1-DIM*clamp01((t-T[j+1])/.5);
   LRW=null;if(F.L.n>MAXROWS){/* บรรทัดยาวเกิน 4 แถว: เลื่อนขึ้นทีละแถวตามที่ร้อง */var ws=wordsOf(j),rc=0,rt=T[j];ws.forEach(function(p,q){if(p.ad||!F.L.at[q])return;var wt=wordT(j,p);if(wt<=t&&F.L.at[q].r>=rc){if(F.L.at[q].r>rc)rt=wt;rc=F.L.at[q].r}});
