@@ -542,9 +542,25 @@ var FIXED=[];
 try{var cr=localStorage.getItem("bwraw");if(cr)RAW=cr;(function(){var r=lyrFix(RAW);if(r.ch.length){RAW=r.t;FIXED=r.ch;try{localStorage.setItem("bwraw",RAW)}catch(e){}}})();(function(){var r=lyrStruct(RAW);if(!r.ch.length)return;try{var sv=JSON.parse(localStorage.getItem(["bw","3"].join(""))||"null"),n0=RAW.split("\n").filter(function(l){return l.trim()&&!/^\s*$/.test(l)}).length;if(sv&&sv.s&&sv.V&&sv.V.length)return;/* ซิงค์แล้ว: ห้ามเปลี่ยนจำนวนบรรทัด (เวลาจะหลุด) ให้ autoSplit จัดการแทน */if([["bw","3"].join(""),"bw3s57l"].some(function(k){try{var v=JSON.parse(localStorage.getItem(k)||"null");return v&&v.s&&v.T&&v.T.length==n0}catch(e){return false}}))return}catch(e){}RAW=r.t;FIXED=FIXED.concat(r.ch);try{localStorage.setItem("bwraw",RAW);localStorage.removeItem("bwsec")}catch(e){}})();var cs=JSON.parse(localStorage.getItem("bwsing")||"null");if(cs&&cs.length==4)SG=cs;if(SG[0].c=="#f3ece6")SG[0].c="auto";SAME=localStorage.getItem("bwsame")=="1";thIdx=+(localStorage.getItem("bwtheme")||0)||0}catch(e){}
 /* ---------- แยกบรรทัดยาวอัตโนมัติ (หลังซิงค์แล้ว) + ลบป้ายท่อนอย่าง (Rap) ที่หลุดเข้าไปเป็นเนื้อ ----------
    ใช้เวลาทีละคำที่ซิงค์ไว้ ตัดตรงช่วงที่หยุดร้อง/เว้นวรรค บรรทัดละไม่เกิน ~7 วิ / 14 คำ เวลาเดิมไม่เปลี่ยน */
+/* ชื่อศิลปินที่ AI ฟังผิด เช่น Beaubbew / Bedubbiw / Be dup biw → Bedupbiw */
+var NAMEFIX=["Bedupbiw","Slope North Side"];
+function lev(a,b){var m=a.length,n=b.length,d=[];for(var i=0;i<=m;i++){d[i]=[i]}for(var j=1;j<=n;j++)d[0][j]=j;for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]==b[j-1]?0:1));return d[m][n]}
+function nameFixLine(t){var hits=[];t.replace(/[A-Za-z][A-Za-z\s]{3,14}[A-Za-z]/g,function(){return""});
+ var re=/[A-Za-z]+(?:[ \t]+[A-Za-z]+){0,2}/g,m;while((m=re.exec(t))){var words=m[0].split(/[ \t]+/),st=m.index,pos=[],o=0;words.forEach(function(w){var k=m[0].indexOf(w,o);pos.push(k);o=k+w.length});
+  for(var a=0;a<words.length;a++)for(var b=Math.min(words.length-1,a+2);b>=a;b--){var cand=words.slice(a,b+1).join(""),lc=cand.toLowerCase();if(lc.length<6||lc.length>11||lc[0]!="b")continue;var d=lev(lc,"bedupbiw");if(d==0&&b==a&&words[a]=="Bedupbiw")continue;if(d<=3&&/[wu]$/.test(lc)){var s0=st+pos[a],e0=st+pos[b]+words[b].length;hits.push([s0,e0]);a=b;break}}
+  re.lastIndex=m.index+m[0].length}
+ return hits}
+function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.slice(0,h[i][0])+"Bedupbiw"+t.slice(h[i][1]);return t}
 (function autoSplit(){try{var keys=["bw"+"3","bw3s57l"],K=null,sv=null;
  var raw=RAW.split("\n"),map=[],secStart=true;for(var r=0;r<raw.length;r++){var l=raw[r];if(l===""){secStart=true;continue}var pre="";if(secStart){var m=l.match(/^((?:§|@[1-4])[ \t]*)+/);if(m)pre=m[0];secStart=false}if(l.slice(pre.length).trim())map.push({r:r,pre:pre})}
- keys.some(function(k){try{var v=JSON.parse(localStorage.getItem(k)||"null");if(v&&v.s&&v.T&&v.T.length==map.length&&v.U&&v.U.length==map.length){K=k;sv=v;return true}}catch(e){}return false});if(!sv)return;
+ keys.some(function(k){try{var v=JSON.parse(localStorage.getItem(k)||"null");if(v&&v.s&&v.T&&v.T.length==map.length&&v.U&&v.U.length==map.length){K=k;sv=v;return true}}catch(e){}return false});
+ if(!sv){var fx=nameFixText(RAW);if(fx!==RAW){RAW=fx;localStorage.setItem("bwraw",RAW);FIXED.push(["ชื่อศิลปินสะกดผิด","แก้เป็น Bedupbiw"])}return}
+ var nNm=0;map.forEach(function(mp,i){var full=raw[mp.r],t=full.slice(mp.pre.length),h=nameFixLine(t);if(!h.length)return;var U=sv.U[i]||[];
+  for(var q=h.length-1;q>=0;q--){var s0=h[q][0],e0=h[q][1],dl="Bedupbiw".length-(e0-s0);t=t.slice(0,s0)+"Bedupbiw"+t.slice(e0);var keep=null;
+   U=U.filter(function(w){if(w[0]>=s0&&w[0]<e0){if(!keep){keep=w.slice();keep[0]=s0;keep[1]="Bedupbiw"}else keep[3]=Math.max(keep[3],w[3]);return false}return true});
+   U.forEach(function(w){if(w[0]>=e0)w[0]+=dl});if(keep){U.push(keep);U.sort(function(a,b){return a[0]-b[0]})}}
+  sv.U[i]=U;raw[mp.r]=mp.pre+t;nNm++});
+ if(nNm){RAW=raw.join("\n");localStorage.setItem("bwraw",RAW);localStorage.setItem(K,JSON.stringify(sv));FIXED.push(["ชื่อศิลปินสะกดผิด "+nNm+" ที่","แก้เป็น Bedupbiw (เวลาเดิมไม่เปลี่ยน)"])}
  var n=map.length,outRaw=raw.slice(),ins={},del={},T2=[],E2=[],C2=[],U2=[],V2=[],nSplit=0,nDel=0,LB=/^\s*[\(\[\{]\s*(?:rap|แร็พ|แร็ป|แรพ|แรป|hook|chorus|verse\s*\d*|pre[- ]?(?:hook|chorus)|bridge|intro|outro|ฮุค|ฮุก|ท่อน[^\)\]\}]*)\s*\d*\s*[\)\]\}]\s*$/i;
  for(var i=0;i<n;i++){var mp=map[i],full=raw[mp.r],t=full.slice(mp.pre.length),U=sv.U[i]||[],Ti=sv.T[i],Ei=sv.E?sv.E[i]:null;
   if(LB.test(t)){del[mp.r]=1;nDel++;if(mp.pre&&i+1<n&&map[i+1].r>mp.r){outRaw[map[i+1].r]=mp.pre+raw[map[i+1].r];map[i+1].pre=mp.pre}continue}
@@ -574,7 +590,7 @@ var PAGE=2;try{var pg0=localStorage.getItem("sns:page");if(pg0!=null)PAGE=+pg0||
 function ROLL(){return PAGE>=2}
 /* บรรทัดที่อยู่บนจอ: โหมด 2-3 บรรทัดเลื่อนต่อเนื่อง (บรรทัดที่เพิ่งร้องค้างไว้ด้านบนให้อ่านทัน) */
 function pageIdx(gi){if(gi<0||gi==null)return[];if(ROLL()){var lo=gi;while(lo>0&&LN[lo-1].g==LN[gi].g&&gi-lo<PAGE-1)lo--;var r=[];for(var q=lo;q<=gi;q++)r.push(q);return r}var o=[];for(var i=0;i<LN.length;i++)if(LN[i].p==gi)o.push(i);return o}
-function pickGi(k,t){var nx=k+1,c=-1;if(nx<N&&T[nx]-t<.12)c=nx;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+1.6))c=k;if(c<0)return -1;return ROLL()?c:LN[c].p}
+function pickGi(k,t){var nx=k+1,c=-1;if(nx<N&&T[nx]-t<.12)c=nx;else if(k>=0&&!(k==N-1&&t>T[k]+5)&&!(E&&t>E[k]+2.4))c=k;if(c<0)return -1;return ROLL()?c:LN[c].p}
 function paginate(){try{document.body.classList.toggle("roll",ROLL())}catch(e){}var pid=-1,pg=-1,cnt=0;LN.forEach(function(l){if(l.g!==pg||(PAGE>0&&cnt>=PAGE)){pid++;cnt=0;pg=l.g}l.p=pid;cnt++})}paginate();
 var N=LN.length,EST=[],sum=0,acc=0;LN.forEach(function(l){sum+=l.t.length+6});LN.forEach(function(l){EST.push(18.5+150.5*acc/sum);acc+=l.t.length+6});
 var T=EST.slice(),E=null,off=0,synced=false,wg=-2,els=[],rowsEl=[],lastK=-2,recording=false,civ=0,drag=false,pst=null,lastChip="",MODEL="Xenova/whisper-small",openT=null;
@@ -1096,7 +1112,7 @@ var LFS=null,LFONTS=[["auto","ตามสไตล์",null],["anton","โป�
 var LFU="auto";try{LFU=localStorage.getItem("bwlfont")||"auto"}catch(e){}
 function lfPick(){for(var i=1;i<LFONTS.length;i++)if(LFONTS[i][0]==LFU)return LFONTS[i][2];return null}
 function lfUI(){var h=$("lfsel");if(!h)return;if(!h.firstChild)LFONTS.forEach(function(F){var b=document.createElement("button");b.type="button";b.dataset.f=F[0];var f=F[2]||LFS||LF;if(F[2])loadFont(F[2][4]);b.style.cssText="flex:0 0 auto;min-width:86px;min-height:54px;border-radius:10px;border:1px solid var(--line,#333);background:rgba(255,255,255,.04);color:inherit;cursor:pointer;padding:4px 10px;line-height:1.15;font:"+(F[2]?f[2]+" "+f[1]+" 19px '"+f[0]+"','Noto Sans Thai',sans-serif":"700 15px 'Noto Sans Thai',sans-serif");b.innerHTML=(F[2]?(F[2][3]=="uppercase"?"ABC":"Aa ก"):"อัตโนมัติ")+"<small style='display:block;font:500 10px Noto Sans Thai,sans-serif;opacity:.7;text-transform:none'>"+F[1]+"</small>";b.onclick=function(){LFU=F[0];try{localStorage.setItem("bwlfont",LFU)}catch(e){}setLF(LFS||LF);lfUI();toast("เปลี่ยนฟอนต์เนื้อเพลงแล้ว · มีผลกับวิดีโอที่ส่งออกด้วย")};h.appendChild(b)});h.querySelectorAll("button").forEach(function(b){var on=b.dataset.f==LFU;b.style.borderColor=on?"var(--hot,#ff3347)":"";b.style.background=on?"rgba(255,51,71,.16)":"rgba(255,255,255,.04)"})}
-function setLF(f){LFS=f.slice();f=lfPick()||f;LF=f.slice();loadFont(f[4]);var r=document.documentElement.style;r.setProperty("--lff","'"+f[0]+"'");r.setProperty("--lfw",f[1]);r.setProperty("--lfs",f[2]);r.setProperty("--ltt",f[3]);
+function setLF(f){if(f&&f[0]=="Cormorant Garamond")f=["Playfair Display","700","italic","none","Playfair+Display:ital,wght@1,700"];/* Cormorant บางเกิน ดูเหมือนไม่มีฟอนต์ */LFS=f.slice();f=lfPick()||f;LF=f.slice();loadFont(f[4]);var r=document.documentElement.style;r.setProperty("--lff","'"+f[0]+"'");r.setProperty("--lfw",f[1]);r.setProperty("--lfs",f[2]);r.setProperty("--ltt",f[3]);
  try{document.fonts.load(f[2]+" "+f[1]+" 40px '"+f[0]+"'").then(function(){wg=-2;BDC={};LYCK="";try{WSP.clear()}catch(e){}})}catch(e){}wg=-2}
 lfUI();if(LFU!="auto")setLF(LF);
 var GEN=[["any","แนวเพลง: ไม่ระบุ"],["hiphop","Hip-hop / Rap"],["trap","Trap"],["drill","Drill"],["rage","Rage"],["emo","Emo rap"],["rnb","R&B"],["alt-rnb","Alt R&B"],["pop","Pop"],["indie","Indie"],["lofi","Lo-fi"],["rock","Rock"],["synth","Synthwave / 80s"],["phonk","Phonk"],["electronic","Electronic"],["folk","Folk / Acoustic"],["conscious","Conscious rap"]];
@@ -1497,7 +1513,7 @@ function flushAd(x,W,H){var list=ADQ;ADQ=[];list.slice(-3).forEach(function(a,n)
  x.globalAlpha=al*.95;x.lineWidth=Math.max(1,fs*.07);x.strokeStyle="rgba("+TH.gl+",.95)";x.shadowColor="rgba("+TH.gl+",.9)";x.shadowBlur=fs*.6;x.strokeText(a.tx,0,0);
  x.shadowBlur=0;x.globalAlpha=al*.5;x.fillStyle="#fff";x.fillText(a.tx,0,0);x.restore()})}
 /* ---------- วางเนื้อเพลงตอนส่งออก: ขนาดคงที่ต่อบรรทัด เลื่อนนุ่มๆ ไม่กระตุก ไม่โชว์บรรทัดล่วงหน้า ---------- */
-function shownSet(t){var k=-1;for(var i=0;i<N;i++)if(T[i]<=t)k=i;if(k<0)return[];if((k==N-1&&t>T[k]+5)||(E&&E[k]!=null&&t>E[k]+1.6))return[];return pageIdx(ROLL()?k:LN[k].p).filter(function(j){return T[j]<=t})}
+function shownSet(t){var k=-1;for(var i=0;i<N;i++)if(T[i]<=t)k=i;if(k<0)return[];if((k==N-1&&t>T[k]+5)||(E&&E[k]!=null&&t>E[k]+2.4))return[];return pageIdx(ROLL()?k:LN[k].p).filter(function(j){return T[j]<=t})}
 var LYC={},LYCK="";
 function lineFit(x,j,W,H){var ck=W+"x"+H+"|"+LF.join(",")+"|"+TSZ+"|"+N;if(ck!==LYCK){LYC={};LYCK=ck}if(LYC[j])return LYC[j];
  /* ขนาดเท่าหน้าตัดต่อ: min(6.4vw,4.4vh)×ขนาดที่ตั้ง ทุกบรรทัดเท่ากัน ยาวก็ตัดขึ้นแถวใหม่ (ไม่ย่อ) */
