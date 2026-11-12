@@ -65,6 +65,21 @@ def run(meta, audio):
            "von": [o for o, _ in on], "vs": vs, "ve": ve, "syl": S.syllables(pcm, t0=vs, t1=ve), "fast": True, "cloud": True}
     k = int(meta.get("nsing") or 1)
     if k >= 2: res["vseg"] = S.voice_segments(pcm, min(k, 4), t0=vs, t1=ve)
+    # ความเห็นที่ 2: Whisper ฟังเสียงร้องที่แยกแล้ว ได้คำ+เวลา ใช้ตรวจ/แก้ช่วงที่ FA ยืดผิด
+    try:
+        from faster_whisper import WhisperModel
+        t1 = time.time()
+        wm = WhisperModel(meta.get("wmodel") or "medium", device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
+        segs, info = wm.transcribe(pcm, language="th", word_timestamps=True, beam_size=2, condition_on_previous_text=False,
+                                   initial_prompt=("Bedupbiw, Slope North Side. " + " ".join(lines))[:600],
+                                   vad_filter=True, vad_parameters={"min_silence_duration_ms": 300})
+        ww = []
+        for sg in segs:
+            ww.extend([w.word, round(w.start, 2), round(w.end, 2), round(w.probability, 2)] for w in sg.words)
+        res["whisper"] = ww
+        print("  Whisper", len(ww), "คำ", round(time.time() - t1), "วิ", flush=True)
+    except Exception as e:
+        print("  Whisper ข้าม:", e, flush=True)
     spread = (max(q["S"] for q in ok) - min(q["S"] for q in ok)) if ok else 0
     res["spread"] = round(spread, 2)
     print("  เสร็จ", len(ok), "/", len(lines), "บรรทัด · ช่วง", round(spread, 1), "วิ · รวม", round(time.time() - t0), "วิ", flush=True)
