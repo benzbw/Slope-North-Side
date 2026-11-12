@@ -590,7 +590,7 @@ var EF={};
 function efReset(){if(!EF.hp||!ac)return;var t=ac.currentTime;[EF.hp.frequency,EF.lp.frequency,EF.dry.gain,EF.send.gain].forEach(function(p){p.cancelScheduledValues(t)});EF.hp.frequency.setValueAtTime(10,t);EF.lp.frequency.setValueAtTime(20000,t);EF.dry.gain.setValueAtTime(1,t);EF.send.gain.setValueAtTime(0,t)}
 a.addEventListener("play",initAudio);
 function beat(){if(an&&!a.paused){an.getByteFrequencyData(fd);var e=0,i;for(i=1;i<7;i++)e+=fd[i];e/=6;avg=avg*.95+e*.05;var n=performance.now();if(e>avg*1.3&&e>110&&n-lastB>220){pulse=1;lastB=n}}
- pulse*=.88;$("pl").style.opacity=pulse>.02?pulse*.8:0;st.style.transform=pulse>.02?"scale("+(1+pulse*.03)+")":""}
+ pulse*=.88;$("pl").style.opacity=pulse>.02?pulse*.8:0;if(st.style.transform)st.style.transform=""}
 
 var SEG=null;try{if(window.Intl&&Intl.Segmenter)SEG=new Intl.Segmenter("th",{granularity:"word"})}catch(e){}
 /* ---------- คำเด่น (punch words): เลือกอัตโนมัติทุกเพลง ---------- */
@@ -711,7 +711,7 @@ function frame(){beat();var pn0=performance.now();
  (function(){var mc=$("mvc");if(MV.on){var w0=innerWidth,h0=innerHeight;if(mc.width!==w0||mc.height!==h0){mc.width=w0;mc.height=h0}if(!drawMV(mc.getContext("2d"),w0,h0,t,k))mc.getContext("2d").clearRect(0,0,w0,h0);mc._on=true}else{var w1=innerWidth,h1=innerHeight,am=ambMode()!="off"&&!LITE;if(am){if(mc.width!==w1||mc.height!==h1){mc.width=w1;mc.height=h1}var cx3=mc.getContext("2d");cx3.clearRect(0,0,w1,h1);drawAmb(cx3,w1,h1,t);mc._on=true}else if(mc._on){mc.getContext("2d").clearRect(0,0,mc.width,mc.height);mc._on=false}}})();
  (function(){var c=$("fxc");if(!c){c=document.createElement("canvas");c.id="fxc";document.body.appendChild(c)}var w=innerWidth,h=innerHeight;if(c.width!==w||c.height!==h){c.width=w;c.height=h}var x=c.getContext("2d");if(c._on)x.clearRect(0,0,w,h);c._on=false;if(lfxDraw(x,w,h,t))c._on=true;if(drawSketch(x,w,h,t))c._on=true;if(ENDC.on&&t>=endStart()){drawEnd(x,w,h,t);c._on=true}if(drawWM(x,w,h,t))c._on=true})();
  rowCap();
- if(PUNCH){var kq=kick(t),tr=kq>.03?"scale("+(1+kq*.05).toFixed(3)+")":"";if(st.style.transform!==tr)st.style.transform=tr}else if(st.style.transform)st.style.transform="";
+ /* ตัวหนังสือไม่เต้นตามจังหวะแล้ว (ให้นิ่ง อ่านง่าย) ฉากหลังยังเต้นอยู่ */if(st.style.transform)st.style.transform="";
  var es=ENDC.on&&t>=endStart();if($("endc").classList.contains("show")!==es){$("endc").classList.toggle("show",es);st.style.transition="opacity .6s";st.style.opacity=es?0:""}
  if(revStop&&!a.paused&&a.currentTime>=revStop){a.pause();revStop=0}
  var sk=$("sk");if(!drag)sk.value=a.currentTime;sk.max=dur();sk.style.setProperty("--p",(a.currentTime/dur()*100)+"%");
@@ -1495,7 +1495,7 @@ function drawGroup(x,W,H,t,k,gi){
  var SB=safeBox(W,H),tagH=multi?lineFit(x,idx[0],W,H).sz*.9:0,NS=stackY(x,idx,W,H,tagH),PS=prev.length?stackY(x,prev,W,H,tagH):null;
  var sx=0,sy=0,k2=W/720;
  x.save();x.translate(SB.cx+sx,SB.cy+sy);
- var gs=1+.012*Math.sin(t*1.1)+(PUNCH?kick(t)*.06:pulse*.03);x.scale(gs,gs);
+ /* ตัวหนังสือนิ่ง ไม่ขยับตามจังหวะ */
  if(multi){var ty0=(PS?PS.top+(NS.top-PS.top)*e:NS.top)+tagH/2;x.font="700 "+(tagH*.45)+"px 'Noto Sans Thai',sans-serif";x.textAlign="center";x.fillStyle=col;x.globalAlpha=.9;x.fillText(SG[sgi].n.split("").join(" "),0,ty0);x.globalAlpha=1;x.textAlign="left"}
  var DIM=ROLL()?.38:.62;
  var SH=0;if(PS)idx.forEach(function(j){if(PS.ys[j]!=null)SH=NS.ys[j]-PS.ys[j]});
