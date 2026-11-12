@@ -719,7 +719,7 @@ function setLite(v,sv2){LITE=v;document.body.classList.toggle("lite",v);$("litec
 /* หน้าตัดต่อ: ไม่เกิน 4 แถว ถ้าเกินซ่อนบรรทัดเก่า บรรทัดยาวมากเลื่อนขึ้นทีละแถว */
 var RCN=0;function rowCap(){if(++RCN%4)return;if(!els.length)return;var cur=null;for(var i=els.length-1;i>=0;i--)if(els[i].className.indexOf(" on")>-1){cur=els[i];break}if(!cur)cur=els[els.length-1];
  var sp=cur.querySelector(".w");if(!sp)return;var lh=sp.getBoundingClientRect().height||parseFloat(getComputedStyle(cur).lineHeight)||40;if(lh<8)return;
- function rows(e){var mh=e.style.maxHeight;e.style.maxHeight="";var r=Math.round(e.scrollHeight/lh);e.style.maxHeight=mh;return Math.max(1,r)}
+ function rows(e){/* บรรทัดที่ซ่อนอยู่วัดขนาดไม่ได้ (ได้ 0) ใช้ค่าที่จำไว้ตอนยังเห็น ไม่งั้นจะสลับซ่อน/โชว์จนกระตุก */if(e.style.display==="none")return e._r||1;var mh=e.style.maxHeight;e.style.maxHeight="";var r=Math.max(1,Math.round(e.scrollHeight/lh));e.style.maxHeight=mh;e._r=r;return r}
  var rc=rows(cur),tot=0;els.forEach(function(e){if(e!==cur)tot+=rows(e)});var hideOld=tot+Math.min(rc,4)>4;
  els.forEach(function(e){var d=(e!==cur&&hideOld)?"none":"";if(e.style.display!==d)e.style.display=d});
  if(rc>4){cur.style.maxHeight=(lh*4.3)+"px";cur.style.overflow="hidden";cur.style.scrollBehavior="smooth";var nw=cur.querySelector(".w.now")||[].slice.call(cur.querySelectorAll(".w.on")).pop();if(nw){var top=nw.getBoundingClientRect().top-cur.getBoundingClientRect().top+cur.scrollTop,rn=Math.floor(top/lh+.2),want=Math.max(0,rn-3)*lh;if(Math.abs(cur.scrollTop-want)>2)cur.scrollTop=want}}
