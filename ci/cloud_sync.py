@@ -70,12 +70,25 @@ def run(meta, audio):
         from faster_whisper import WhisperModel
         t1 = time.time()
         wm = WhisperModel(meta.get("wmodel") or "medium", device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
-        segs, info = wm.transcribe(pcm, language="th", word_timestamps=True, beam_size=2, condition_on_previous_text=False,
-                                   initial_prompt=("Bedupbiw, Slope North Side. " + " ".join(lines))[:600],
-                                   vad_filter=True, vad_parameters={"min_silence_duration_ms": 300})
         ww = []
-        for sg in segs:
-            ww.extend([w.word, round(w.start, 2), round(w.end, 2), round(w.probability, 2)] for w in sg.words)
+        win = float(meta.get("wwin") or 0)
+        if win > 0:
+            # ฟังทีละช่วงสั้น ๆ (ไม่ใช้ VAD) — กันอาการหยุดถอดกลางเพลงแร็ปเร็ว
+            n = len(pcm) / 16000.0; t = 0.0
+            while t < n - .5:
+                a = int(t * 16000); b = int(min(n, t + win + 1.0) * 16000)
+                segs, info = wm.transcribe(pcm[a:b], language="th", word_timestamps=True, beam_size=3,
+                                           condition_on_previous_text=False, vad_filter=False,
+                                           initial_prompt="Bedupbiw, Slope North Side. แร็ปไทย")
+                for sg in segs:
+                    ww.extend([w.word, round(w.start + t, 2), round(w.end + t, 2), round(w.probability, 2)] for w in sg.words if w.start < win + .5)
+                t += win
+        else:
+            segs, info = wm.transcribe(pcm, language="th", word_timestamps=True, beam_size=2, condition_on_previous_text=False,
+                                       initial_prompt=("Bedupbiw, Slope North Side. " + " ".join(lines))[:600],
+                                       vad_filter=True, vad_parameters={"min_silence_duration_ms": 300})
+            for sg in segs:
+                ww.extend([w.word, round(w.start, 2), round(w.end, 2), round(w.probability, 2)] for w in sg.words)
         res["whisper"] = ww
         print("  Whisper", len(ww), "คำ", round(time.time() - t1), "วิ", flush=True)
     except Exception as e:
