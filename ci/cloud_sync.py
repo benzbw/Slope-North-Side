@@ -72,7 +72,16 @@ def run(meta, audio):
         wm = WhisperModel(meta.get("wmodel") or "medium", device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
         ww = []
         win = float(meta.get("wwin") or 0)
-        if win > 0:
+        if meta.get("wranges"):
+            # ฟังเฉพาะช่วงที่ขอ: [[เริ่ม, จบ, "prompt"], ...] ผลแต่ละช่วงติดป้าย r
+            for ri, rg in enumerate(meta["wranges"]):
+                a = int(rg[0] * 16000); b = int(rg[1] * 16000)
+                segs, info = wm.transcribe(pcm[a:b], language="th", word_timestamps=True, beam_size=5,
+                                           condition_on_previous_text=False, vad_filter=False,
+                                           initial_prompt=(rg[2] if len(rg) > 2 else None))
+                for sg in segs:
+                    ww.extend([w.word, round(w.start + rg[0], 2), round(w.end + rg[0], 2), round(w.probability, 2), ri] for w in sg.words)
+        elif win > 0:
             # ฟังทีละช่วงสั้น ๆ (ไม่ใช้ VAD) — กันอาการหยุดถอดกลางเพลงแร็ปเร็ว
             n = len(pcm) / 16000.0; t = 0.0
             while t < n - .5:
