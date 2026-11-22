@@ -594,6 +594,22 @@ function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.s
  localStorage.setItem("bwraw",RAW);localStorage.setItem(K,JSON.stringify(sv));if(K!=keys[0])try{localStorage.setItem(keys[0],JSON.stringify(sv))}catch(e){}
  if(nSplit)FIXED.push(["บรรทัดยาวเกิน "+nSplit+" บรรทัด","แยกเป็นบรรทัดสั้นตามช่วงที่หยุดร้อง (เวลาเดิมไม่เปลี่ยน)"]);if(nDel)FIXED.push(["ป้ายท่อน "+nDel+" อัน เช่น (Rap)","ลบออก ไม่ขึ้นเป็นเนื้อเพลง"])}catch(e){try{console.warn("autoSplit",e)}catch(_){}}})();
 /* แก้เวลาเพลงที่ตรวจด้วยเสียงแล้ว (ถอดเสียง 3 รอบยืนยัน): ใช้ครั้งเดียวต่อโปรเจกต์ ไม่ทับบรรทัดที่ผู้ใช้ตรวจเอง */
+/* ท่อนฮุคซ้ำ: เสียงฮุคมักเป็นชุดเดียวกันวางซ้ำ ⇒ เวลาในแต่ละรอบต้องเหมือนกันทุกคำ (ต่างแค่จุดเริ่ม)
+   หา "ช่วงห่าง" จากบรรทัดที่มั่นใจทั้งสองรอบ แล้วใช้เวลาของรอบที่มั่นใจกว่าให้อีกรอบ — กันฮุครอบหนึ่งตรง อีกรอบเพี้ยน */
+(function hookSync(){try{["bw"+"3","bw3s57l"].forEach(function(k){var sv=null;try{sv=JSON.parse(localStorage.getItem(k)||"null")}catch(e){}if(!sv||!sv.U||!sv.T||!sv.C)return;
+ var U=sv.U,C=sv.C,V=sv.V||[],n=U.length,key=U.map(function(L){return(L||[]).map(function(u){return u[1]}).join("").replace(/[\s()（）]/g,"").toLowerCase()}),done={},nfix=0;
+ function cf(j){return V[j]?2:(C[j]||0)}
+ for(var i=0;i<n;i++)for(var j=i+1;j<n;j++){if(done[i+"_"+j]||key[i].length<6||key[i]!=key[j]||(i>0&&j>0&&key[i-1]==key[j-1]&&key[i-1].length>=6))continue;
+  var L=0;while(j+L<n&&i+L<j&&key[i+L]==key[j+L]&&key[i+L].length>=2)L++;if(L<3)continue;
+  var ds=[];for(var m=0;m<L;m++){done[(i+m)+"_"+(j+m)]=1;if(Math.min(cf(i+m),cf(j+m))>=.7)ds.push(sv.T[j+m]-sv.T[i+m])}
+  if(ds.length<2)continue;ds.sort(function(a,b){return a-b});var off=ds[ds.length>>1];if(ds.filter(function(d){return Math.abs(d-off)<.15}).length<2)continue;
+  var ca=0,cb=0,nd=0;for(m=0;m<L;m++){ca+=cf(i+m);cb+=cf(j+m);if(Math.abs(sv.T[j+m]-sv.T[i+m]-off)>.35)nd++}if(nd<2)continue;var useA=ca>=cb;/* ใช้รอบที่มั่นใจกว่า ทั้งท่อน (ไม่ผสมรายบรรทัด กันเวลาซ้อนกัน) */
+  for(m=0;m<L;m++){var a=i+m,b=j+m;if(!U[a]||!U[b]||U[a].length!=U[b].length)continue;var src=useA?a:b,dst=useA?b:a,sh=useA?off:-off;
+   if(V[dst]||!U[src].some(function(u,q){return Math.abs(u[2]+sh-U[dst][q][2])>.35}))continue;if(dst>0&&U[dst-1]&&U[dst-1].length&&U[dst-1][U[dst-1].length-1][3]>U[src][0][2]+sh+.02)continue;if(dst+1<n&&U[dst+1]&&U[dst+1].length&&key[dst+1]!=key[src+1]&&U[src][U[src].length-1][3]+sh>U[dst+1][0][2]+.02)continue;
+   U[dst].forEach(function(u,q){u[2]=Math.round((U[src][q][2]+sh)*100)/100;u[3]=Math.round((U[src][q][3]+sh)*100)/100});
+   sv.T[dst]=Math.round((sv.T[src]+sh)*100)/100;if(sv.E)sv.E[dst]=Math.round((sv.E[src]+sh)*100)/100;C[dst]=C[src];nfix++}}
+ if(nfix){/* กันทับซ้อนกับบรรทัดก่อน */for(var q=1;q<n;q++)if(sv.E&&sv.E[q-1]>sv.T[q]-.03)sv.E[q-1]=Math.round((sv.T[q]-.03)*100)/100;
+  localStorage.setItem(k,JSON.stringify(sv));if(!FIXED.some(function(x){return x[2]=="hook"}))FIXED.push(["ฮุคร้องซ้ำ แต่เวลาเนื้อแต่ละรอบไม่ตรงกัน "+nfix+" บรรทัด","ใช้เวลาจากรอบที่ตรงกว่าให้ทุกรอบ","hook"])}})}catch(e){try{console.warn("hookSync",e)}catch(_){}}})();
 (function songFix(){try{if(localStorage.getItem("bwsfx")=="1")return;var SFX=[["มึงนั้นก็ควรจะวางก่อนเพราะตอนนี้กูนั้นไม่ได้ยิน",[[18.5,18.64],[18.66,18.78],[18.8,18.96],[18.98,19.28],[19.3,19.55],[19.57,19.7],[19.72,19.86],[19.88,20.26],[20.28,20.38],[20.4,20.52],[20.54,20.72],[20.74,21.12]],21.14],["มันยากหรือปล่าวนายยังคง",[[95.95,96.1],[96.12,96.31],[96.33,96.77],[96.79,96.92],[96.94,97.32]],97.32],["ตามฉากที่เฝ้ากับมาร์ค",[[97.34,97.4],[97.42,97.57],[97.59,97.71],[97.73,97.93],[97.95,98.09],[98.11,98.33]],98.33],["ผิดเป้าแต่ไม่รู้ตัวเองทำพลาดหรือฟาว",[[98.35,98.46],[98.48,98.82],[98.84,98.91],[98.93,99.0],[99.02,99.11],[99.13,99.46],[99.48,99.54],[99.56,99.62],[99.64,99.8],[99.82,100.13],[100.15,101.1]],101.3]];
  ["bw"+"3","bw3s57l"].forEach(function(k){var sv=null;try{sv=JSON.parse(localStorage.getItem(k)||"null")}catch(e){}if(!sv||!sv.U||!sv.T)return;var n=0,V=sv.V||[];
   SFX.forEach(function(f){for(var j=0;j<sv.U.length;j++){var U=sv.U[j];if(!U||U.length!=f[1].length||V[j])continue;if(U.map(function(u){return u[1]}).join("").replace(/\s/g,"")!=f[0])continue;
@@ -1094,7 +1110,25 @@ function csUI(){var b=$("cloudbox");if(!b)return;if(!csHost()||LOCAL){b.hidden=t
   bt.disabled=true;bt.textContent="กำลังตรวจ…";try{var r=await fetch("https://api.github.com/repos/"+CS_REPO,{headers:{"Authorization":"Bearer "+v,"Accept":"application/vnd.github+json"},cache:"no-store"}),j=r.ok?await r.json():null;
    if(!j||!j.permissions||!j.permissions.push){toast(r.status==401?"รหัสไม่ถูกต้อง":"รหัสนี้ยังไม่มีสิทธิ์เขียน (Contents: Read and write)");bt.disabled=false;bt.textContent="บันทึกและตรวจรหัส";return}
    localStorage.setItem("sns:ghpat",v);toast("ตั้งค่าเสร็จ กดซิงค์อัตโนมัติได้เลย");csUI()}catch(e){toast("ตรวจรหัสไม่สำเร็จ เช็กเน็ตแล้วลองใหม่");bt.disabled=false;bt.textContent="บันทึกและตรวจรหัส"}}}
-$("auto").onclick=function(){autoSync()};
+$("auto").onclick=function(){autoSync()};/* ตรวจ "ฮุคร้อง 2 รอบ แต่เขียนไว้รอบเดียว": บรรทัดในท่อน § ยืดยาวผิดปกติ (คำต่อวินาทีต่ำกว่าครึ่งของทั้งเพลง)
+   ⇒ AI ต้องเอาเนื้อรอบเดียวไปยืดคลุมเสียง 2 รอบ เวลาเลยเพี้ยนทั้งท่อน · เสนอปุ่มเดียว: ใส่ x2 แล้วซิงค์ใหม่ */
+function twiceCheck(){try{if(!synced||!T||!N)return null;var raw=RAW.split(/\n\s*\n/),rate=[],li=0,secOf=[];
+ raw.forEach(function(sec,si){sec.split("\n").forEach(function(l){if(l.replace(/^((?:§|@[1-4])[ \t]*)+/,"").trim())secOf.push({si:si,hook:/^\s*§/.test(sec)})})});
+ if(secOf.length!=N)return null;
+ for(var j=0;j<N;j++){var t=LN[j].t,sy=(t.match(/[ก-ฮ]/g)||[]).length/1.8+(t.match(/[A-Za-z]+/g)||[]).length*1.2,d=Math.max(.3,lineEnd(j)-T[j]);rate.push(sy/d)}
+ var srt=rate.slice().sort(function(a,b){return a-b}),med=srt[srt.length>>1]||1,bad={};
+ secOf.forEach(function(o,j){if(!o.hook)return;var b=(bad[o.si]=bad[o.si]||{n:0,s:0,f:0});b.n++;if(rate[j]<med*.55)b.s++;if(rate[j]>=med*1.0)b.f++});
+ var out=Object.keys(bad).filter(function(si){var b=bad[si];return b.n>=3&&b.s>=Math.max(2,Math.ceil(b.n*.4))&&b.f>=1&&!/[x×]\s*[2-4]\s*[\)\]]?\s*$/i.test(raw[si])}).map(Number);
+ return out.length?{secs:out,raw:raw}:null}catch(e){return null}}
+function twiceFix(r){var raw=r.raw.slice();r.secs.slice().sort(function(a,b){return b-a}).forEach(function(si){raw.splice(si+1,0,raw[si].replace(/\s+$/,""))});
+ try{["bw"+"3","bw3s57l"].forEach(function(k){var v=localStorage.getItem(k);if(v){localStorage.setItem(k+"bak",v);localStorage.removeItem(k)}});
+  localStorage.setItem("bwraw",raw.join("\n\n"));sessionStorage.setItem("bwresync","1")}catch(e){}location.reload()}
+(function(){var r=twiceCheck();if(r){var bx=document.createElement("div");bx.id="twicebox";bx.style.cssText="margin:10px 0;padding:12px;border-radius:12px;background:rgba(255,190,60,.12);border:1px solid rgba(255,190,60,.45);font-size:14px;line-height:1.5";
+  bx.innerHTML='<b>⚠ ท่อนฮุคน่าจะร้อง 2 รอบ แต่เนื้อเขียนไว้รอบเดียว</b><br>AI เลยยืดเนื้อรอบเดียวคลุมเสียง 2 รอบ เนื้อจึงไม่ตรงทั้งท่อน<div style="height:8px"></div><button class="cta" id="twicego">แก้ให้เลย: ใส่ x2 แล้วซิงค์ใหม่</button>';
+  var host=$("s-result")||$("s-start");host.parentNode.insertBefore(bx,host);$("twicego").onclick=function(){twiceFix(r)};
+  setTimeout(function(){toast("เจอท่อนฮุคที่ร้อง 2 รอบแต่เขียนรอบเดียว · ไปที่ขั้นซิงค์ กดแก้ได้ปุ่มเดียว")},2600)}
+ try{if(sessionStorage.getItem("bwresync")){sessionStorage.removeItem("bwresync");setTimeout(function(){go(2);autoSync()},900)}}catch(e){}})();
+
 setTimeout(function(){try{csUI();var pj=JSON.parse(localStorage.getItem("bwcloudjob")||"null");if(pj&&cloudOn()&&Date.now()-pj.t<3600e3&&!LOCAL)autoSync()}catch(e){}},1200);$("quick").onclick=function(){autoSync(true)};
 try{fetch("/api/ping").then(function(r){return r.json()}).then(function(j){if(j&&j.ok){LOCAL=true;try{csUI()}catch(e){}if(j.auth){$("akey").hidden=false;$("akey").value=KEY0}info("เชื่อมต่อเซิร์ฟเวอร์ AI แล้ว"+(j.model?" (โมเดล "+j.model+")":"")+" แม่นกว่าโหมดในเบราว์เซอร์",0)}}).catch(function(){})}catch(e){}
 /* ---------- singers ---------- */
