@@ -858,6 +858,11 @@ var WC={};
 function wordsOf(i){if(WC[i])return WC[i];var t=LN[i].t,parts=[],off=0,m;
  if(SEG){Array.from(SEG.segment(t)).forEach(function(sg){var tx=sg.segment;if(/^\s+$/.test(tx)&&parts.length)parts[parts.length-1].tx+=tx;else parts.push({tx:tx})})}
  else{t.split(/(\s+)/).forEach(function(tx){if(!tx)return;if(/^\s+$/.test(tx)&&parts.length)parts[parts.length-1].tx+=tx;else if(tx.length>9){var q=0;while(q<tx.length){var en=Math.min(tx.length,q+4);while(en<tx.length&&(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/.test(tx[en])||/[เแโใไ]/.test(tx[en-1])))en++;parts.push({tx:tx.slice(q,en)});q=en}}else parts.push({tx:tx})})}
+ /* ห้ามตัดกลางคำ: ตัวตัดคำของเบราว์เซอร์มักหั่นคำสะกดแบบพูด เช่น "ปล่าว" เป็น ป/ล่า/ว แล้วขึ้นคนละแถว */
+ (function(){var bd=null,o=0;if(UT&&UT[i]&&UT[i].length){var ok=true;bd={};UT[i].forEach(function(u){if(t.substr(u[0],String(u[1]).length)==u[1])bd[u[0]]=1;else ok=false});if(!ok)bd=null}
+  var out=[];parts.forEach(function(p){var pv=out[out.length-1],th=p.tx.replace(/\s+$/,"");
+   var lone=/^[\u0E01-\u0E2E][\u0E48-\u0E4C]?$/.test(th);
+   if(pv&&!/\s$/.test(pv.tx)&&((bd&&!bd[o])||lone))pv.tx+=p.tx;else out.push({tx:p.tx});o+=p.tx.length});parts=out})();
  var rg=[],re=new RegExp(KW.source,"gi");while((m=re.exec(t))){rg.push([m.index,m.index+m[0].length]);if(!m[0].length)re.lastIndex++}
  var PLi=(pkData().PL||{})[i],pkd=false,tot=0,pkR=null;if(PLi)Object.keys(PLi).forEach(function(k){if(k[0]!="~")return;var ph=k.slice(1),src="",map=[];for(var c=0;c<t.length;c++){var nc=pkNorm(t[c]);if(nc){src+=nc.toLowerCase();map.push(c)}}var ix=src.indexOf(ph);if(ix>=0){pkR=[map[ix],map[ix+ph.length-1]+1];pkd=true}});parts.forEach(function(p){p.o=off;off+=p.tx.length;p.kw=rg.some(function(r){return p.o<r[1]&&off>r[0]});if(pkR&&p.o<pkR[1]&&off>pkR[0]){p.pk=1;p.kw=true}else if(PLi&&!pkd&&PLi[pkNorm(p.tx.replace(/[()（）]/g,""))]){p.pk=1;p.kw=true;pkd=true}p.f=tot;tot+=p.tx.replace(/\s/g,"").length||1});
  parts.forEach(function(p){p.f/=Math.max(1,tot)});
