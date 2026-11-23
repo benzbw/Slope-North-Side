@@ -775,8 +775,16 @@ function pageUI(){document.querySelectorAll("#pagesel button").forEach(function(
 document.querySelectorAll("#pagesel button").forEach(function(b){b.onclick=function(){PAGE=+b.dataset.n;try{localStorage.setItem("sns:page",String(PAGE))}catch(e){}paginate();wg=-2;pageUI();toast(PAGE?"แสดงหน้าละ "+PAGE+" บรรทัด":"แสดงทั้งท่อน")}});pageUI();
 /* ---------- ไตเติลเปิดเพลง: ชื่อเพลง + SLOPE NORTH SIDE (ทุกเพลง ทั้งเก่าและใหม่) ---------- */
 var INTRO_ON=true;try{INTRO_ON=localStorage.getItem("bwintro")!=="0"}catch(e){}
+/* ชื่อเพลงที่ได้มาจากชื่อไฟล์อัตโนมัติ (เช่น "VIDEO 20261111 230656") ห้ามขึ้นจอ → ใช้ชื่อโปรเจกต์แทน */
+function autoTitle(t){t=String(t||"").trim();return !t||/^(video|vid|img|image|audio|aud|rec|recording|new recording|voice|screen\s*record\w*|record|track|song|untitled|ไฟล์|เสียง)[\s_\-]*\d/i.test(t)||/^[\d\s_\-.:]{6,}$/.test(t)||/^[A-Z]{2,6}[\s_\-]?\d{6,}/.test(t)}
+(function titleFromProject(){var n=0,iv=setInterval(function(){var m=window.SNSMETA;if(++n>40||m){clearInterval(iv)}if(!m||!m.name)return;var nm=String(m.name).trim();if(!nm||autoTitle(nm))return;var ch=0;
+ try{var r=JSON.parse(localStorage.getItem("bwrel")||"null")||{};if(autoTitle(r.title)){r.title=nm;localStorage.setItem("bwrel",JSON.stringify(r));ch++}}catch(e){}
+ try{if(typeof ENDC!="undefined"&&autoTitle(ENDC.title)){ENDC.title=nm;localStorage.setItem("bwend",JSON.stringify(ENDC));var et=document.getElementById("end-title");if(et)et.value=nm;ch++}}catch(e){}
+ try{if(typeof CV!="undefined"&&autoTitle(CV.title)){CV.title=nm;var cj=JSON.parse(localStorage.getItem("bwcover")||"{}");cj.title=nm;localStorage.setItem("bwcover",JSON.stringify(cj));ch++}}catch(e){}
+ try{if(typeof STS!="undefined"&&STS&&autoTitle(STS.title)){STS.title=nm;localStorage.setItem("bwstudio",JSON.stringify(STS));ch++}}catch(e){}
+ },250)})();
 function introInfo(){var t="",a="";try{var r=JSON.parse(localStorage.getItem("bwrel")||"null");if(r){t=(r.title||"").trim();a=(r.artist||"").trim();if(r.feat)a+=(a?" ft. ":"")+r.feat}}catch(e){}
- if(!t){try{var e0=JSON.parse(localStorage.getItem("bwend")||"null");if(e0&&e0.title)t=e0.title.trim();if(!a&&e0&&e0.artist)a=e0.artist}catch(e){}}if(!t)t=(STS&&STS.title||"").trim();return{t:t,a:a.replace(/\s*,\s*/g," x ")}}
+ if(!t){try{var e0=JSON.parse(localStorage.getItem("bwend")||"null");if(e0&&e0.title)t=e0.title.trim();if(!a&&e0&&e0.artist)a=e0.artist}catch(e){}}if(!t)t=(STS&&STS.title||"").trim();if(autoTitle(t)&&window.SNSMETA&&SNSMETA.name&&!autoTitle(SNSMETA.name))t=String(SNSMETA.name).trim();return{t:t,a:a.replace(/\s*,\s*/g," x ")}}
 function drawIntro(x,W,H,t){if(!INTRO_ON||t<0)return false;var D=3.8;if(t>D)return false;var I=introInfo();
  var al=clamp01(t<.5?t/.5:(D-t)/.8),e=1-Math.pow(1-clamp01(t/1),3),M=Math.min(W,H),cy=H>W*1.3?H*.25:H*.23;
  x.save();x.setTransform(1,0,0,1,0,0);x.textAlign="center";x.textBaseline="middle";x.globalAlpha=al;

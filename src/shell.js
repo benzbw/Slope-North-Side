@@ -407,7 +407,7 @@ function addBar(host){if(!host||host.querySelector(".sx-back"))return;var b=h('<
  var s=h('<span class="sx-save"></span>');b.after(s);saveEl.push(s)}
 async function enterProject(){var r=$("sx");if(r)r.hidden=true;lanPin();uiSimplify();
  if(S.demo){META={name:"Dangerous (ตัวอย่าง)"};var bn=h('<div class="sx-demo"><span>ตัวอย่างผลงาน · '+(S.silent?'ไม่มีเสียงเพลงในเว็บสาธารณะ':'แก้ได้แต่ไม่บันทึก')+'</span><button>ทำเพลงของคุณ</button></div>');document.body.appendChild(bn);bn.querySelector("button").onclick=function(){goHome()}}
- else{try{META=await Store.meta(S.pid)}catch(e){META=null}if(!META){toastS("ไม่พบโปรเจกต์นี้ในบัญชี");setTimeout(function(){location.hash="";location.reload()},1200);return}}
+ else{try{META=await Store.meta(S.pid)}catch(e){META=null}window.SNSMETA=META;if(!META){toastS("ไม่พบโปรเจกต์นี้ในบัญชี");setTimeout(function(){location.hash="";location.reload()},1200);return}}
  addBar($("top"));addBar(document.querySelector("#pg1 .pgh"));try{document.title=(META.name||"")+" · Slope North Side"}catch(e){}
  if(S.demo)return;
  if(S.silent){var au0=await Store.loadAudio(S.pid,META).catch(function(){return null});if(au0&&typeof window.snsSetAudio=="function"){window.snsSetAudio(au0.url,au0.name)}else{var fn0=$("fname");if(fn0)fn0.textContent="เว็บสาธารณะไม่ได้ฝังเพลงไว้ กดอัปโหลดไฟล์เพลง Dangerous ในเครื่องนี้ครั้งเดียว";needAudio()}}
