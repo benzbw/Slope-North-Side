@@ -184,9 +184,9 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
 .w.on{animation:wpop .42s cubic-bezier(.2,.9,.3,1) forwards}
 .w.on.a1{animation-name:wsl}.w.on.a2{animation-name:wbl}
 .g.h .w.on{animation:wgl .38s linear forwards}
-.w.k.on{color:#fff;text-shadow:0 0 18px var(--hot),0 0 2px #000}
+.w.k.on{opacity:1;color:#fff;text-shadow:0 0 18px var(--hot),0 0 2px #000}
 .w.k.now{animation:pkf .55s ease-out}
-/* ตัวหนังสือนิ่ง ไม่เด้ง/ไม่สั่น (ใช้แค่จางเข้า+เรืองแสง) และตัดบรรทัดให้แถวยาวพอๆ กัน */#stage .w{transform:none!important;rotate:none!important;scale:none!important;translate:none!important}#stage .l{text-wrap:balance}#stage .w.ad{font-size:.58em;font-style:italic;opacity:.8;color:var(--hot);vertical-align:.35em;margin:0 .15em;text-transform:uppercase}@keyframes pkf{0%{color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
+/* ตัวหนังสือนิ่ง ไม่เด้ง/ไม่สั่น (ใช้แค่จางเข้า+เรืองแสง) และตัดบรรทัดให้แถวยาวพอๆ กัน */#stage .w{transform:none!important;rotate:none!important;scale:none!important;translate:none!important}#stage .l{text-wrap:balance}#stage .w.ad{font-size:.58em;font-style:italic;opacity:.8;color:var(--hot);vertical-align:.35em;margin:0 .15em;text-transform:uppercase}@keyframes pkf{0%{opacity:1;color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
 /* แบบนุ่มไหล: ค่อยๆ ลอยขึ้นจากเบลอ เรืองแสงแล้วนิ่ง ทุกคำเหมือนกันไม่สะดุด */
 .anim-soft .w.on,.anim-soft .w.on.a1,.anim-soft .w.on.a2{animation:wsoft .6s cubic-bezier(.22,.61,.36,1) forwards}
 .anim-soft .g.h .w.on,.anim-soft .g.h .w.on.a1,.anim-soft .g.h .w.on.a2{animation:wsofth .7s cubic-bezier(.22,.61,.36,1) forwards}
@@ -405,6 +405,9 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
    <div class="h" style="margin-top:18px;font-size:15px">ปกเพลง</div>
    <button class="cta alt" id="cv-open" style="min-height:44px;font-size:14px">ทำปกเพลง (3000×3000 สำหรับลงแพลตฟอร์ม)</button>
    <div class="h" style="margin-top:18px;font-size:15px">ฉากจบเพลง</div>
+   <div style="margin:10px 0 4px;font-size:14px">ฉากคั่นช่วงดนตรี <span class="mut" style="font-size:12px">(ช่วงที่มีแต่บีต/แอดลิบ ไม่มีเนื้อ)</span></div>
+   <div class="chips" id="inter-sty"><button data-s="off">ไม่ใส่</button><button data-s="samurai">⚔ ซามูไร ภาพวาดญี่ปุ่น</button></div>
+   <p class="mut" id="inter-info" style="font-size:12px;margin:4px 0 10px"></p>
    <label class="tgl"><input type="checkbox" id="intro-on" checked><span>ขึ้นชื่อเพลง + SLOPE NORTH SIDE ตอนเริ่มเพลง (3–4 วิแรก)</span></label>
    <label class="tgl"><input type="checkbox" id="end-on" checked><span>ใส่ลายน้ำ SLOPE NORTH SIDE + ชื่อเพลง + ศิลปิน ตอนจบเพลง</span></label>
    <div class="row"><input class="inp" id="end-title" maxlength="40" placeholder="ชื่อเพลง"></div>
@@ -791,6 +794,10 @@ function endStart(){var le=N?((E&&E[N-1]!=null)?E[N-1]:T[N-1]+3):0,D=dur();if(le
 function endTail(){if(!ENDC.on)return 0;var D=dur();return Math.max(0,endStart()+3.4-D)}
 try{["400 40px Anton","italic 600 40px 'Playfair Display'","500 20px Montserrat"].forEach(function(f){document.fonts.load(f)})}catch(e){}
 $("end-on").checked=ENDC.on;$("end-title").value=ENDC.title;$("end-artist").value=ENDC.artist;endFill();
+function interUI(){var sp=interSpan(),f=function(v){var m=Math.floor(v/60),q=Math.round(v%60);return m+":"+(q<10?"0":"")+q};[].forEach.call(document.querySelectorAll("#inter-sty button"),function(b){b.classList.toggle("on",b.dataset.s==INTER.sty)});
+ $("inter-info").textContent=sp?("ช่วง "+f(sp[0])+"–"+f(sp[1])+" ("+Math.round(sp[1]-sp[0])+" วิ) · ซามูไรดวลดาบตามจังหวะบีต"):"ยังไม่เจอช่วงที่ไม่มีเนื้อยาวเกิน 6 วิ (ต้องซิงค์ก่อน)"}
+[].forEach.call(document.querySelectorAll("#inter-sty button"),function(b){b.onclick=function(){INTER.sty=b.dataset.s;interSave();interUI();var sp=interSpan();if(INTER.sty!="off"&&sp){try{seek(Math.max(0,sp[0]-.5));initAudio();a.play()}catch(e){}toast("เล่นให้ดูช่วงฉากคั่น")}}});
+setTimeout(interUI,1500);
 $("intro-on").checked=INTRO_ON;$("intro-on").onchange=function(){INTRO_ON=this.checked;try{localStorage.setItem("bwintro",INTRO_ON?"1":"0")}catch(e){}toast(INTRO_ON?"เปิดชื่อเพลงตอนเริ่ม":"ปิดชื่อเพลงตอนเริ่ม")};
 $("end-on").onchange=function(){ENDC.on=this.checked;endSave()};$("end-title").oninput=function(){ENDC.title=this.value;endSave()};$("end-artist").oninput=function(){ENDC.artist=this.value;endSave()};
 var fT=0,fN=0,fSum=0,autoDone=false,LITE=false;
@@ -812,7 +819,7 @@ function frame(){beat();var pn0=performance.now();
  els.forEach(function(e){var j=+e.dataset.i,on=T[j]<=t,c="l"+(on?" on v"+(j%4)+(j<k?" past":""):"");if(e.className!==c){var was=e.className.indexOf(" on")>-1;e.className=c;if(on&&!was&&!a.paused&&Math.abs(t-T[j])<.8)fx(j)}
   if(on){var ws=wordsOf(j),ch=e.children,q,st0=[];for(q=0;q<ch.length;q++)st0.push(wordT(j,ws[q]));for(q=0;q<ch.length;q++){var wc=ch[q].className,w0=wc.replace(" on","").replace(" now",""),nx=q+1<ch.length?st0[q+1]:(E&&E[j]!=null?E[j]:lineEnd(j)),w1=t>=st0[q]?w0+" on"+(t<nx?" now":""):w0;if(w1!==wc)ch[q].className=w1}}});
  (function(){var mc=$("mvc");if(MV.on){var w0=innerWidth,h0=innerHeight;if(mc.width!==w0||mc.height!==h0){mc.width=w0;mc.height=h0}if(!drawMV(mc.getContext("2d"),w0,h0,t,k))mc.getContext("2d").clearRect(0,0,w0,h0);mc._on=true}else{var w1=innerWidth,h1=innerHeight,am=ambMode()!="off"&&!LITE;if(am){if(mc.width!==w1||mc.height!==h1){mc.width=w1;mc.height=h1}var cx3=mc.getContext("2d");cx3.clearRect(0,0,w1,h1);drawAmb(cx3,w1,h1,t);mc._on=true}else if(mc._on){mc.getContext("2d").clearRect(0,0,mc.width,mc.height);mc._on=false}}})();
- (function(){var c=$("fxc");if(!c){c=document.createElement("canvas");c.id="fxc";document.body.appendChild(c)}var w=innerWidth,h=innerHeight;if(c.width!==w||c.height!==h){c.width=w;c.height=h}var x=c.getContext("2d");if(c._on)x.clearRect(0,0,w,h);c._on=false;if(lfxDraw(x,w,h,t))c._on=true;if(drawSketch(x,w,h,t))c._on=true;if(ENDC.on&&t>=endStart()){drawEnd(x,w,h,t);c._on=true}if(drawWM(x,w,h,t))c._on=true})();
+ (function(){var c=$("fxc");if(!c){c=document.createElement("canvas");c.id="fxc";document.body.appendChild(c)}var w=innerWidth,h=innerHeight;if(c.width!==w||c.height!==h){c.width=w;c.height=h}var x=c.getContext("2d");if(c._on)x.clearRect(0,0,w,h);c._on=false;try{if(drawInterLive(x,t))c._on=true}catch(e){}if(lfxDraw(x,w,h,t))c._on=true;if(drawSketch(x,w,h,t))c._on=true;if(ENDC.on&&t>=endStart()){drawEnd(x,w,h,t);c._on=true}if(drawWM(x,w,h,t))c._on=true})();
  rowCap();
  /* ตัวหนังสือไม่เต้นตามจังหวะแล้ว (ให้นิ่ง อ่านง่าย) ฉากหลังยังเต้นอยู่ */if(st.style.transform)st.style.transform="";
  var es=ENDC.on&&t>=endStart();if($("endc").classList.contains("show")!==es){$("endc").classList.toggle("show",es);st.style.transition="opacity .6s";st.style.opacity=es?0:""}
@@ -1763,6 +1770,92 @@ function pkStamp(x,W,H,t){if(!PK_ON||!N)return false;var any=false,M=Math.min(W,
   var e1=clamp01(a/.18),k=1.18-.2*(1-Math.pow(1-e1,3))+a*.03,al=a<.18?e1:(1-clamp01((a-.35)/.75));x.globalAlpha=al*.3;x.textAlign="center";x.textBaseline="middle";
   x.translate(W/2,H*.46);x.scale(k,k);x.lineWidth=Math.max(2,fs*.025);x.strokeStyle=TH.hot;x.strokeText(w,0,0);x.globalAlpha=al*.1;x.fillStyle=TH.hot;x.fillText(w,0,0);
   if(a<.1){x.setTransform(1,0,0,1,0,0);x.globalAlpha=(1-a/.1)*.07;x.fillStyle="#fff";x.fillRect(0,0,W,H)}x.restore()});return any}
+/* ---------- ฉากคั่นช่วงดนตรี (ช่วงที่มีแต่บีต/แอดลิบ ไม่มีเนื้อ) ----------
+   สไตล์ "samurai": ภาพวาดญี่ปุ่น (กระดาษวาชิ พระอาทิตย์แดง ภูเขาหมึก) ซามูไรสองคนดวลดาบตามจังหวะบีต
+   วาดด้วยโค้ดทั้งหมด ไม่ใช้เน็ต ไม่ใช้ AI เสียเงิน · ใช้ได้ทั้งหน้าแก้ไขและตอนส่งออก */
+var INTER={sty:"off"};try{var ij=JSON.parse(localStorage.getItem("bwinter")||"null");if(ij)INTER=Object.assign(INTER,ij)}catch(e){}
+function interSave(){try{localStorage.setItem("bwinter",JSON.stringify(INTER))}catch(e){}}
+var INTERSP=null;
+function interSpan(){if(INTERSP&&INTERSP.n===N&&INTERSP.t0===T[0])return INTERSP.v;var v=null,best=0;
+ try{if(synced&&N>1)for(var j=0;j<N-1;j++){var e0=lineEnd(j),s1=T[j+1],g=s1-e0;if(g>=6&&g>best){best=g;v=[e0+.25,s1-.2]}}}catch(e){}
+ if(INTER.s!=null&&INTER.e!=null&&INTER.e-INTER.s>2)v=[INTER.s,INTER.e];
+ INTERSP={n:N,t0:T[0],v:v};return v}
+var INTPAP=null;
+function interPaper(){if(INTPAP)return INTPAP;var c=document.createElement("canvas");c.width=c.height=256;var x=c.getContext("2d"),R=mvRand(4242);
+ x.fillStyle="#efe2c8";x.fillRect(0,0,256,256);
+ for(var i=0;i<2600;i++){var v=R();x.fillStyle=v<.5?"rgba(120,90,50,"+(R()*.08)+")":"rgba(255,250,235,"+(R()*.12)+")";x.fillRect(R()*256,R()*256,1+R()*2,1)}
+ x.strokeStyle="rgba(110,80,40,.05)";for(i=0;i<40;i++){x.lineWidth=.5+R();x.beginPath();var y=R()*256;x.moveTo(0,y);x.bezierCurveTo(80,y+R()*10-5,170,y+R()*10-5,256,y+R()*6-3);x.stroke()}
+ INTPAP=c;return c}
+function interBeat(t){var p=(typeof BEAT!="undefined"&&BEAT&&BEAT.p)?BEAT.p:.744,t0=(BEAT&&BEAT.t0!=null)?BEAT.t0:0;var n=Math.floor((t-t0)/p);return{p:p,n:n,ph:((t-t0)/p)-n}}
+function ink(x,w,col){x.lineCap="round";x.lineJoin="round";x.lineWidth=w;x.strokeStyle=col}
+/* ซามูไร 1 คน: cx,gy = ตำแหน่งเท้า, s = ความสูง, d = หันขวา(1)/ซ้าย(-1), pz = 0 ตั้งท่า → 1 ฟันออก, lean = เอนตัว */
+function samurai(x,cx,gy,s,d,pz,lean,acc,fall){x.save();x.translate(cx,gy);if(fall){x.rotate(d*-fall*1.25);x.translate(0,0)}x.scale(d,1);
+ var k="#141210",hip=-s*.48,sh=-s*.82,lx=lean*s*.08;
+ /* ฮากามะ (กางเกงกระโปรงบาน) */
+ x.fillStyle=k;x.beginPath();x.moveTo(-s*.1+lx*.3,hip);x.lineTo(s*.11+lx*.3,hip);x.lineTo(s*.27,0);x.quadraticCurveTo(s*.04,-s*.05,0,-s*.18);x.quadraticCurveTo(-s*.04,-s*.05,-s*.27,0);x.closePath();x.fill();
+ /* ลายจีบผ้า */ink(x,s*.006,"rgba(239,226,200,.35)");x.beginPath();x.moveTo(-s*.03,hip+s*.03);x.lineTo(-s*.13,-s*.02);x.moveTo(s*.05,hip+s*.03);x.lineTo(s*.15,-s*.02);x.stroke();
+ /* ลำตัว + แขนเสื้อกว้าง */
+ x.fillStyle=k;x.beginPath();x.moveTo(-s*.11+lx*.3,hip);x.lineTo(-s*.12+lx,sh);x.quadraticCurveTo(lx,sh-s*.05,s*.12+lx,sh);x.lineTo(s*.12+lx*.3,hip);x.closePath();x.fill();
+ x.beginPath();x.moveTo(-s*.1+lx,sh+s*.02);x.lineTo(-s*.28+lx,sh+s*.2);x.lineTo(-s*.18+lx,sh+s*.32);x.lineTo(-s*.06+lx,sh+s*.16);x.closePath();x.fill();
+ /* โอบิ (ผ้าคาดเอวแดง) */x.fillStyle=acc;x.fillRect(-s*.115+lx*.3,hip-s*.045,s*.235,s*.04);
+ /* หัว + มวยผม */var hx=lx*1.15,hy=sh-s*.1;x.fillStyle=k;x.beginPath();x.arc(hx,hy,s*.068,0,7);x.fill();
+ x.beginPath();x.ellipse(hx-s*.035,hy-s*.075,s*.03,s*.016,-.4,0,7);x.fill();
+ /* ผ้าคาดหัวแดงพลิ้ว */ink(x,s*.012,acc);x.beginPath();x.moveTo(hx-s*.06,hy-s*.02);x.quadraticCurveTo(hx-s*.14,hy-s*.02+Math.sin(pz*6+cx)*s*.02,hx-s*.2,hy+s*.03);x.stroke();
+ /* แขน + ดาบ: ตั้งท่า(ชี้ขึ้นเฉียง) → ฟัน(พุ่งไปข้างหน้า) */
+ var ang=-1.05+pz*1.25,hdx=lx+s*(.1+pz*.16),hdy=sh+s*(.16-pz*.04);
+ ink(x,s*.05,k);x.beginPath();x.moveTo(lx+s*.05,sh+s*.03);x.quadraticCurveTo(lx+s*.12,sh+s*.12,hdx,hdy);x.stroke();
+ var L=s*.62,bx=hdx+Math.cos(ang)*L,by=hdy+Math.sin(ang)*L;
+ ink(x,s*.022,"#2a2622");x.beginPath();x.moveTo(hdx-Math.cos(ang)*s*.1,hdy-Math.sin(ang)*s*.1);x.lineTo(hdx,hdy);x.stroke();/* ด้าม */
+ ink(x,s*.016,"#3b3833");x.beginPath();x.moveTo(hdx,hdy);x.quadraticCurveTo((hdx+bx)/2+Math.sin(ang)*s*.02,(hdy+by)/2-Math.cos(ang)*s*.02,bx,by);x.stroke();
+ ink(x,s*.005,"rgba(255,255,255,.85)");x.beginPath();x.moveTo(hdx+Math.cos(ang)*s*.05,hdy+Math.sin(ang)*s*.05-s*.004);x.lineTo(bx,by-s*.004);x.stroke();
+ ink(x,s*.03,acc);x.beginPath();x.moveTo(hdx+Math.cos(ang+1.57)*s*.03,hdy+Math.sin(ang+1.57)*s*.03);x.lineTo(hdx-Math.cos(ang+1.57)*s*.03,hdy-Math.sin(ang+1.57)*s*.03);x.stroke();/* สึบะ */
+ x.restore();return{x:cx+d*(bx),y:gy+by}}
+function drawInter(x,W,H,t,live){if(INTER.sty!="samurai")return false;var sp=interSpan();if(!sp||t<sp[0]-.05||t>sp[1]+.05)return false;
+ var D=sp[1]-sp[0],u=Math.max(0,Math.min(1,(t-sp[0])/D)),M=Math.min(W,H),R=mvRand(777),i,acc="#b8261d";
+ var fin=Math.min(1,(t-sp[0])/.6),fout=Math.min(1,(sp[1]-t)/.6),al=Math.max(0,Math.min(fin,fout));x.save();x.globalAlpha=al;
+ /* กระดาษวาชิ */var pp=x.createPattern(interPaper(),"repeat");x.fillStyle=pp;x.fillRect(0,0,W,H);
+ var vg=x.createRadialGradient(W/2,H*.45,M*.3,W/2,H*.45,Math.max(W,H)*.75);vg.addColorStop(0,"rgba(80,50,20,0)");vg.addColorStop(1,"rgba(80,50,20,.45)");x.fillStyle=vg;x.fillRect(0,0,W,H);
+ /* พระอาทิตย์แดง ค่อยๆ ใหญ่ขึ้น */var sr=M*(.24+.04*u),sx=W*.5,sy=H*(W<H?.33:.38);x.fillStyle=acc;x.globalAlpha=al*.92;x.beginPath();x.arc(sx,sy,sr,0,7);x.fill();
+ x.globalAlpha=al*.18;x.fillStyle="#fff3d6";for(i=0;i<5;i++){x.fillRect(sx-sr,sy-sr*.6+i*sr*.32,sr*2,sr*.05)}x.globalAlpha=al;
+ /* แถบเมฆแบบภาพพิมพ์ไม้ เลื่อนช้าๆ */
+ for(i=0;i<3;i++){var cy=H*(.2+i*.12),cxo=((t*W*.012*(i+1))+i*W*.4)%(W*1.6)-W*.3,cw=W*(.35+.1*i),ch=M*.035;x.fillStyle="rgba(250,242,224,.92)";x.strokeStyle="rgba(40,30,20,.55)";x.lineWidth=M*.0025;
+  x.beginPath();x.moveTo(cxo,cy);x.lineTo(cxo+cw,cy);x.arc(cxo+cw,cy+ch/2,ch/2,-1.57,1.57);x.lineTo(cxo,cy+ch);x.arc(cxo,cy+ch/2,ch/2,1.57,4.71);x.closePath();x.fill();x.stroke()}
+ /* ภูเขาหมึก 3 ชั้น */
+ var gy=H*(W<H?.7:.78);
+ [[.52,.16,"rgba(40,36,34,.22)",1.3],[.58,.12,"rgba(30,28,26,.38)",2.1],[.64,.08,"rgba(20,18,16,.6)",3.4]].forEach(function(m,mi){x.fillStyle=m[2];x.beginPath();x.moveTo(0,H);
+  for(var px=0;px<=W;px+=W/60){var yy=H*m[0]-H*m[1]*(.55+.45*Math.sin(px/W*m[3]*3.1+mi*2)*Math.cos(px/W*m[3]*1.3+mi))-H*m[1]*.5*Math.max(0,Math.sin(px/W*Math.PI*(1+mi*.5)));x.lineTo(px,Math.min(yy,gy))}
+  x.lineTo(W,H);x.closePath();x.fill()});
+ /* พื้นดินแปรงหมึก + หญ้า */
+ var gg=x.createLinearGradient(0,gy,0,H);gg.addColorStop(0,"#1b1714");gg.addColorStop(1,"#3a2f26");x.fillStyle=gg;x.beginPath();x.moveTo(0,H);x.lineTo(0,gy+M*.01);for(var gx=0;gx<=W;gx+=W/40)x.lineTo(gx,gy+Math.sin(gx*.05)*M*.006+((gx*7919)%13)/13*M*.006);x.lineTo(W,H);x.closePath();x.fill();
+ ink(x,M*.003,"rgba(27,23,20,.85)");x.beginPath();for(i=0;i<70;i++){var hx=R()*W,hh=M*(.015+R()*.03),bend=Math.sin(t*2+i)*M*.008;x.moveTo(hx,gy+2);x.quadraticCurveTo(hx+bend*.5,gy-hh*.6,hx+bend,gy-hh)}x.stroke();
+ /* กลีบซากุระปลิว */
+ for(i=0;i<34;i++){var pr=mvRand(i*131+7),ph=pr(),spd=.04+pr()*.05,px2=((pr()*W+t*W*spd*2.2)%(W*1.2))-W*.1,py2=((pr()*H+t*H*spd*1.1+Math.sin(t*1.5+i)*M*.02)%(H*1.1))-H*.05,rr=M*(.006+pr()*.006);
+  x.save();x.translate(px2,py2);x.rotate(t*1.7+i);x.fillStyle=i%5?"rgba(236,150,160,.85)":"rgba(184,38,29,.8)";x.beginPath();x.ellipse(0,0,rr*1.6,rr*.8,0,0,7);x.fill();x.restore()}
+ /* ท่าดวลตามจังหวะ */
+ var s=W<H?H*.34:H*.52,bt=interBeat(t),L0=W*.22,R0=W*.78,lx,rx,pzL=0,pzR=0,lean=0,clash=0,cpx=W/2,fallR=0,slash=0;
+ var walk=Math.min(1,u/.22),ease=1-Math.pow(1-walk,3);lx=-s*.4+(L0+s*.4)*ease;rx=W+s*.4-(W+s*.4-R0)*ease;
+ if(u>=.22&&u<.84){/* ทุก 2 จังหวะ พุ่งเข้าปะทะกลางจอ แล้วถอยกลับ */var b2=(bt.n%2+bt.ph)/2,hit=b2<.35?Math.sin(b2/.35*Math.PI):0,gap=(R0-L0)/2-s*.5;
+  lx=L0+gap*hit;rx=R0-gap*hit;pzL=pzR=Math.min(1,hit*1.4);lean=hit;if(b2>.15&&b2<.24)clash=1-Math.abs(b2-.195)/.045;cpx=W/2+Math.sin(bt.n)*s*.04}
+ else if(u>=.84){/* ชักดาบสวนกัน (อิไอ) แล้วฝ่ายขวาล้ม */var q=Math.min(1,(u-.84)/.05);lx=L0+(W*.66-L0)*q;rx=R0-(R0-W*.34)*q;pzL=pzR=q;lean=q;
+  slash=Math.min(1,Math.max(0,(u-.87)/.04));fallR=Math.max(0,(u-.9)/.06);fallR=Math.min(1,fallR)*.9}
+ x.save();x.globalAlpha=al*.35;x.fillStyle="#000";[lx,rx].forEach(function(px){x.beginPath();x.ellipse(px,gy+M*.008,s*.2,s*.02,0,0,7);x.fill()});x.restore();
+ samurai(x,lx,gy,s,1,pzL,lean,acc,0);samurai(x,rx,gy,s,-1,pzR,lean,"#1d3d6b",fallR);
+ /* ประกายดาบตอนปะทะ (ไม่แฟลชทั้งจอ — สบายตา) */
+ if(clash>0){var cy2=gy-s*.86;x.save();x.globalAlpha=al*clash;ink(x,M*.004,"#fff");for(i=0;i<10;i++){var a2=i/10*6.283+bt.n,r1=s*.03,r2=s*(.12+.08*((i*37)%5)/5)*clash;x.beginPath();x.moveTo(cpx+Math.cos(a2)*r1,cy2+Math.sin(a2)*r1);x.lineTo(cpx+Math.cos(a2)*r2,cy2+Math.sin(a2)*r2);x.stroke()}
+  var sg=x.createRadialGradient(cpx,cy2,0,cpx,cy2,s*.18);sg.addColorStop(0,"rgba(255,255,240,.9)");sg.addColorStop(1,"rgba(255,255,240,0)");x.fillStyle=sg;x.fillRect(cpx-s*.2,cy2-s*.2,s*.4,s*.4);
+  x.fillStyle="rgba(20,18,16,.8)";for(i=0;i<8;i++){var dr=mvRand(bt.n*17+i);x.beginPath();x.arc(cpx+(dr()-.5)*s*.5,cy2+(dr()-.5)*s*.3,M*.004*(1+dr()*2),0,7);x.fill()}x.restore()}
+ /* รอยฟันแดงทแยงทั้งจอ ตอนจบฉาก */
+ if(slash>0){x.save();x.globalAlpha=al*.92;var x1=W*.05,y1=H*.82,x2=W*.95,y2=H*.18,ex=x1+(x2-x1)*slash,ey=y1+(y2-y1)*slash;
+  ink(x,M*.035,acc);x.beginPath();x.moveTo(x1,y1);x.lineTo(ex,ey);x.stroke();ink(x,M*.008,"#fff4e0");x.beginPath();x.moveTo(x1+W*.02,y1-H*.004);x.lineTo(ex,ey-H*.004);x.stroke();
+  x.fillStyle=acc;for(i=0;i<14;i++){var sr2=mvRand(i*53+1),f=sr2();if(f>slash)continue;x.beginPath();x.arc(x1+(x2-x1)*f+(sr2()-.5)*M*.08,y1+(y2-y1)*f+(sr2()-.5)*M*.08,M*.004*(1+sr2()*3),0,7);x.fill()}x.restore()}
+ /* กรอบภาพพิมพ์ + ตราประทับแดง */
+ x.strokeStyle="rgba(20,18,16,.75)";x.lineWidth=M*.006;x.strokeRect(M*.03,M*.03,W-M*.06,H-M*.06);x.lineWidth=M*.0018;x.strokeRect(M*.045,M*.045,W-M*.09,H-M*.09);
+ var hs=M*.085,hx2=W-M*.06-hs,hy2=H-M*.06-hs*1.4;x.fillStyle=acc;x.fillRect(hx2,hy2,hs,hs*1.3);x.fillStyle="#efe2c8";x.font="900 "+Math.round(hs*.3)+"px 'Archivo Black','Noto Sans Thai',sans-serif";x.textAlign="center";x.textBaseline="middle";
+ x.fillText("S",hx2+hs/2,hy2+hs*.25);x.fillText("N",hx2+hs/2,hy2+hs*.65);x.fillText("S",hx2+hs/2,hy2+hs*1.05);
+ x.restore();return true}
+function drawInterLive(x,t){if(INTER.sty!="samurai")return false;var st=document.getElementById("stage");if(!st)return false;var r=st.getBoundingClientRect();if(r.width<20||r.height<20)return false;
+ var sp=interSpan();if(!sp||t<sp[0]-.05||t>sp[1]+.05)return false;x.save();x.beginPath();x.rect(r.left,r.top,r.width,r.height);x.clip();x.translate(r.left,r.top);var ok=drawInter(x,r.width,r.height,t,true);x.restore();return ok}
+
 function lfxDraw(x,W,H,t){var sa=false;try{sa=pkStamp(x,W,H,t)}catch(e){}try{if(drawIntro(x,W,H,t))sa=true}catch(e){}if(!LFX_ON)return sa;var ev=lfxEvents(),any=sa,M=Math.min(W,H);
  ev.forEach(function(e){var a=t-e.t;if(a<0||a>e.d)return;any=true;var R=lfxRnd(e.s),fo=a>e.d-.7?(e.d-a)/.7:1;x.save();
   if(e.k=="bleed"){/* คำเจ็บปวด: ขอบจอแดงเลือดหมูเต้นตุบเดียวแล้วจาง */var pb=a/e.d,ab=pb<.15?pb/.15:1-(pb-.15)/.85;var vb=x.createRadialGradient(W/2,H/2,M*.42,W/2,H/2,Math.max(W,H)*.7);vb.addColorStop(0,"rgba(0,0,0,0)");vb.addColorStop(1,"rgba(110,0,12,.9)");x.globalAlpha=Math.max(0,ab)*.6;x.fillStyle=vb;x.fillRect(0,0,W,H)}
@@ -1784,7 +1877,7 @@ function lfxDraw(x,W,H,t){var sa=false;try{sa=pkStamp(x,W,H,t)}catch(e){}try{if(
   else if(e.k=="ghost"){/* ผี: หมอกซีด + เงาขาวลอยผ่าน + จอกระพริบ */var gi2=Math.min(1,a/.6);for(var gh=0;gh<3;gh++){var gx2=W*(-.2+((a*.18+R())%1.4)),gy2=H*(.25+R()*.45),gr3=M*(.16+R()*.1);x.globalAlpha=gi2*fo*.18;var gg=x.createRadialGradient(gx2,gy2,0,gx2,gy2,gr3);gg.addColorStop(0,"rgba(235,240,255,1)");gg.addColorStop(.6,"rgba(200,210,235,.35)");gg.addColorStop(1,"rgba(200,210,235,0)");x.fillStyle=gg;x.beginPath();x.ellipse(gx2,gy2,gr3*.6,gr3,Math.sin(a+gh)*.2,0,7);x.fill()}
    if(Math.sin(a*37)>.85&&a<1.5){x.globalAlpha=.18*fo;x.fillStyle="#cfe3ff";x.fillRect(0,0,W,H)}}
   else if(e.k=="glitch"){/* crazy/raging: ภาพฉีกเป็นแถบ RGB เลื่อน */if(a<.7){/* นุ่มลง: เปลี่ยนแค่ 8 ครั้ง/วิ แถบน้อยลง จางลง และไม่ทับแถวเนื้อเพลงกลางจอ */var gn=Math.floor(a*8);var R2=lfxRnd(e.s+gn);for(var gb2=0;gb2<3;gb2++){var top=R2()<.5,gy3=top?R2()*H*.26:H*(.66+R2()*.3),gh2=H*(.006+R2()*.02),gdx=(R2()-.5)*W*.06;x.globalAlpha=.3*(1-a/.7);x.fillStyle=R2()<.5?"rgba(255,0,60,.5)":"rgba(0,240,255,.45)";x.fillRect(gdx,gy3,W,gh2)}}}
-  else if(e.k=="danger"){/* อันตราย: แถบเตือนเหลือง-ดำ เลื่อนเข้าขอบบนล่าง */var di=Math.min(1,a/.25),bh=M*.06;[0,H-bh].forEach(function(yy,bi2){x.save();x.globalAlpha=di*fo*.85;x.beginPath();x.rect(0,yy+(bi2?1:-1)*(1-di)*bh,W,bh);x.clip();x.fillStyle="#111";x.fillRect(0,yy-bh,W,bh*3);x.fillStyle="#ffcc00";var off2=(a*M*.25)%(bh*2);for(var sx3=-bh*2;sx3<W+bh*2;sx3+=bh*2){x.beginPath();x.moveTo(sx3+off2,yy+bh);x.lineTo(sx3+off2+bh,yy);x.lineTo(sx3+off2+bh*2,yy);x.lineTo(sx3+off2+bh,yy+bh);x.closePath();x.fill()}x.restore()});
+  else if(e.k=="danger"){/* แถบเตือนเหลือง-ดำ: เอาออกตามที่ศิลปินขอ (ไม่สวย) เหลือแค่ขอบแดงจางๆ */
    var vd=x.createRadialGradient(W/2,H/2,M*.35,W/2,H/2,Math.max(W,H)*.7);vd.addColorStop(0,"rgba(0,0,0,0)");vd.addColorStop(1,"rgba(150,0,0,.8)");x.globalAlpha=fo*.35*(.6+.4*Math.sin(a*12));x.fillStyle=vd;x.fillRect(0,0,W,H)}
   else if(e.k=="night"){var fl=a<.5?(Math.sin(a*60)>0?.5:.25):.45;x.globalAlpha=fl*fo*Math.min(1,a/.15);x.fillStyle="#000";x.fillRect(0,0,W,H)}
   x.restore()});return any}
@@ -1852,6 +1945,7 @@ function drawFrame(c,W,H,t){
  var vg=x.createRadialGradient(W/2,H/2,Math.min(W,H)*.2,W/2,H/2,M*.75);vg.addColorStop(0,"rgba(0,0,0,.4)");vg.addColorStop(1,"rgba(0,0,0,.88)");x.fillStyle=vg;x.fillRect(0,0,W,H);
  var ea=ENDC.on?t-endStart()+.4:-1;if(gi>=0&&ea<.6){if(ea>0){x.save();x.globalAlpha=1-ea/.6}drawGroup(x,W,H,t,k,gi);if(ea>0)x.restore()}
  if(k>=0)drawBigFx(x,W,H,t,k);
+ try{drawInter(x,W,H,t)}catch(e){}
  lfxDraw(x,W,H,t);drawSketch(x,W,H,t);
  if(ENDC.on)drawEnd(x,W,H,t);
  drawWM(x,W,H,t);
