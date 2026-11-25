@@ -406,6 +406,7 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <p class="mut" id="fname">ใช้เสียงที่ฝังมากับแอป</p>
    <div style="height:12px"></div>
    <label class="cta alt">อัปโหลด / เปลี่ยนเพลง<input type="file" id="fi" accept="audio/*,video/*,.mp3,.m4a,.mp4,.wav"></label>
+   <button class="cta alt" type="button" id="imp-in" style="margin-top:8px">📥 เปิดไฟล์โปรเจกต์ที่แก้แล้ว (.json)</button>
    <p class="mut" style="margin-top:12px">เปลี่ยนเพลงแล้ว ต้องซิงค์ใหม่ในขั้นที่ 2</p>
  </section>
  <section class="card">
@@ -1039,7 +1040,8 @@ tabs.forEach(function(b){b.onclick=function(){var n=+b.dataset.s;if(n==step&&ope
 $("shut").onclick=function(){if(openT)openTab(openT)};$("chip").onclick=function(){go(2)};$("next1").onclick=function(){go(2)};$("to3").onclick=function(){go(3)};
 try{window.THEMES=THEMES;window.toast=toast}catch(e){}
 window.snsSetAudio=function(u,n){a.pause();a.src=u;MS.buf=null;MS.rec=null;MS.fit={};MS.cur=null;a.load();$("fname").textContent=n||"เพลง"};
-$("fi").onchange=function(){var f=this.files[0];if(!f)return;a.pause();a.src=URL.createObjectURL(f);MS.buf=null;MS.rec=null;MS.fit={};MS.cur=null;a.load();$("fname").textContent=f.name;toast("โหลดแล้ว: "+f.name)};
+try{$("imp-in").onclick=function(){if(window.snsImport)window.snsImport();else toast("กลับหน้าแรกแล้วกด นำเข้าโปรเจกต์")}}catch(e){}
+$("fi").onchange=function(){var f=this.files[0];if(f&&(/\.json$/i.test(f.name)||/json/i.test(f.type))){if(window.snsImport){window.snsImport(f)}else toast("ไฟล์นี้เป็นไฟล์โปรเจกต์ ให้กลับหน้าแรกแล้วกด นำเข้าโปรเจกต์");this.value="";return};if(!f)return;a.pause();a.src=URL.createObjectURL(f);MS.buf=null;MS.rec=null;MS.fit={};MS.cur=null;a.load();$("fname").textContent=f.name;toast("โหลดแล้ว: "+f.name)};
 /* ---------- sync: manual ---------- */
 function setLine(i,v){var lo=i?T[i-1]+.1:0,hi=i<N-1?T[i+1]-.1:1e9;T[i]=Math.round(Math.min(Math.max(v,lo),hi)*100)/100;E=null;synced=true;save();updList()}
 function updList(){rowsEl.forEach(function(r,i){r.querySelector(".tmb").textContent=fmt(T[i],1)})}
@@ -3182,8 +3184,9 @@ async function exportProject(p){busy("กำลังเตรียมไฟล
   if(!done){var a=document.createElement("a");a.href=URL.createObjectURL(bl2);a.download=fn;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000)}
   busy();toastS(au?"ส่งออกแล้ว ("+Math.round(js.length/1048576)+" MB) ส่งไฟล์ไปอีกเครื่อง แล้วกด นำเข้าโปรเจกต์":"ส่งออกแล้ว (ไม่มีไฟล์เพลงในเครื่องนี้ ต้องใส่เพลงใหม่ที่ปลายทาง)")}
  catch(e){busy();toastS("ส่งออกไม่สำเร็จ: "+(e&&e.message||e))}}
-function importProject(){var inp=document.createElement("input");inp.type="file";inp.accept=".json,application/json";
- inp.onchange=async function(){var f=inp.files&&inp.files[0];if(!f)return;busy("กำลังนำเข้า…");
+/* ไม่กรองชนิดไฟล์: มือถือ Android มักมองไฟล์ .snsproj.json ที่โหลดมาเป็น "ไฟล์ทั่วไป" แล้วกดเลือกไม่ได้ · ตรวจเนื้อไฟล์แทน */
+function importProject(file){var inp=document.createElement("input");inp.type="file";
+ var go=async function(f){if(!f)return;busy("กำลังนำเข้า…");
   try{var d=JSON.parse(await f.text());if(!d||d.sns!="project"||!d.meta||!d.state)throw new Error("ไม่ใช่ไฟล์โปรเจกต์ของแอปนี้");
    var meta=Object.assign({},d.meta),id=String(meta.id||rid()).toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,40)||rid();meta.id=id;
    var old=await Store.meta(id);if(old){var pre="p:"+id+":";S.raw.keys().forEach(function(k){if(k&&k.indexOf(pre)==0)S.raw.rm(k)})}
@@ -3192,7 +3195,8 @@ function importProject(){var inp=document.createElement("input");inp.type="file"
    if(d.audio&&d.audio.data){var bl=await (await fetch(d.audio.data)).blob();await Store.saveAudio(id,new File([bl],d.audio.name||"song",{type:bl.type||"audio/mpeg"}))}
    busy();toastS((old?"อัปเดต":"นำเข้า")+" \""+(meta.name||"เพลง")+"\" แล้ว");await home()}
   catch(e){busy();toastS("นำเข้าไม่สำเร็จ: "+(e&&e.message||e))}};
- inp.click()}
+ if(file&&file.size)return go(file);inp.onchange=function(){go(inp.files&&inp.files[0])};inp.click()}
+window.snsImport=importProject;
 /* ---------- หน้าแรก ---------- */
 var STEPS=[["เช็กเทรนด์ & วางแนว","ดูชาร์ตไทย/โลก Top 10 ทั้งทุกแนวและฮิปฮอป แนวที่กำลังมา และประเมินโอกาสแมสตามสไตล์ศิลปิน","ทุกเครื่อง"],["สร้างโปรเจกต์","ตั้งชื่อเพลง ใส่ไฟล์เพลงและเนื้อเพลง แยกท่อนร้อง/ฮุค และคนร้อง","ทุกเครื่อง"],["มิกซ์เสียงก่อน","ขั้น 1 › เสียง: ใส่เสียงร้อง+บีตแยกไฟล์ ให้มิกซ์ จูนนิดๆ หาคีย์ เทียบกับเพลงที่ชอบ แล้วใช้เป็นเพลงของโปรเจกต์","ทุกเครื่อง"],
  ["ซิงค์เนื้อกับเสียง","AI จับจังหวะคำร้องทีละคำ แล้วปรับเองได้ทีละบรรทัด","แม่นสุดบนคอม"],
