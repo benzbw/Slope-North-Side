@@ -215,6 +215,11 @@ body.anim-fx .l .w.k.on,body.anim-fx .g.h .l .w.k.on{color:var(--hot);animation:
 .g.h .w.on{animation:wgl .38s linear forwards}
 .w.k.on{opacity:1;color:#fff;text-shadow:0 0 18px var(--hot),0 0 2px #000}
 .w.k.now{animation:pkf .55s ease-out}
+/* เล่นสีคำ: คำเด่นเป็นสีธีม · ท่อนฮุค คำที่กำลังร้องไล่เป็นสีที่สอง แล้วค่อยๆ กลับ · คำเด่นในฮุคเป็นสีที่สอง (สลับสีกับเนื้อฮุค) */
+body.colp #stage .w{transition:color .7s ease}
+body.colp #stage .w.k.on{color:var(--hot)}
+body.colp #stage .g.h .w.k.on{color:var(--acc2,#ffd27a)}
+body.colp #stage .g.h .w.now{color:var(--acc2,#ffd27a);transition:color .22s ease}
 /* ตัวหนังสือนิ่ง ไม่เด้ง/ไม่สั่น (ใช้แค่จางเข้า+เรืองแสง) และตัดบรรทัดให้แถวยาวพอๆ กัน */#stage .w{transform:none!important;rotate:none!important;scale:none!important;translate:none!important}#stage .l{text-wrap:balance}#stage .w.ad{font-size:.58em;font-style:italic;opacity:.8;color:var(--hot);vertical-align:.35em;margin:0 .15em;text-transform:uppercase}@keyframes pkf{0%{opacity:1;color:#fff;text-shadow:-4px 0 rgba(0,240,255,.9),4px 0 rgba(255,0,70,.9),0 0 40px var(--hot),0 0 80px var(--hot)}100%{text-shadow:0 0 18px var(--hot),0 0 2px #000}}
 /* แบบนุ่มไหล: ค่อยๆ ลอยขึ้นจากเบลอ เรืองแสงแล้วนิ่ง ทุกคำเหมือนกันไม่สะดุด */
 .anim-soft .w.on,.anim-soft .w.on.a1,.anim-soft .w.on.a2{animation:wsoft .6s cubic-bezier(.22,.61,.36,1) forwards}
@@ -580,6 +585,7 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <div class="h" style="margin-top:18px;font-size:15px">ปกเพลง</div>
    <button class="cta alt" id="cv-open" style="min-height:44px;font-size:14px">ทำปกเพลง (3000×3000 สำหรับลงแพลตฟอร์ม)</button>
    <div class="h" style="margin-top:18px;font-size:15px">ฉากจบเพลง</div>
+   <label class="tgl"><input type="checkbox" id="colp-on" checked> 🎨 เล่นสีคำเด่น/ท่อนฮุค <span class="mut" style="font-size:12px">(คำเด่นเป็นสีธีม · ท่อนฮุคไล่สีคู่ตามคำที่ร้อง)</span></label>
    <div style="margin:10px 0 4px;font-size:14px">✂ ตัดอินโทร <span class="mut" style="font-size:12px">(ข้ามช่วงบีตล้วนตอนต้นเพลง ทั้งพรีวิวและวิดีโอที่ส่งออก)</span></div>
    <div class="chips" id="cut-row"><button data-c="auto">✂ อัตโนมัติ</button><button data-c="now">ตัดถึงจุดที่เล่นอยู่</button><button data-c="-">−0.5</button><button data-c="+">+0.5</button><button data-c="0">ไม่ตัด</button></div>
    <p style="font-size:13px;margin:4px 0 0" id="cut-v"></p><p class="mut" id="cut-hint" style="font-size:12px;margin:2px 0 10px"></p>
@@ -980,8 +986,9 @@ function cutSet(v){CUT=Math.max(0,Math.round(v*10)/10);try{if(synced&&N)CUT=Math
 function cutUI(){var e=$("cut-v");if(!e)return;var f=function(v){var m=Math.floor(v/60),q=(v%60).toFixed(1);return m+":"+(v%60<10?"0":"")+q};
  var L=0;try{L=dur()}catch(x){}e.textContent=CUT>0?("✓ ตัดแล้ว: เริ่มที่ "+f(CUT)+" (ตัดออก "+CUT.toFixed(1)+" วิ) · เพลงเหลือ "+f(Math.max(0,L-CUT)).replace(/\.\d$/,"")+" · บันทึกอัตโนมัติ"):"ไม่ตัด (เริ่มตั้งแต่ 0:00)";
  var h=$("cut-hint");if(h){var s0=null;try{if(synced&&N)s0=T[0]}catch(x){}h.textContent=s0!=null?("เนื้อร้องเริ่มที่ "+f(s0)+" · ปุ่ม ✂ อัตโนมัติ จะเหลือบีตไว้ 2 วิก่อนร้อง"):"ซิงค์เนื้อก่อน ปุ่มอัตโนมัติถึงจะรู้ว่าร้องเริ่มตรงไหน"}}
-function drawIntro(x,W,H,t){t-=CUT;if(!INTRO_ON||t<0)return false;var D=3.8;try{if(synced&&N&&T[0]>CUT+.5)D=Math.min(D,T[0]-CUT-.15)}catch(e){}if(D<1.2||t>D)return false;var I=introInfo();
- var al=clamp01(t<.5?t/.5:(D-t)/.8),e=1-Math.pow(1-clamp01(t/1),3),M=Math.min(W,H),cy=H>W*1.3?H*.25:H*.23;
+function drawIntro(x,W,H,t){t-=CUT;if(!INTRO_ON||t<0)return false;var D=3.8,hi=false;try{if(synced&&N){var s0=T[0]-CUT;if(s0<D+.15){D=Math.max(2.6,s0-.15);if(s0<D+.1)hi=true}}}catch(e){}if(t>D)return false;var I=introInfo();
+ /* เนื้อร้องเริ่มเร็ว: ชื่อเพลงยังขึ้นอย่างน้อย 2.6 วิ แต่ย้ายขึ้นไปด้านบนไม่ให้ทับเนื้อ · ที่ 0:00 (หยุดอยู่) ก็ยังเห็นชื่อ */
+ var al=clamp01(t<.5?.35+.65*t/.5:(D-t)/.8),e=1-Math.pow(1-clamp01(t/1),3),M=Math.min(W,H),cy=hi?(H>W*1.3?H*.17:H*.15):(H>W*1.3?H*.25:H*.23);
  x.save();x.setTransform(1,0,0,1,0,0);x.textAlign="center";x.textBaseline="middle";x.globalAlpha=al;
  var bs=M*.03;x.font="600 "+bs+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.9)";x.shadowColor="rgba(0,0,0,.7)";x.shadowBlur=bs*.8;
  var br="SLOPE NORTH SIDE".split("").join(String.fromCharCode(8202,8202));try{x.letterSpacing=(bs*.35)+"px"}catch(_){}x.fillText("SLOPE NORTH SIDE",W/2,cy-M*.085);try{x.letterSpacing="0px"}catch(_){}
@@ -1008,6 +1015,7 @@ setTimeout(interUI,1500);
 setTimeout(cutUI,1500);
 /* พรีวิว: กดเล่นจากต้นเพลงให้ข้ามช่วงที่ตัด */
 try{a.addEventListener("play",function(){if(CUT>0&&a.currentTime<CUT-.05&&!(typeof TAP!="undefined"&&TAP))try{a.currentTime=CUT}catch(e){}})}catch(e){}
+try{$("colp-on").checked=COLP;$("colp-on").onchange=function(){COLP=this.checked;try{localStorage.setItem("bwcolp",COLP?"1":"0")}catch(e){}document.body.classList.toggle("colp",COLP);toast(COLP?"เปิดเล่นสีแล้ว":"ปิดเล่นสีแล้ว")}}catch(e){}
 $("intro-on").checked=INTRO_ON;$("intro-on").onchange=function(){INTRO_ON=this.checked;try{localStorage.setItem("bwintro",INTRO_ON?"1":"0")}catch(e){}toast(INTRO_ON?"เปิดชื่อเพลงตอนเริ่ม":"ปิดชื่อเพลงตอนเริ่ม")};
 $("end-on").onchange=function(){ENDC.on=this.checked;endSave()};$("end-title").oninput=function(){ENDC.title=this.value;endSave()};$("end-artist").oninput=function(){ENDC.artist=this.value;endSave()};
 var fT=0,fN=0,fSum=0,autoDone=false,LITE=false;
@@ -1726,7 +1734,12 @@ async function mvRun(idx){var smp=window.SNSX&&SNSX.ST&&SNSX.ST.sample,eng=mvEng
  $("mv-on").checked=MV.on;$("mv-on").onchange=function(){MV.on=this.checked;mvSave()};
  $("mv-go").onclick=function(){mvRun()};$("mv-re").onclick=function(){MV.seed=Math.floor(Math.random()*9999)+1;MV.urls={};MVI={};mvSave();mvGrid();mvRun()};
  mvLoad();mvGrid()})();
-function applyTheme(i,quiet){thIdx=i;TH=THEMES[i];var r=document.documentElement.style;r.setProperty("--tx",TH.txt);r.setProperty("--hot",TH.hot);r.setProperty("--gl",TH.gl);
+/* เล่นสีคำ: สีที่สองคู่กับสีธีม (หมุนเฉดสี ~38° ให้สว่างขึ้น) เช่น แดง→ทอง เขียว→ฟ้าอมเขียว ใช้กับคำเด่น/ท่อนฮุค */
+var COLP=true;try{COLP=localStorage.getItem("bwcolp")!=="0"}catch(e){}
+function acc2Of(gl){try{var c=String(gl).split(",").map(Number),r=c[0]/255,g=c[1]/255,b=c[2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),h=0,d=mx-mn;
+ if(d){if(mx==r)h=((g-b)/d)%6;else if(mx==g)h=(b-r)/d+2;else h=(r-g)/d+4;h*=60}if(d<.08)return"#ffd27a";h=(h+38+360)%360;return"hsl("+Math.round(h)+",95%,70%)"}catch(e){return"#ffd27a"}}
+var ACC2="#ffd27a";
+function applyTheme(i,quiet){thIdx=i;TH=THEMES[i];var r=document.documentElement.style;r.setProperty("--tx",TH.txt);r.setProperty("--hot",TH.hot);r.setProperty("--gl",TH.gl);ACC2=acc2Of(TH.gl);r.setProperty("--acc2",ACC2);try{document.body.classList.toggle("colp",COLP)}catch(e){}
  var bi=document.querySelectorAll("#bg i");[TH.b1,TH.b2,TH.b3].forEach(function(c,k){if(bi[k])bi[k].style.setProperty("--c","rgb("+c+")")});
  sgInputs.forEach(function(c,k){if(SG[k].c=="auto")c.value=TH.txt});wg=-2;
  document.querySelectorAll("#thg button").forEach(function(b,k){b.classList.toggle("on",k==i)});
@@ -1798,6 +1811,10 @@ function drawLine(x,txt,sz,col,hook,sgi,age,j,t){
   if(pw&&act){shc="rgba("+TH.gl+",1)";shb=sz*.6+gb}
   if(chroma){x.shadowBlur=0;x.shadowColor="transparent";x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);x.fillStyle="rgba(0,255,255,.7)";x.fillText(tx2,-sz*.1,0);x.fillStyle="rgba(255,0,60,.8)";x.fillText(tx2,sz*.1,0);x.shadowColor=shc;x.shadowBlur=shb;x.fillStyle=fc;x.fillText(tx2,0,0);x.shadowBlur=0;x.shadowColor="transparent"}
   else{/* แบบเดิม: เงาดำ + เรืองแสงสีธีมคมชัดเต็มความละเอียด */x.shadowBlur=0;x.shadowColor="transparent";x.fillStyle="rgba(0,0,0,.65)";x.fillText(tx2,0,sz*.06);x.shadowColor=shc;x.shadowBlur=shb;x.fillStyle=fc;x.fillText(tx2,0,0);x.shadowBlur=0;x.shadowColor="transparent"}
+  if(COLP&&wa>=0&&(p.kw||(hook&&!(sgi>0)))){/* เล่นสี: ไล่สีทับจากซ้ายไปขวาตามเวลาที่ร้องคำนั้น (นุ่ม ไม่กระพริบ) */
+   var wd=Math.max(.12,Math.min(.8,wEnd(qi)-WSt[qi])),pr=clamp01(wa/wd),ka=1,tc=p.kw?(hook?ACC2:TH.hot):ACC2;
+   if(!p.kw){var we=wEnd(qi);ka=t<we?1:clamp01(1-(t-we)/.7)}
+   if(ka>0&&pr>0){x.save();x.globalAlpha*=ka;x.beginPath();x.rect(-sz*.3,-sz*1.4,(cw+sz*.6)*pr,sz*2.8);x.clip();x.shadowColor=tc;x.shadowBlur=sz*.35;x.fillStyle=tc;x.fillText(tx2,0,0);x.restore()}}
   x.restore()})}
 /* ภาพคำสำเร็จรูป (มีเงา+เรืองแสงในตัว) วาดครั้งเดียวแล้วใช้ซ้ำทุกเฟรม: เบาเครื่องมาก ไม่กระตุกตอนอัด */
 var WSP=new Map();
