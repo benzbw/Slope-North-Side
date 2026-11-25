@@ -785,7 +785,9 @@ function wordTimes(i){var en0=lineEnd(i),key=T[i]+"|"+en0;if(WTC[i]&&WTC[i].k==k
  else for(k=1;k<n;k++)v[k]=ex[k];
  for(k=1;k<n;k++)v[k]=Math.max(v[k],v[k-1]+.06);
  WTC[i]={k:key,v:v};return v}
-function wordT(i,p){if((SYL&&SYL.length)||(UT&&UT[i])){var ws=wordsOf(i),q=ws.indexOf(p);if(q>=0)return wordTimes(i)[q]}var en=Math.max(T[i]+.3,lineEnd(i)-.35),cap=LN[i].t.replace(/\s/g,"").length*.16+.5;en=Math.min(en,T[i]+cap);return T[i]+(en-T[i])*p.f}
+/* คำท้ายบรรทัดที่เริ่มชิดบรรทัดถัดไปมาก (<0.25 วิ) แทบไม่ทันเห็นก่อนถูกเลื่อนออก → ให้ขึ้นเร็วขึ้นเล็กน้อย */
+function wordT(i,p){var t0=wordT0(i,p);if(i+1<N&&T[i+1]!=null){var lim=Math.max(T[i],T[i+1]-.25);if(t0>lim)t0=lim}return t0}
+function wordT0(i,p){if((SYL&&SYL.length)||(UT&&UT[i])){var ws=wordsOf(i),q=ws.indexOf(p);if(q>=0)return wordTimes(i)[q]}var en=Math.max(T[i]+.3,lineEnd(i)-.35),cap=LN[i].t.replace(/\s/g,"").length*.16+.5;en=Math.min(en,T[i]+cap);return T[i]+(en-T[i])*p.f}
 function mkLine(i){var e=document.createElement("div");e.className="l";e.dataset.i=i;wordsOf(i).forEach(function(p,q){var sp=document.createElement("span");sp.className="w"+(p.kw?" k":"")+(p.ad?" ad":"")+" a"+((i+q)%3==0?1:(i+q)%5==0?2:0);sp.textContent=p.tx;e.appendChild(sp)});return e}
 function build(gi){var prev=wg;wg=gi;var idx=pageIdx(gi);
  /* โหมดเลื่อนต่อเนื่อง: เก็บบรรทัดเดิมไว้ ไม่ให้คำเด้งซ้ำ แค่ตัดบรรทัดบนสุดออกแล้วเติมบรรทัดใหม่ */
