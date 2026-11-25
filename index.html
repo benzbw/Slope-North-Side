@@ -843,7 +843,10 @@ function fixT(){for(var i=1;i<N;i++)if(!(T[i]>=T[i-1]+.05))T[i]=Math.round((T[i-
 function save(){fixT();try{localStorage.setItem("bw3s57l",JSON.stringify({T:T,E:E,s:synced,o:off,C:CONF,V:VER,Q:VSEG,Y:SYL,U:UT}))}catch(e){}}
 /* เพลงที่ร้องจนวินาทีสุดท้าย: หน้าปิดท้ายขึ้นหลังเพลงจบ ให้หน้าตัดต่อเล่นต่ออีกไม่กี่วิเหมือนวิดีโอที่ส่งออก */
 var LTAIL0=0;try{a.addEventListener("ended",function(){LTAIL0=performance.now()});["play","seeking"].forEach(function(ev){a.addEventListener(ev,function(){LTAIL0=0})})}catch(e){}
-function tm(){if(LTAIL0&&a.ended){try{var tl=endTail();if(tl>0)return a.currentTime+off+Math.min((performance.now()-LTAIL0)/1000,tl)}catch(e){}}return a.currentTime+off}
+/* หน่วงเสียงของเครื่อง (ลำโพง/หูฟังบลูทูธ): ได้ยินช้ากว่าเวลาเพลงจริง → ตอนเล่นในแอปให้เนื้อรอเสียงด้วย ไม่งั้นเนื้อขึ้นก่อนเสียง */
+var EXPON=false;function liveLat(){try{if(!ac||EXPON||a.paused)return 0;var o=(ac.outputLatency||0)+(ac.baseLatency||0);return Math.max(0,Math.min(.5,o||0))}catch(e){return 0}}
+function tm(){return tm0()-liveLat()}
+function tm0(){if(LTAIL0&&a.ended){try{var tl=endTail();if(tl>0)return a.currentTime+off+Math.min((performance.now()-LTAIL0)/1000,tl)}catch(e){}}return a.currentTime+off}
 function dur(){return a.duration||176.6}
 function fmt(x,d){x=Math.max(0,x);var m=Math.floor(x/60),s=x-m*60;return m+":"+(s<10?"0":"")+(d?s.toFixed(1):Math.floor(s))}
 function seek(t){a.currentTime=Math.max(0,Math.min(dur()-.05,t-off))}
@@ -2262,7 +2265,8 @@ function snsFixMp4(u8){try{var dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLe
 
 /* ชดเชยดีเลย์ตอนบันทึกวิดีโอ: เสียงที่ส่งเข้าไฟล์ออกก่อนเสียงที่หูได้ยิน (ลำโพง/หูฟังบลูทูธมีดีเลย์) เนื้อเลยดูช้าในไฟล์ → วาดภาพล่วงหน้าเท่าดีเลย์ของเครื่อง */
 var VLAGU=0;try{VLAGU=+(localStorage.getItem("sns:vlag")||0)||0}catch(e){}
-function vlagAuto(){try{initAudio()}catch(e){}var o=0;try{o=(ac&&(ac.outputLatency||0))+(ac&&(ac.baseLatency||0))}catch(e){}return Math.max(0,Math.min(.6,o||0))}
+/* ตอนส่งออก เสียงถูกอัดจากในแอปโดยตรง ไม่ผ่านลำโพง → ไม่ต้องชดเชยหน่วงลำโพง (เดิมบวกไว้ทำให้เนื้อในวิดีโอขึ้นก่อนเสียง โดยเฉพาะตอนต่อหูฟังบลูทูธ) */
+function vlagAuto(){try{initAudio()}catch(e){}var o=0;try{o=(ac&&(ac.baseLatency||0))}catch(e){}return Math.max(0,Math.min(.06,o||0))}
 function vlag(){return vlagAuto()+VLAGU}
 function vlagUI(){var e=$("vlag");if(e)e.textContent="ชดเชย "+vlag().toFixed(2)+" วิ (เครื่องนี้ "+vlagAuto().toFixed(2)+(VLAGU?(VLAGU>0?" +":" ")+VLAGU.toFixed(2)+" ที่ปรับเอง":"")+")"}
 ["vlag-m","vlag-p"].forEach(function(id,k){var b=$(id);if(b)b.onclick=function(){VLAGU=Math.round((VLAGU+(k?-.05:.05))*100)/100;try{localStorage.setItem("sns:vlag",String(VLAGU))}catch(e){}vlagUI()}});setTimeout(vlagUI,1500);
@@ -2274,7 +2278,7 @@ async function startVideo(){
  LYCK="";try{WSP.clear()}catch(e){}WMC=null;
  initAudio();if(!ac||!rdest){toast("เริ่มระบบเสียงไม่ได้ ลองกดเล่นเพลงหนึ่งครั้งก่อนแล้วลองใหม่");return}
  try{await ac.resume()}catch(e){}
- makeTiles();var CL=clipRange(),LP=!CL&&LOOPON&&dur()-CUT>LOOPX*4,S0=CL?CL.s:(LP?CUT+LOOPX:CUT),LB=null;if(LP){try{LB=await getBuf()}catch(e){LP=false;S0=CUT}}a.currentTime=S0;
+ EXPON=true;makeTiles();var CL=clipRange(),LP=!CL&&LOOPON&&dur()-CUT>LOOPX*4,S0=CL?CL.s:(LP?CUT+LOOPX:CUT),LB=null;if(LP){try{LB=await getBuf()}catch(e){LP=false;S0=CUT}}a.currentTime=S0;
  var cvs=document.createElement("canvas");cvs.width=W;cvs.height=H;
  try{var _px=cvs.getContext("2d");for(var _j=0;_j<N;_j++)lineFit(_px,_j,W,H);drawFrame(cvs,W,H,S0)}catch(e){}
  $("vov").hidden=false;$("vbox").innerHTML="";$("vbox").appendChild(cvs);$("vpb").hidden=false;$("vcancel").hidden=false;$("vact").innerHTML="";
@@ -2305,7 +2309,7 @@ async function startVideo(){
    $("vst").textContent="กำลังบันทึก "+fmt(now-c0)+" / "+fmt(c1-c0)+" อย่าปิดหน้านี้";$("vpb").firstElementChild.style.width=Math.min(100,(now-c0)/(c1-c0)*100)+"%";requestAnimationFrame(loop)}
   efReset();if(CL&&EF.lp&&ac){EF.fb.gain.value=.5;var t0=ac.currentTime;EF.lp.frequency.setValueAtTime(700,t0);EF.lp.frequency.exponentialRampToValueAtTime(20000,t0+1.1)}
   mr.start(1000);a.play();loop()});
- vcancelFn=null;a.pause();try{if(LPS&&LPS.stop)LPS.stop();if(LPG)LPG.disconnect()}catch(e){}try{if(mIn&&ac)mIn.gain.setValueAtTime(1,ac.currentTime);efReset()}catch(e){}
+ vcancelFn=null;a.pause();EXPON=false;try{if(LPS&&LPS.stop)LPS.stop();if(LPG)LPG.disconnect()}catch(e){}try{if(mIn&&ac)mIn.gain.setValueAtTime(1,ac.currentTime);efReset()}catch(e){}
  if(!cancelled&&!LP){drawFrame(cvs,W,H,tm());await new Promise(function(r){setTimeout(r,450)})}
  await new Promise(function(r){mr.onstop=r;try{mr.stop()}catch(e){r()}});
  stream.getVideoTracks().forEach(function(tr){tr.stop()});try{if(wl)wl.release()}catch(e){}
