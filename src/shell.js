@@ -239,8 +239,9 @@ async function exportProject(p){busy("กำลังเตรียมไฟล
   if(!done){var a=document.createElement("a");a.href=URL.createObjectURL(bl2);a.download=fn;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000)}
   busy();toastS(au?"ส่งออกแล้ว ("+Math.round(js.length/1048576)+" MB) ส่งไฟล์ไปอีกเครื่อง แล้วกด นำเข้าโปรเจกต์":"ส่งออกแล้ว (ไม่มีไฟล์เพลงในเครื่องนี้ ต้องใส่เพลงใหม่ที่ปลายทาง)")}
  catch(e){busy();toastS("ส่งออกไม่สำเร็จ: "+(e&&e.message||e))}}
-function importProject(){var inp=document.createElement("input");inp.type="file";inp.accept=".json,application/json";
- inp.onchange=async function(){var f=inp.files&&inp.files[0];if(!f)return;busy("กำลังนำเข้า…");
+/* ไม่กรองชนิดไฟล์: มือถือ Android มักมองไฟล์ .snsproj.json ที่โหลดมาเป็น "ไฟล์ทั่วไป" แล้วกดเลือกไม่ได้ · ตรวจเนื้อไฟล์แทน */
+function importProject(file){var inp=document.createElement("input");inp.type="file";
+ var go=async function(f){if(!f)return;busy("กำลังนำเข้า…");
   try{var d=JSON.parse(await f.text());if(!d||d.sns!="project"||!d.meta||!d.state)throw new Error("ไม่ใช่ไฟล์โปรเจกต์ของแอปนี้");
    var meta=Object.assign({},d.meta),id=String(meta.id||rid()).toLowerCase().replace(/[^a-z0-9_-]/g,"").slice(0,40)||rid();meta.id=id;
    var old=await Store.meta(id);if(old){var pre="p:"+id+":";S.raw.keys().forEach(function(k){if(k&&k.indexOf(pre)==0)S.raw.rm(k)})}
@@ -249,7 +250,8 @@ function importProject(){var inp=document.createElement("input");inp.type="file"
    if(d.audio&&d.audio.data){var bl=await (await fetch(d.audio.data)).blob();await Store.saveAudio(id,new File([bl],d.audio.name||"song",{type:bl.type||"audio/mpeg"}))}
    busy();toastS((old?"อัปเดต":"นำเข้า")+" \""+(meta.name||"เพลง")+"\" แล้ว");await home()}
   catch(e){busy();toastS("นำเข้าไม่สำเร็จ: "+(e&&e.message||e))}};
- inp.click()}
+ if(file&&file.size)return go(file);inp.onchange=function(){go(inp.files&&inp.files[0])};inp.click()}
+window.snsImport=importProject;
 /* ---------- หน้าแรก ---------- */
 var STEPS=[["เช็กเทรนด์ & วางแนว","ดูชาร์ตไทย/โลก Top 10 ทั้งทุกแนวและฮิปฮอป แนวที่กำลังมา และประเมินโอกาสแมสตามสไตล์ศิลปิน","ทุกเครื่อง"],["สร้างโปรเจกต์","ตั้งชื่อเพลง ใส่ไฟล์เพลงและเนื้อเพลง แยกท่อนร้อง/ฮุค และคนร้อง","ทุกเครื่อง"],["มิกซ์เสียงก่อน","ขั้น 1 › เสียง: ใส่เสียงร้อง+บีตแยกไฟล์ ให้มิกซ์ จูนนิดๆ หาคีย์ เทียบกับเพลงที่ชอบ แล้วใช้เป็นเพลงของโปรเจกต์","ทุกเครื่อง"],
  ["ซิงค์เนื้อกับเสียง","AI จับจังหวะคำร้องทีละคำ แล้วปรับเองได้ทีละบรรทัด","แม่นสุดบนคอม"],
