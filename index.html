@@ -580,6 +580,9 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <div class="h" style="margin-top:18px;font-size:15px">ปกเพลง</div>
    <button class="cta alt" id="cv-open" style="min-height:44px;font-size:14px">ทำปกเพลง (3000×3000 สำหรับลงแพลตฟอร์ม)</button>
    <div class="h" style="margin-top:18px;font-size:15px">ฉากจบเพลง</div>
+   <div style="margin:10px 0 4px;font-size:14px">✂ ตัดอินโทร <span class="mut" style="font-size:12px">(ข้ามช่วงบีตล้วนตอนต้นเพลง ทั้งพรีวิวและวิดีโอที่ส่งออก)</span></div>
+   <div class="chips" id="cut-row"><button data-c="auto">✂ อัตโนมัติ</button><button data-c="now">ตัดถึงจุดที่เล่นอยู่</button><button data-c="-">−0.5</button><button data-c="+">+0.5</button><button data-c="0">ไม่ตัด</button></div>
+   <p style="font-size:13px;margin:4px 0 0" id="cut-v"></p><p class="mut" id="cut-hint" style="font-size:12px;margin:2px 0 10px"></p>
    <div style="margin:10px 0 4px;font-size:14px">ฉากคั่นช่วงดนตรี <span class="mut" style="font-size:12px">(ช่วงที่มีแต่บีต/แอดลิบ ไม่มีเนื้อ)</span></div>
    <div class="chips" id="inter-sty"><button data-s="off">ไม่ใส่</button><button data-s="samurai">⚔ ซามูไร ภาพวาดญี่ปุ่น</button></div>
    <p class="mut" id="inter-info" style="font-size:12px;margin:4px 0 10px"></p>
@@ -971,7 +974,13 @@ function autoTitle(t){t=String(t||"").trim();return !t||/^(video|vid|img|image|a
  },250)})();
 function introInfo(){var t="",a="";try{var r=JSON.parse(localStorage.getItem("bwrel")||"null");if(r){t=(r.title||"").trim();a=(r.artist||"").trim();if(r.feat)a+=(a?" ft. ":"")+r.feat}}catch(e){}
  if(!t){try{var e0=JSON.parse(localStorage.getItem("bwend")||"null");if(e0&&e0.title)t=e0.title.trim();if(!a&&e0&&e0.artist)a=e0.artist}catch(e){}}if(!t)t=(STS&&STS.title||"").trim();if(autoTitle(t)&&window.SNSMETA&&SNSMETA.name&&!autoTitle(SNSMETA.name))t=String(SNSMETA.name).trim();return{t:t,a:a.replace(/\s*,\s*/g," x ")}}
-function drawIntro(x,W,H,t){if(!INTRO_ON||t<0)return false;var D=3.8;if(t>D)return false;var I=introInfo();
+/* ตัดอินโทร: ข้ามช่วงบีตล้วนตอนต้นเพลง · วิดีโอ/พรีวิวเริ่มที่ CUT วิ (เนื้อเพลงไม่ต้องซิงค์ใหม่) */
+var CUT=0;try{CUT=Math.max(0,+(localStorage.getItem("bwcut")||0)||0)}catch(e){}
+function cutSet(v){CUT=Math.max(0,Math.round(v*10)/10);try{if(synced&&N)CUT=Math.min(CUT,Math.max(0,T[0]-.3))}catch(e){}try{localStorage.setItem("bwcut",String(CUT))}catch(e){}cutUI()}
+function cutUI(){var e=$("cut-v");if(!e)return;var f=function(v){var m=Math.floor(v/60),q=(v%60).toFixed(1);return m+":"+(v%60<10?"0":"")+q};
+ e.textContent=CUT>0?("เริ่มที่ "+f(CUT)+" · ตัดอินโทรออก "+CUT.toFixed(1)+" วิ"):"ไม่ตัด (เริ่มตั้งแต่ 0:00)";
+ var h=$("cut-hint");if(h){var s0=null;try{if(synced&&N)s0=T[0]}catch(x){}h.textContent=s0!=null?("เนื้อร้องเริ่มที่ "+f(s0)+" · ปุ่ม ✂ อัตโนมัติ จะเหลือบีตไว้ 2 วิก่อนร้อง"):"ซิงค์เนื้อก่อน ปุ่มอัตโนมัติถึงจะรู้ว่าร้องเริ่มตรงไหน"}}
+function drawIntro(x,W,H,t){t-=CUT;if(!INTRO_ON||t<0)return false;var D=3.8;if(t>D)return false;var I=introInfo();
  var al=clamp01(t<.5?t/.5:(D-t)/.8),e=1-Math.pow(1-clamp01(t/1),3),M=Math.min(W,H),cy=H>W*1.3?H*.25:H*.23;
  x.save();x.setTransform(1,0,0,1,0,0);x.textAlign="center";x.textBaseline="middle";x.globalAlpha=al;
  var bs=M*.03;x.font="600 "+bs+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.9)";x.shadowColor="rgba(0,0,0,.7)";x.shadowBlur=bs*.8;
@@ -992,6 +1001,13 @@ function interUI(){var sp=interSpan(),f=function(v){var m=Math.floor(v/60),q=Mat
  $("inter-info").textContent=sp?("ช่วง "+f(sp[0])+"–"+f(sp[1])+" ("+Math.round(sp[1]-sp[0])+" วิ) · ซามูไรดวลดาบตามจังหวะบีต"):"ยังไม่เจอช่วงที่ไม่มีเนื้อยาวเกิน 6 วิ (ต้องซิงค์ก่อน)"}
 [].forEach.call(document.querySelectorAll("#inter-sty button"),function(b){b.onclick=function(){INTER.sty=b.dataset.s;interSave();interUI();var sp=interSpan();if(INTER.sty!="off"&&sp){try{seek(Math.max(0,sp[0]-.5));initAudio();a.play()}catch(e){}toast("เล่นให้ดูช่วงฉากคั่น")}}});
 setTimeout(interUI,1500);
+[].forEach.call(document.querySelectorAll("#cut-row button"),function(b){b.onclick=function(){var c=b.dataset.c;
+ if(c=="auto"){var s0=null;try{if(synced&&N)s0=T[0]}catch(e){}if(s0==null){toast("ซิงค์เนื้อก่อน หรือเล่นเพลงไปถึงจุดที่จะเริ่มแล้วกด ตัดถึงจุดที่เล่นอยู่");return}cutSet(Math.max(0,s0-2))}
+ else if(c=="now")cutSet(tm());else if(c=="0")cutSet(0);else cutSet(CUT+(c=="+"?.5:-.5));
+ try{seek(CUT);initAudio();a.play()}catch(e){}toast(CUT>0?"เล่นจากจุดเริ่มใหม่ให้ฟัง":"ไม่ตัดอินโทรแล้ว")}});
+setTimeout(cutUI,1500);
+/* พรีวิว: กดเล่นจากต้นเพลงให้ข้ามช่วงที่ตัด */
+try{a.addEventListener("play",function(){if(CUT>0&&a.currentTime<CUT-.05&&!(typeof TAP!="undefined"&&TAP))try{a.currentTime=CUT}catch(e){}})}catch(e){}
 $("intro-on").checked=INTRO_ON;$("intro-on").onchange=function(){INTRO_ON=this.checked;try{localStorage.setItem("bwintro",INTRO_ON?"1":"0")}catch(e){}toast(INTRO_ON?"เปิดชื่อเพลงตอนเริ่ม":"ปิดชื่อเพลงตอนเริ่ม")};
 $("end-on").onchange=function(){ENDC.on=this.checked;endSave()};$("end-title").oninput=function(){ENDC.title=this.value;endSave()};$("end-artist").oninput=function(){ENDC.artist=this.value;endSave()};
 var fT=0,fN=0,fSum=0,autoDone=false,LITE=false;
@@ -2224,9 +2240,9 @@ async function startVideo(){
  LYCK="";try{WSP.clear()}catch(e){}WMC=null;
  initAudio();if(!ac||!rdest){toast("เริ่มระบบเสียงไม่ได้ ลองกดเล่นเพลงหนึ่งครั้งก่อนแล้วลองใหม่");return}
  try{await ac.resume()}catch(e){}
- makeTiles();var CL=clipRange();a.currentTime=CL?CL.s:0;
+ makeTiles();var CL=clipRange();a.currentTime=CL?CL.s:CUT;
  var cvs=document.createElement("canvas");cvs.width=W;cvs.height=H;
- try{var _px=cvs.getContext("2d");for(var _j=0;_j<N;_j++)lineFit(_px,_j,W,H);drawFrame(cvs,W,H,CL?CL.s:0)}catch(e){}
+ try{var _px=cvs.getContext("2d");for(var _j=0;_j<N;_j++)lineFit(_px,_j,W,H);drawFrame(cvs,W,H,CL?CL.s:CUT)}catch(e){}
  $("vov").hidden=false;$("vbox").innerHTML="";$("vbox").appendChild(cvs);$("vpb").hidden=false;$("vcancel").hidden=false;$("vact").innerHTML="";
  var mime=pickMime(),opts={videoBitsPerSecond:QQ.br,audioBitsPerSecond:256000};if(mime)opts.mimeType=mime;
  if(MV.on){$("vst").textContent="กำลังเตรียมจังหวะตัดภาพ...";try{await beatGrid()}catch(e){}}wmLogo();var LAG=vlag();vlagUI();var stream=cvs.captureStream(QQ.fps);rdest.stream.getAudioTracks().forEach(function(tr){stream.addTrack(tr)});
@@ -2234,10 +2250,10 @@ async function startVideo(){
  try{mr=new MediaRecorder(stream,opts)}catch(e){try{mr=new MediaRecorder(stream)}catch(e2){$("vov").hidden=true;toast("เริ่มตัวบันทึกไม่ได้ในเบราว์เซอร์นี้");return}}
  mr.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data)};
  try{if(navigator.wakeLock)wl=await navigator.wakeLock.request("screen")}catch(e){}
- drawFrame(cvs,W,H,0);
+ drawFrame(cvs,W,H,CL?CL.s:CUT);
  await new Promise(function(res){var done=false;function fin(){if(done)return;done=true;res()}
   var endT=0,endT0=0;a.addEventListener("ended",function(){var tl=CL?0:endTail();if(tl>0&&!cancelled){endT=tl;endT0=performance.now()}else fin()},{once:true});vcancelFn=function(){cancelled=true;fin()};
-  var tailT0=0,tailTm=0,efOn=false,c0=CL?CL.s:0,c1=CL?CL.e+(CL.tail||0):dur();
+  var tailT0=0,tailTm=0,efOn=false,c0=CL?CL.s:CUT,c1=CL?CL.e+(CL.tail||0):dur();
   function shade(al){if(al<=0)return;var cx2=cvs.getContext("2d");cx2.save();cx2.globalAlpha=Math.min(1,al);cx2.fillStyle="#000";cx2.fillRect(0,0,W,H);cx2.restore()}
   function loop(){if(done)return;var now=a.currentTime;
    if(endT){var el2=(performance.now()-endT0)/1000;drawFrame(cvs,W,H,dur()+el2);$("vst").textContent="กำลังบันทึกหน้าปิดท้าย… อย่าปิดหน้านี้";if(el2>=endT){fin();return}requestAnimationFrame(loop);return}
@@ -2245,6 +2261,7 @@ async function startVideo(){
     $("vst").textContent="กำลังบันทึกหางเสียง… อย่าปิดหน้านี้";requestAnimationFrame(loop);return}
    if(CL&&now>=CL.e){if(CL.tail){tailT0=performance.now();tailTm=tm();a.pause();if(EF.dry&&ac){EF.dry.gain.setTargetAtTime(0,ac.currentTime,.02);if(CL.mode=="stop"){EF.send.gain.setValueAtTime(.9,ac.currentTime);EF.send.gain.setTargetAtTime(0,ac.currentTime+.05,.05);EF.fb.gain.value=.3}}requestAnimationFrame(loop);return}fin();return}
    drawFrame(cvs,W,H,tm()+LAG);
+   if(!CL&&CUT>0){var fiC=clamp01((now-CUT)/.4);shade(1-fiC);if(mIn&&ac)mIn.gain.setTargetAtTime(fiC,ac.currentTime,.03)}
    if(CL){var fi=clamp01((now-CL.s)/.35),fo2=CL.mode=="fade"?clamp01((CL.e-now)/1.4):CL.mode=="loop"?clamp01((CL.e-now)/.5):1,fa=Math.min(fi,fo2);shade(1-fa);
     if(mIn&&ac){mIn.gain.setTargetAtTime(Math.max(0,CL.mode=="loop"?Math.min(clamp01((now-CL.s)/.5),fo2):fa),ac.currentTime,.03)}
     if(EF.hp&&ac&&!efOn&&CL.mode=="echo"&&now>=CL.te){efOn=true;var t=ac.currentTime;EF.hp.frequency.setTargetAtTime(650,t,.12);EF.lp.frequency.setTargetAtTime(6500,t,.2);EF.send.gain.setTargetAtTime(.95,t,.08);EF.fb.gain.value=.55}}
