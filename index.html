@@ -773,6 +773,17 @@ function nameFixText(t){var h=nameFixLine(t);for(var i=h.length-1;i>=0;i--)t=t.s
 /* แก้เวลาเพลงที่ตรวจด้วยเสียงแล้ว (ถอดเสียง 3 รอบยืนยัน): ใช้ครั้งเดียวต่อโปรเจกต์ ไม่ทับบรรทัดที่ผู้ใช้ตรวจเอง */
 /* ท่อนฮุคซ้ำ: เสียงฮุคมักเป็นชุดเดียวกันวางซ้ำ ⇒ เวลาในแต่ละรอบต้องเหมือนกันทุกคำ (ต่างแค่จุดเริ่ม)
    หา "ช่วงห่าง" จากบรรทัดที่มั่นใจทั้งสองรอบ แล้วใช้เวลาของรอบที่มั่นใจกว่าให้อีกรอบ — กันฮุครอบหนึ่งตรง อีกรอบเพี้ยน */
+/* คำแรกของบรรทัดโดนลากไปติดช่วงอินโทร/ช่วงเงียบ (เช่น "ที่@1.4 กู@3.5 มา@6.1 ช้า@6.2…") ⇒ เนื้อขึ้นก่อนร้องจริง
+   ถ้าช่วงห่างของคำต้นบรรทัดยาวกว่าจังหวะคำที่เหลือมากๆ ให้ขยับคำต้นๆ มาชิดคำถัดไปตามจังหวะการร้องของบรรทัดนั้น */
+function leadFix(U,T,E,V){if(!U||!T)return 0;var n=0,r2=function(v){return Math.round(v*100)/100};
+ for(var j=0;j<U.length;j++){var L=U[j];if(!L||L.length<4||(V&&V[j]))continue;var g=[];for(var i=0;i<L.length-1;i++)g.push(L[i+1][2]-L[i][2]);
+  var m=0;var rest=g.slice(2).sort(function(a,b){return a-b}),med=rest.length?rest[rest.length>>1]:.2;med=Math.max(.08,Math.min(.4,med));var thr=Math.max(.9,med*5);
+  while(m<Math.min(3,g.length-2)&&g[m]>thr)m++;if(!m)continue;
+  var st=Math.max(.1,Math.min(.4,med*1.15));for(i=m-1;i>=0;i--){var ns=r2(L[i+1][2]-st);L[i][2]=ns;L[i][3]=r2(L[i+1][2]-.02)}
+  if(j>0&&E&&E[j-1]!=null&&L[0][2]<E[j-1])L[0][2]=r2(Math.max(L[0][2],T[j-1]+.05));T[j]=L[0][2];n++}
+ return n}
+(function leadFixLoad(){try{["bw"+"3","bw3s57l"].forEach(function(k){var sv=null;try{sv=JSON.parse(localStorage.getItem(k)||"null")}catch(e){}if(!sv||!sv.U||!sv.T)return;
+ var n=leadFix(sv.U,sv.T,sv.E,sv.V);if(n){localStorage.setItem(k,JSON.stringify(sv));if(!FIXED.some(function(x){return x[2]=="lead"}))FIXED.push(["คำต้นบรรทัดขึ้นก่อนเสียงร้อง "+n+" บรรทัด","ขยับให้ขึ้นตอนเริ่มร้องจริง","lead"])}})}catch(e){try{console.warn("leadFix",e)}catch(_){}}})();
 (function hookSync(){try{["bw"+"3","bw3s57l"].forEach(function(k){var sv=null;try{sv=JSON.parse(localStorage.getItem(k)||"null")}catch(e){}if(!sv||!sv.U||!sv.T||!sv.C)return;
  var U=sv.U,C=sv.C,V=sv.V||[],n=U.length,key=U.map(function(L){return(L||[]).map(function(u){return u[1]}).join("").replace(/[\s()（）]/g,"").toLowerCase()}),done={},nfix=0;
  function cf(j){return V[j]?2:(C[j]||0)}
@@ -1227,7 +1238,7 @@ async function autoSync(quick){
   var res=quick===true?await quickSync():LOCAL?await localSync():cloudOn()?await cloudSync():await browserSync();
   if(res&&res.conf&&quick!==true){info("ปรับเวลาให้เข้ากับจังหวะเสียงจริง...",98);res=await fuseSync(res);if(res.fa)res=faApply(res)}
   if(!res){info("ถอดเสียงแล้วแต่จับคู่กับเนื้อไม่ได้ ลองรัน start.py (แม่นกว่า) หรือเช็กเนื้อเพลงว่าตรงกับเสียง",0);btn.disabled=false;return}
-  T=res.S;E=res.E;CONF=res.conf||null;VER=[];synced=true;save();if(rowsEl.length)buildList();seek(0);
+  T=res.S;E=res.E;CONF=res.conf||null;VER=[];synced=true;try{leadFix(UT,T,E,VER)}catch(e){}save();if(rowsEl.length)buildList();seek(0);
   var sec2=res.second;info(sec2?"เสร็จแล้ว · AI 2 ตัวฟังแล้วเห็นตรงกัน "+sec2.agree+" จาก "+sec2.n+" บรรทัด"+(sec2.clash.length?" · ไม่ตรงกัน "+sec2.clash.length+" บรรทัด (ขึ้นสีเหลืองให้เช็ก)":""):"เสร็จแล้ว",100);toast(quick===true?"ซิงค์แบบประมาณเสร็จ ต้องตรวจทีละบรรทัดต่อ":"ซิงค์เสร็จแล้ว ตรวจผลได้เลย");syncView();
  }catch(e){info("ไม่สำเร็จ: "+(e&&e.message?e.message:e),0);$("quick").hidden=false}
  btn.disabled=false}
