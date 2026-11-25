@@ -166,7 +166,7 @@ def run(meta, audio):
     try:
         from faster_whisper import WhisperModel
         t1 = time.time()
-        wm = WhisperModel(meta.get("wmodel") or "large-v3", device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
+        wm = WhisperModel(meta.get("wmodel") or "medium", device="cpu", compute_type="int8", cpu_threads=os.cpu_count() or 4)
         ww = []
         win = float(meta.get("wwin") or 0)
         if meta.get("wranges"):
@@ -189,8 +189,14 @@ def run(meta, audio):
                 for sg in segs:
                     ww.extend([w.word, round(w.start + t, 2), round(w.end + t, 2), round(w.probability, 2)] for w in sg.words if w.start < win + .5)
                 t += win
+        elif meta.get("refine"):
+            ww = refine(wm, pcm, lines, fo, res)  # ช้ามาก (~25 นาที/เพลง บน CPU ฟรี) ใช้เฉพาะเมื่อขอ
         else:
-            ww = refine(wm, pcm, lines, fo, res)
+            segs, info = wm.transcribe(pcm, language="th", word_timestamps=True, beam_size=2, condition_on_previous_text=False,
+                                       initial_prompt=("Bedupbiw, Slope North Side. " + " ".join(lines))[:600],
+                                       vad_filter=True, vad_parameters={"min_silence_duration_ms": 300})
+            for sg in segs:
+                ww.extend([w.word, round(w.start, 2), round(w.end, 2), round(w.probability, 2)] for w in sg.words)
         res["whisper"] = ww
         print("  Whisper", len(ww), "คำ", round(time.time() - t1), "วิ", flush=True)
     except Exception as e:
