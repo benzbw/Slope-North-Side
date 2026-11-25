@@ -42,6 +42,103 @@ class J(dict):
         if "msg" in self: print("  ·", self.get("msg"), self.get("pct", ""), flush=True)
 
 
+
+# ---------- ตรวจซ้ำด้วยหู AI ตัวที่ 2 (Whisper) แล้วแก้คำที่ FA วางผิดที่ ----------
+# FA มักยืด/บีบเนื้อเมื่อเสียงร้องเร็วหรือมีช่วงอินโทร · Whisper ฟังทีละ 12 วิ โดยบอกเนื้อช่วงนั้นให้รู้
+# แล้วเทียบตัวอักษรกับเนื้อจริง → ได้เวลาทีละคำ · แทนที่เฉพาะบรรทัดที่หลักฐานชัด
+TH_C = set(chr(c) for c in range(0x0E01, 0x0E2F)); TH_V = set('ะาำิีึืุูเแโใไๅ')
+EQ = [set('ขคฆ'), set('ทธฑฒถฐ'), set('สศษซ'), set('พภผ'), set('ฟฝ'), set('ตฏ'), set('ดฎ'), set('ชฌฉ'), set('นณ'), set('ลฬร'), set('ยญ'), set('ฮห'), set('ใไ'), set('aeiou')]
+def _sk(s): return [c for c in s.lower() if c in TH_C or c in TH_V or (c.isascii() and c.isalnum())]
+def _sim(a, b):
+    if a == b: return 2
+    for g in EQ:
+        if a in g and b in g: return 1
+    return -1
+def _align(A, B):
+    import numpy as np
+    n, m = len(A), len(B); G = -1
+    S = np.zeros((n + 1, m + 1), dtype=np.int32); P = np.zeros((n + 1, m + 1), dtype=np.int8)
+    for i in range(1, n + 1): S[i, 0] = S[i - 1, 0] + G; P[i, 0] = 1
+    for j in range(1, m + 1): S[0, j] = 0; P[0, j] = 2
+    for i in range(1, n + 1):
+        a = A[i - 1]
+        for j in range(1, m + 1):
+            d = S[i - 1, j - 1] + _sim(a, B[j - 1]); u = S[i - 1, j] + G; l = S[i, j - 1] + G
+            if d >= u and d >= l: S[i, j] = d; P[i, j] = 0
+            elif u >= l: S[i, j] = u; P[i, j] = 1
+            else: S[i, j] = l; P[i, j] = 2
+    j = int(S[n].argmax()); i = n; mp = {}
+    while i > 0 and j > 0:
+        p = P[i, j]
+        if p == 0:
+            if _sim(A[i - 1], B[j - 1]) > 0: mp[i - 1] = j - 1
+            i -= 1; j -= 1
+        elif p == 1: i -= 1
+        else: j -= 1
+    return mp
+def refine(wm, pcm, lines, fo, res, win=12.0, step=10.0):
+    import statistics
+    n = len(pcm) / 16000.0; ww = []; cand = {}
+    S0 = [q.get("S") for q in fo]; E0 = [q.get("E") for q in fo]
+    t = max(0.0, (min([s for s in S0 if s is not None] or [0]) - 1.0))
+    while t < n - 1:
+        a, b = t, min(n, t + win)
+        idx = [j for j in range(len(fo)) if S0[j] is not None and S0[j] < b + 2.5 and (E0[j] or S0[j] + 2) > a - 2.5]
+        if idx:
+            lo, hi = max(0, idx[0] - 1), min(len(fo), idx[-1] + 2); idx = list(range(lo, hi))
+            prompt = " ".join(lines[j] for j in idx)[:700]
+            segs, info = wm.transcribe(pcm[int(a * 16000):int(b * 16000)], language="th", word_timestamps=True, beam_size=5,
+                                       condition_on_previous_text=False, vad_filter=False, initial_prompt=prompt)
+            B = []; BT = []
+            for sg in segs:
+                for w in sg.words:
+                    ws, we = w.start + a, w.end + a; ww.append([w.word, round(ws, 2), round(we, 2), round(w.probability, 2)])
+                    cs = _sk(w.word)
+                    for k, ch in enumerate(cs): B.append(ch); BT.append(ws + (we - ws) * k / max(1, len(cs)))
+            A = []; AW = []
+            for j in idx:
+                for wi, u in enumerate(fo[j].get("units") or []):
+                    for ch in _sk(u[1]): A.append(ch); AW.append((j, wi))
+            if A and B:
+                first = {}
+                for ia, ib in _align(A, B).items():
+                    first.setdefault(AW[ia], []).append(BT[ib])
+                for key, v in first.items():
+                    tv = min(v)
+                    if a + .5 < tv < b - .5 or (a == 0 and tv < b - .5):  # ขอบหน้าต่างเชื่อไม่ได้
+                        cand.setdefault(key, []).append(tv)
+        t += step
+    nfix = 0
+    for j, q in enumerate(fo):
+        U = q.get("units") or []
+        if len(U) < 2 or S0[j] is None: continue
+        got = {i: statistics.median(cand[(j, i)]) for i in range(len(U)) if (j, i) in cand}
+        if len(got) < max(2, .6 * len(U)): continue
+        ks = sorted(got); tt = [got[k] for k in ks]
+        if any(tt[i + 1] <= tt[i] for i in range(len(tt) - 1)): continue
+        if any(tt[i + 1] - tt[i] > 2.5 for i in range(len(tt) - 1)): continue
+        if abs(tt[0] - U[ks[0]][2]) > 6: continue
+        diff = statistics.median(abs(got[k] - U[k][2]) for k in ks)
+        if diff < .2: continue
+        new = []
+        for i in range(len(U)):
+            if i in got: new.append(got[i]); continue
+            pv = max([k for k in ks if k < i], default=None); nx = min([k for k in ks if k > i], default=None)
+            if pv is not None and nx is not None: new.append(got[pv] + (got[nx] - got[pv]) * (i - pv) / (nx - pv))
+            elif pv is not None: new.append(got[pv] + (U[i][2] - U[pv][2]))
+            else: new.append(got[nx] - (U[nx][2] - U[i][2]))
+        for i in range(len(U)):
+            U[i][2] = round(new[i], 2); U[i][3] = round(min(new[i + 1] - .02 if i + 1 < len(U) else new[i] + .6, new[i] + .6), 2)
+        q["S"] = U[0][2]; q["E"] = round(U[-1][3] + .3, 2)
+        res["S"][j] = q["S"]; res["E"][j] = q["E"]; res["conf"][j] = max(res["conf"][j], .85); nfix += 1
+    for i in range(1, len(res["S"])):
+        if res["S"][i] <= res["S"][i - 1]: res["S"][i] = res["S"][i - 1] + .05
+    for i in range(len(res["S"]) - 1):
+        if res["E"][i] > res["S"][i + 1] - .03: res["E"][i] = round(res["S"][i + 1] - .03, 2)
+    res["refined"] = nfix
+    print("  Whisper ตรวจซ้ำ แก้", nfix, "บรรทัด", flush=True)
+    return ww
+
 def run(meta, audio):
     import numpy as np
     import start as S
@@ -92,6 +189,8 @@ def run(meta, audio):
                 for sg in segs:
                     ww.extend([w.word, round(w.start + t, 2), round(w.end + t, 2), round(w.probability, 2)] for w in sg.words if w.start < win + .5)
                 t += win
+        elif meta.get("refine"):
+            ww = refine(wm, pcm, lines, fo, res)  # ช้ามาก (~25 นาที/เพลง บน CPU ฟรี) ใช้เฉพาะเมื่อขอ
         else:
             segs, info = wm.transcribe(pcm, language="th", word_timestamps=True, beam_size=2, condition_on_previous_text=False,
                                        initial_prompt=("Bedupbiw, Slope North Side. " + " ".join(lines))[:600],
