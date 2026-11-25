@@ -905,14 +905,22 @@ function pkData(){var key=LN.map(function(l){return l.t}).join("\n")+"|"+(STS.ti
  PKK=key;PKC={P:P,PL:PL,list:pick.map(function(n){return{n:n.replace(/^~/,""),d:disp[n]||n.replace(/^~/,""),s:sc[n],top:sc[n]>=8,miss:n[0]=="~"&&phr[n.slice(1)]&&!phr[n.slice(1)].c}}),sc:sc};return PKC}
 function pkRefresh(){PKC=null;WC={};wg=-2;try{BDC={}}catch(e){}try{pkUI()}catch(e){}}
 var WC={};
+var SLANG=/(?<![ก-ฮะ-ฺเ-์])[เแโ]?[ก-ฮ]{1,2}(?<!ก)็(?:อ[ก-ฮ]|[ก-ฮ])(?![ะาำิีึืุู่้๊๋์])|แม่ง|ปล่าว|เปล่า|ป่าว|ฟาว|เว้ย|เว่ย|เด้อ|ด็อกเตอร์|เบเบ|เซๆ|เทๆ|มึง|โคตร|ชิบหาย|เหี้ย|อีสัส|ไอ้สัส|ว่ะ|ป่ะ|ปะ(?=[\s]|$)/;
 function wordsOf(i){if(WC[i])return WC[i];var t=LN[i].t,parts=[],off=0,m;
  if(SEG){Array.from(SEG.segment(t)).forEach(function(sg){var tx=sg.segment;if(/^\s+$/.test(tx)&&parts.length)parts[parts.length-1].tx+=tx;else parts.push({tx:tx})})}
  else{t.split(/(\s+)/).forEach(function(tx){if(!tx)return;if(/^\s+$/.test(tx)&&parts.length)parts[parts.length-1].tx+=tx;else if(tx.length>9){var q=0;while(q<tx.length){var en=Math.min(tx.length,q+4);while(en<tx.length&&(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/.test(tx[en])||/[เแโใไ]/.test(tx[en-1])))en++;parts.push({tx:tx.slice(q,en)});q=en}}else parts.push({tx:tx})})}
+ /* คำแสลง/คำพูดที่ตัวตัดคำไม่รู้จัก (เช่น "แม่ง" ถูกหั่นเป็น แม่|งอ|ยู่) → บังคับให้เป็นคำเดียว แล้วตัดคำใหม่รอบๆ */
+ (function(){if(!SEG)return;var bs={},o=0;parts.forEach(function(p){bs[o]=1;o+=p.tx.length});bs[t.length]=1;var hit=false,re=new RegExp(SLANG.source,"g"),mm;
+  while((mm=re.exec(t))){var s0=mm.index,e0=s0+mm[0].length;if(!mm[0].length){re.lastIndex++;continue}for(var k=s0+1;k<e0;k++)if(bs[k]){delete bs[k];hit=true}if(!bs[s0]||!bs[e0]){bs[s0]=1;bs[e0]=1;hit=true}}
+  if(!hit)return;var ks=Object.keys(bs).map(Number).sort(function(x,y){return x-y}),np=[];for(var q=0;q<ks.length-1;q++){var tx=t.slice(ks[q],ks[q+1]);if(!tx)continue;if(/^\s+$/.test(tx)&&np.length)np[np.length-1].tx+=tx;else np.push({tx:tx})}
+  /* ส่วนที่เหลือ (ระหว่างคำแสลง) รวมเป็นก้อนแล้วตัดคำใหม่ทั้งก้อน */var out=[],run="",isS=new RegExp("^(?:"+SLANG.source+")$");
+  function flush(){if(!run)return;Array.from(SEG.segment(run)).forEach(function(sg){var x2=sg.segment;if(/^\s+$/.test(x2)&&out.length)out[out.length-1].tx+=x2;else out.push({tx:x2,ns:1})});run=""}
+  np.forEach(function(p){var core=p.tx.replace(/\s+$/,"");if(isS.test(core)){flush();out.push({tx:p.tx,sl:1})}else run+=p.tx});flush();parts=out})();
  /* ห้ามตัดกลางคำ: ตัวตัดคำของเบราว์เซอร์มักหั่นคำสะกดแบบพูด เช่น "ปล่าว" เป็น ป/ล่า/ว แล้วขึ้นคนละแถว */
  (function(){var bd=null,o=0;if(UT&&UT[i]&&UT[i].length){var ok=true;bd={};UT[i].forEach(function(u){if(t.substr(u[0],String(u[1]).length)==u[1])bd[u[0]]=1;else ok=false});if(!ok)bd=null}
   var out=[];parts.forEach(function(p){var pv=out[out.length-1],th=p.tx.replace(/\s+$/,"");
    var lone=/^[\u0E01-\u0E2E][\u0E48-\u0E4C]?$/.test(th);
-   if(pv&&!/\s$/.test(pv.tx)&&((bd&&!bd[o])||lone))pv.tx+=p.tx;else out.push({tx:p.tx});o+=p.tx.length});parts=out})();
+   var frag=th.replace(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/g,"").length<=2;if(pv&&!pv.sl&&!p.sl&&!/\s$/.test(pv.tx)&&((bd&&!bd[o]&&frag)||lone))pv.tx+=p.tx;else out.push({tx:p.tx,sl:p.sl});o+=p.tx.length});parts=out})();
  var rg=[],re=new RegExp(KW.source,"gi");while((m=re.exec(t))){rg.push([m.index,m.index+m[0].length]);if(!m[0].length)re.lastIndex++}
  var PLi=(pkData().PL||{})[i],pkd=false,tot=0,pkR=null;if(PLi)Object.keys(PLi).forEach(function(k){if(k[0]!="~")return;var ph=k.slice(1),src="",map=[];for(var c=0;c<t.length;c++){var nc=pkNorm(t[c]);if(nc){src+=nc.toLowerCase();map.push(c)}}var ix=src.indexOf(ph);if(ix>=0){pkR=[map[ix],map[ix+ph.length-1]+1];pkd=true}});parts.forEach(function(p){p.o=off;off+=p.tx.length;p.kw=rg.some(function(r){return p.o<r[1]&&off>r[0]});if(pkR&&p.o<pkR[1]&&off>pkR[0]){p.pk=1;p.kw=true}else if(PLi&&!pkd&&PLi[pkNorm(p.tx.replace(/[()（）]/g,""))]){p.pk=1;p.kw=true;pkd=true}p.f=tot;tot+=p.tx.replace(/\s/g,"").length||1});
  parts.forEach(function(p){p.f/=Math.max(1,tot)});
