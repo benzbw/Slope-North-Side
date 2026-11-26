@@ -585,6 +585,7 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <div class="h" style="margin-top:18px;font-size:15px">ปกเพลง</div>
    <button class="cta alt" id="cv-open" style="min-height:44px;font-size:14px">ทำปกเพลง (3000×3000 สำหรับลงแพลตฟอร์ม)</button>
    <div class="h" style="margin-top:18px;font-size:15px">ฉากจบเพลง</div>
+   <label class="tgl"><input type="checkbox" id="introlbl-on" checked> ขึ้นคำว่า SLOPE NORTH SIDE บนปกเปิด <span class="mut" style="font-size:12px">(ตั้งแยกแต่ละเพลง)</span></label>
    <label class="tgl"><input type="checkbox" id="colp-on" checked> 🎨 เล่นสีคำเด่น/ท่อนฮุค <span class="mut" style="font-size:12px">(คำเด่นเป็นสีธีม · ท่อนฮุคไล่สีคู่ตามคำที่ร้อง)</span></label>
    <div style="margin:10px 0 4px;font-size:14px">✂ ตัดอินโทร <span class="mut" style="font-size:12px">(ข้ามช่วงบีตล้วนตอนต้นเพลง ทั้งพรีวิวและวิดีโอที่ส่งออก)</span></div>
    <div class="chips" id="cut-row"><button data-c="auto">✂ อัตโนมัติ</button><button data-c="now">ตัดถึงจุดที่เล่นอยู่</button><button data-c="-">−0.5</button><button data-c="+">+0.5</button><button data-c="0">ไม่ตัด</button></div>
@@ -592,7 +593,7 @@ textarea.sx-in{min-height:120px;padding:12px 14px;resize:vertical;line-height:1.
    <div style="margin:10px 0 4px;font-size:14px">ฉากคั่นช่วงดนตรี <span class="mut" style="font-size:12px">(ช่วงที่มีแต่บีต/แอดลิบ ไม่มีเนื้อ)</span></div>
    <div class="chips" id="inter-sty"><button data-s="off">ไม่ใส่</button><button data-s="samurai">⚔ ซามูไร ภาพวาดญี่ปุ่น</button></div>
    <p class="mut" id="inter-info" style="font-size:12px;margin:4px 0 10px"></p>
-   <label class="tgl"><input type="checkbox" id="intro-on" checked><span>ขึ้นชื่อเพลง + SLOPE NORTH SIDE ตอนเริ่มเพลง (3–4 วิแรก)</span></label>
+   <label class="tgl"><input type="checkbox" id="intro-on" checked><span>ขึ้นปกเพลง + ชื่อเพลงตอนเริ่มคลิป (3–4 วิแรก)</span></label>
    <label class="tgl"><input type="checkbox" id="loop-on" checked><span>🔁 จบแบบวนลูป (แบบรีล): ท้ายเพลงค่อยๆ ผสมกลับไปต้นเพลง เล่นวนใน IG/TikTok แล้วต่อกันเนียน (เปิดอยู่จะไม่มีการ์ดปิดท้าย)</span></label>
    <label class="tgl"><input type="checkbox" id="end-on" checked><span>ใส่ลายน้ำ SLOPE NORTH SIDE + ชื่อเพลง + ศิลปิน ตอนจบเพลง</span></label>
    <div class="row"><input class="inp" id="end-title" maxlength="40" placeholder="ชื่อเพลง"></div>
@@ -1000,16 +1001,38 @@ function cutSet(v){CUT=Math.max(0,Math.round(v*10)/10);try{if(synced&&N)CUT=Math
 function cutUI(){var e=$("cut-v");if(!e)return;var f=function(v){var m=Math.floor(v/60),q=(v%60).toFixed(1);return m+":"+(v%60<10?"0":"")+q};
  var L=0;try{L=dur()}catch(x){}e.textContent=CUT>0?("✓ ตัดแล้ว: เริ่มที่ "+f(CUT)+" (ตัดออก "+CUT.toFixed(1)+" วิ) · เพลงเหลือ "+f(Math.max(0,L-CUT)).replace(/\.\d$/,"")+" · บันทึกอัตโนมัติ"):"ไม่ตัด (เริ่มตั้งแต่ 0:00)";
  var h=$("cut-hint");if(h){var s0=null;try{if(synced&&N)s0=T[0]}catch(x){}h.textContent=s0!=null?("เนื้อร้องเริ่มที่ "+f(s0)+" · ปุ่ม ✂ อัตโนมัติ จะเหลือบีตไว้ 2 วิก่อนร้อง"):"ซิงค์เนื้อก่อน ปุ่มอัตโนมัติถึงจะรู้ว่าร้องเริ่มตรงไหน"}}
-function drawIntro(x,W,H,t){t-=CUT;if(!INTRO_ON||t<0)return false;var D=3.8,hi=false;try{if(synced&&N){var s0=T[0]-CUT;if(s0<D+.15){D=Math.max(2.6,s0-.15);if(s0<D+.1)hi=true}}}catch(e){}if(t>D)return false;var I=introInfo();
- /* เนื้อร้องเริ่มเร็ว: ชื่อเพลงยังขึ้นอย่างน้อย 2.6 วิ แต่ย้ายขึ้นไปด้านบนไม่ให้ทับเนื้อ · ที่ 0:00 (หยุดอยู่) ก็ยังเห็นชื่อ */
- var al=clamp01(t<.5?.35+.65*t/.5:(D-t)/.8),e=1-Math.pow(1-clamp01(t/1),3),M=Math.min(W,H),cy=hi?(H>W*1.3?H*.17:H*.15):(H>W*1.3?H*.25:H*.23);
- x.save();x.setTransform(1,0,0,1,0,0);x.textAlign="center";x.textBaseline="middle";x.globalAlpha=al;
- var bs=M*.03;x.font="600 "+bs+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.9)";x.shadowColor="rgba(0,0,0,.7)";x.shadowBlur=bs*.8;
- var br="SLOPE NORTH SIDE".split("").join(String.fromCharCode(8202,8202));try{x.letterSpacing=(bs*.35)+"px"}catch(_){}x.fillText("SLOPE NORTH SIDE",W/2,cy-M*.085);try{x.letterSpacing="0px"}catch(_){}
- x.shadowBlur=0;var lw=M*.2*e;x.fillStyle=TH.hot;x.fillRect(W/2-lw/2,cy-M*.052,lw,Math.max(2,M*.004));
- if(I.t){var up=LF[3]=="uppercase",tt=up?I.t.toUpperCase():I.t,fs=M*.095;x.font=lfont(fs);var mw=x.measureText(tt).width;if(mw>W*.8){fs*=W*.8/mw;x.font=lfont(fs)}
-  x.shadowColor="rgba("+TH.gl+",.85)";x.shadowBlur=fs*.45;x.fillStyle="#fff";x.globalAlpha=al;x.fillText(tt,W/2,cy+fs*.12);x.shadowBlur=0}
- if(I.a){var as=M*.032;x.font="500 "+as+"px Montserrat,'Noto Sans Thai',sans-serif";var aw=x.measureText(I.a).width;if(aw>W*.8){as*=W*.8/aw;x.font="500 "+as+"px Montserrat,'Noto Sans Thai',sans-serif"}x.fillStyle="rgba(255,255,255,.75)";x.fillText(I.a,W/2,cy+M*.1)}
+/* ปกเปิดคลิป: โชว์ปกเพลงจริง (ภาพปกที่ทำในแอป) แบบปกอัลบั้ม + ฉากหลังเบลอจากปก + ชื่อเพลง/ศิลปิน */
+var INTART=null,INTARTK="";
+function introArt(){var k="";try{k=localStorage.getItem("bwcvart")||localStorage.getItem("bwthumb")||""}catch(e){}
+ if(k&&k!==INTARTK){INTARTK=k;var im=new Image();im.src=k;INTART=im}
+ if(INTART&&INTART.tagName=="IMG"&&!(INTART.complete&&INTART.naturalWidth))return null;
+ if(INTART)return INTART;if(!k){try{var c=document.createElement("canvas");c.width=c.height=720;drawCover(c,720);INTART=c}catch(e){}}return INTART}
+setTimeout(function(){try{introArt()}catch(e){}},300);
+function introLabel(){var v=null;try{v=localStorage.getItem("bwintrolbl")}catch(e){}if(v!=null)return v!=="0";var nm=(window.SNSMETA&&SNSMETA.name)||"";return !/welcome\s*to\s*my\s*world/i.test(nm)}
+function rrect(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()}
+/* ในหน้าแก้ไข: วาดปกเปิดเฉพาะในกรอบพรีวิว ไม่ทับปุ่ม/แผงของแอป */
+function introAny(x,W,H,t){if(x.canvas&&x.canvas.id=="fxc"){var st=document.getElementById("stage");if(!st)return false;var r=st.getBoundingClientRect();if(r.width<20||r.height<20)return false;
+ x.save();x.beginPath();x.rect(r.left,r.top,r.width,r.height);x.clip();x.translate(r.left,r.top);var ok=drawIntroAt(x,r.width,r.height,t,r.left,r.top);x.restore();return ok}return drawIntro(x,W,H,t)}
+function drawIntroAt(x,W,H,t,ox,oy){var tr=x.setTransform;x.setTransform=function(){tr.call(x,1,0,0,1,ox,oy)};try{return drawIntro(x,W,H,t)}finally{x.setTransform=tr}}
+function drawIntro(x,W,H,t){t-=CUT;if(!INTRO_ON||t<0)return false;var D=3.8;try{if(synced&&N){var s0=T[0]-CUT;if(s0<D+.15)D=Math.max(1.4,s0-.1)}}catch(e){}if(t>D)return false;var I=introInfo();
+ var al=clamp01(t<.45?.4+.6*t/.45:(D-t)/.6),e=1-Math.pow(1-clamp01(t/.9),3),M=Math.min(W,H),art=introArt(),port=H>W*1.2;
+ x.save();x.setTransform(1,0,0,1,0,0);x.globalAlpha=al;
+ /* ฉากหลัง: ปกขยายเต็มจอ เบลอ มืดลง */
+ x.fillStyle="#07070a";x.fillRect(0,0,W,H);
+ if(art){var sc=Math.max(W,H)/Math.min(art.width,art.height)*1.15;try{x.filter="blur("+Math.round(M*.09)+"px) saturate(1.3)"}catch(_){}x.globalAlpha=al*.45;x.drawImage(art,W/2-art.width*sc/2,H/2-art.height*sc/2,art.width*sc,art.height*sc);try{x.filter="none"}catch(_){}x.globalAlpha=al}
+ var vg=x.createRadialGradient(W/2,H*.42,M*.2,W/2,H*.5,Math.max(W,H)*.75);vg.addColorStop(0,"rgba(0,0,0,.15)");vg.addColorStop(1,"rgba(0,0,0,.75)");x.fillStyle=vg;x.fillRect(0,0,W,H);
+ /* ปกสี่เหลี่ยมจัตุรัส ค่อยๆ ขยายจาก 94% (นิ่ง ไม่สั่น) */
+ var S=Math.min(W*(port?.74:.42),H*(port?.44:.6))*(.94+.06*e),cx=W/2,cy=port?H*.4:H*.42,X=cx-S/2,Y=cy-S/2,R=S*.025;
+ x.save();x.shadowColor="rgba(0,0,0,.75)";x.shadowBlur=S*.12;x.shadowOffsetY=S*.04;rrect(x,X,Y,S,S,R);x.fillStyle="#111";x.fill();x.restore();
+ x.save();rrect(x,X,Y,S,S,R);x.clip();if(art)x.drawImage(art,X,Y,S,S);else{x.fillStyle=TH.hot;x.fillRect(X,Y,S,S)}
+ var sh=x.createLinearGradient(X,Y,X+S,Y+S);sh.addColorStop(0,"rgba(255,255,255,.10)");sh.addColorStop(.5,"rgba(255,255,255,0)");x.fillStyle=sh;x.fillRect(X,Y,S,S);x.restore();
+ x.strokeStyle="rgba(255,255,255,.12)";x.lineWidth=Math.max(1,M*.002);rrect(x,X,Y,S,S,R);x.stroke();
+ /* ชื่อเพลง / ศิลปิน ใต้ปก */
+ x.textAlign="center";x.textBaseline="middle";var ty=Y+S+M*(port?.085:.07),ta=clamp01((t-.25)/.5);x.globalAlpha=al*ta;
+ if(I.t){var up=LF[3]=="uppercase",tt=up?I.t.toUpperCase():I.t,fs=M*.075;x.font=lfont(fs);var mw=x.measureText(tt).width;if(mw>W*.84){fs*=W*.84/mw;x.font=lfont(fs)}
+  x.shadowColor="rgba(0,0,0,.6)";x.shadowBlur=fs*.3;x.fillStyle="#fff";x.fillText(tt,cx,ty);x.shadowBlur=0}
+ if(I.a){var as=M*.034;x.font="500 "+as+"px Montserrat,'Noto Sans Thai',sans-serif";var aw=x.measureText(I.a).width;if(aw>W*.8){as*=W*.8/aw;x.font="500 "+as+"px Montserrat,'Noto Sans Thai',sans-serif"}x.fillStyle="rgba(255,255,255,.72)";x.fillText(I.a,cx,ty+M*.065)}
+ if(introLabel()){var bs=M*.022;x.font="600 "+bs+"px Montserrat,'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.55)";try{x.letterSpacing=(bs*.4)+"px"}catch(_){}x.fillText("SLOPE NORTH SIDE",cx,Y-M*.05);try{x.letterSpacing="0px"}catch(_){}}
  x.restore();return true}
 var ENDC={on:true,title:"Dangerous",artist:"Bedupbiw ft. Killmonger"};try{var ej=JSON.parse(localStorage.getItem("bwend")||"null");if(ej)ENDC=Object.assign(ENDC,ej)}catch(e){}
 function endSave(){try{localStorage.setItem("bwend",JSON.stringify(ENDC))}catch(e){}endFill()}
@@ -1036,6 +1059,7 @@ try{a.addEventListener("ended",function(){if(LOOPON&&!(typeof TAP!="undefined"&&
 /* พรีวิว: กดเล่นจากต้นเพลงให้ข้ามช่วงที่ตัด */
 try{a.addEventListener("play",function(){if(CUT>0&&a.currentTime<CUT-.05&&!(typeof TAP!="undefined"&&TAP))try{a.currentTime=CUT}catch(e){}})}catch(e){}
 try{$("colp-on").checked=COLP;$("colp-on").onchange=function(){COLP=this.checked;try{localStorage.setItem("bwcolp",COLP?"1":"0")}catch(e){}document.body.classList.toggle("colp",COLP);toast(COLP?"เปิดเล่นสีแล้ว":"ปิดเล่นสีแล้ว")}}catch(e){}
+setTimeout(function(){try{$("introlbl-on").checked=introLabel();$("introlbl-on").onchange=function(){try{localStorage.setItem("bwintrolbl",this.checked?"1":"0")}catch(e){}toast(this.checked?"ขึ้นชื่อค่ายบนปกเปิด":"ไม่ขึ้นชื่อค่ายบนปกเปิด (เฉพาะเพลงนี้)")}}catch(e){}},1600);
 $("intro-on").checked=INTRO_ON;$("intro-on").onchange=function(){INTRO_ON=this.checked;try{localStorage.setItem("bwintro",INTRO_ON?"1":"0")}catch(e){}toast(INTRO_ON?"เปิดชื่อเพลงตอนเริ่ม":"ปิดชื่อเพลงตอนเริ่ม")};
 $("end-on").onchange=function(){ENDC.on=this.checked;endSave()};$("end-title").oninput=function(){ENDC.title=this.value;endSave()};$("end-artist").oninput=function(){ENDC.artist=this.value;endSave()};
 var fT=0,fN=0,fSum=0,autoDone=false,LITE=false;
@@ -2104,7 +2128,7 @@ function drawInter(x,W,H,t,live){if(INTER.sty!="samurai")return false;var sp=int
 function drawInterLive(x,t){if(INTER.sty!="samurai")return false;var st=document.getElementById("stage");if(!st)return false;var r=st.getBoundingClientRect();if(r.width<20||r.height<20)return false;
  var sp=interSpan();if(!sp||t<sp[0]-.05||t>sp[1]+.05)return false;x.save();x.beginPath();x.rect(r.left,r.top,r.width,r.height);x.clip();x.translate(r.left,r.top);var ok=drawInter(x,r.width,r.height,t,true);x.restore();return ok}
 
-function lfxDraw(x,W,H,t){var sa=false;try{sa=pkStamp(x,W,H,t)}catch(e){}try{if(drawIntro(x,W,H,t))sa=true}catch(e){}if(!LFX_ON)return sa;var ev=lfxEvents(),any=sa,M=Math.min(W,H);
+function lfxDraw(x,W,H,t){var sa=false;try{sa=pkStamp(x,W,H,t)}catch(e){}try{if(introAny(x,W,H,t))sa=true}catch(e){}if(!LFX_ON)return sa;var ev=lfxEvents(),any=sa,M=Math.min(W,H);
  ev.forEach(function(e){var a=t-e.t;if(a<0||a>e.d)return;any=true;var R=lfxRnd(e.s),fo=a>e.d-.7?(e.d-a)/.7:1;x.save();
   if(e.k=="bleed"){/* คำเจ็บปวด: ขอบจอแดงเลือดหมูเต้นตุบเดียวแล้วจาง */var pb=a/e.d,ab=pb<.15?pb/.15:1-(pb-.15)/.85;var vb=x.createRadialGradient(W/2,H/2,M*.42,W/2,H/2,Math.max(W,H)*.7);vb.addColorStop(0,"rgba(0,0,0,0)");vb.addColorStop(1,"rgba(110,0,12,.9)");x.globalAlpha=Math.max(0,ab)*.6;x.fillStyle=vb;x.fillRect(0,0,W,H)}
   else if(e.k=="bullet"){for(var b=0;b<3;b++){var ba2=a-b*.18;if(ba2<0)continue;var bx=W*(.15+R()*.7),by=H*(.15+R()*.25),br=M*.012;x.globalAlpha=fo;
@@ -2278,7 +2302,7 @@ async function startVideo(){
  LYCK="";try{WSP.clear()}catch(e){}WMC=null;
  initAudio();if(!ac||!rdest){toast("เริ่มระบบเสียงไม่ได้ ลองกดเล่นเพลงหนึ่งครั้งก่อนแล้วลองใหม่");return}
  try{await ac.resume()}catch(e){}
- EXPON=true;makeTiles();var CL=clipRange(),LP=!CL&&LOOPON&&dur()-CUT>LOOPX*4,S0=CL?CL.s:(LP?CUT+LOOPX:CUT),LB=null;if(LP){try{LB=await getBuf()}catch(e){LP=false;S0=CUT}}a.currentTime=S0;
+ EXPON=true;try{introArt();if(INTART&&INTART.decode)await INTART.decode()}catch(e){}makeTiles();var CL=clipRange(),LP=!CL&&LOOPON&&dur()-CUT>LOOPX*4,S0=CL?CL.s:(LP?CUT+LOOPX:CUT),LB=null;if(LP){try{LB=await getBuf()}catch(e){LP=false;S0=CUT}}a.currentTime=S0;
  var cvs=document.createElement("canvas");cvs.width=W;cvs.height=H;
  try{var _px=cvs.getContext("2d");for(var _j=0;_j<N;_j++)lineFit(_px,_j,W,H);drawFrame(cvs,W,H,S0)}catch(e){}
  $("vov").hidden=false;$("vbox").innerHTML="";$("vbox").appendChild(cvs);$("vpb").hidden=false;$("vcancel").hidden=false;$("vact").innerHTML="";
@@ -2550,7 +2574,7 @@ function drawStory(c){var W=c.width,H=c.height,x=c.getContext("2d"),k=W/1080,cv=
  x.fillStyle=TH.hot;x.fillRect(W/2-40*k,H-150*k,80*k,5*k);
  x.font="700 "+(26*k)+"px 'Noto Sans Thai',sans-serif";x.fillStyle="rgba(255,255,255,.6)";x.textAlign="center";spaced(x,"STREAM EVERYWHERE",W/2,H-95*k,6*k);
  grain(x,Math.max(W,H),.12)}
-var pkT=0,thT=0;function cvThumbSave(c){clearTimeout(thT);thT=setTimeout(function(){try{var t=document.createElement("canvas");t.width=t.height=240;t.getContext("2d").drawImage(c,0,0,240,240);var u=t.toDataURL("image/jpeg",.8);if(u.length<120000)localStorage.setItem("bwthumb",u)}catch(e){}},900)}
+var pkT=0,thT=0;function cvThumbSave(c){clearTimeout(thT);thT=setTimeout(function(){try{var t=document.createElement("canvas");t.width=t.height=240;t.getContext("2d").drawImage(c,0,0,240,240);var u=t.toDataURL("image/jpeg",.8);if(u.length<120000)localStorage.setItem("bwthumb",u);var t2=document.createElement("canvas");t2.width=t2.height=640;t2.getContext("2d").drawImage(c,0,0,640,640);var u2=t2.toDataURL("image/jpeg",.82);if(u2.length<260000)localStorage.setItem("bwcvart",u2)}catch(e){}},900)}
 /* เก็บรูปปกจริงของเพลงนี้ไว้โชว์ที่การ์ดหน้าแรก (ทำครั้งเดียวหลังเปิดเพลง ถ้ายังไม่มี) */
 setTimeout(function(){try{if(localStorage.getItem("bwthumb"))return;var go=function(){try{var c=document.createElement("canvas");c.width=c.height=720;drawCover(c,720);cvThumbSave(c)}catch(e){}};if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){setTimeout(go,1500)});else go()}catch(e){}},4000);
 function cvRender(){var c=$("cvc");drawCover(c,c.width);cvThumbSave(c);try{cvThumbs();var tp=$("cv-tip");if(tp)tp.textContent=CTIP[CV.tpl]||"";clearTimeout(pkT);pkT=setTimeout(function(){try{pkGrid()}catch(e){}},450)}catch(e){}if($("cvs"))drawStory($("cvs"));document.querySelectorAll("#cv-t button").forEach(function(b){b.classList.toggle("on",b.dataset.t==CV.tpl)})}
